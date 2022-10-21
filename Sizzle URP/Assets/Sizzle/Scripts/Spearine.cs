@@ -59,7 +59,7 @@ public class Spearine : MonoBehaviour
 
         // TESTING ONLY 
         //primaryTarget = player;
-    }
+    } // Test
 
     // Update is called once per frame
     void Update()
