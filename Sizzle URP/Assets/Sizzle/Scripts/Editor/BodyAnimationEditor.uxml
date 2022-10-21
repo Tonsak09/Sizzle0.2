@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:Label text="Animation Sections" display-tooltip-when-elided="true" />
+    <ui:VisualElement name="SectionRow" style="align-items: flex-start; height: 35px; justify-content: center;">
+        <ui:VisualElement name="Row" style="align-items: center; flex-direction: row; padding-left: 10px;">
+            <ui:VisualElement name="Icon" style="width: 25px; height: 25px; background-image: url(&apos;/Assets/Sizzle/Art/textures/Emotes/FYL_Emote_QuestionMark.png#FYL_Emote_QuestionMark&apos;); align-items: flex-start; flex-direction: row; padding-left: 0; justify-content: flex-start;" />
+            <ui:Label text="Label" display-tooltip-when-elided="true" name="Section" style="padding-left: 10px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
