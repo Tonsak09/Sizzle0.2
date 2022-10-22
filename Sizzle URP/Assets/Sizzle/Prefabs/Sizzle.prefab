@@ -5058,7 +5058,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000000011175871, y: 0, z: 0.016045384}
+  m_ConnectedAnchor: {x: 0, y: -0.000000059604645, z: 0.016044617}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -8270,15 +8270,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d504ee21f3ad8e74087bb8c2ba367e5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  frontBody: {fileID: 7450884251833034876}
-  neck: {fileID: 7736738230238575269}
+  baseBody: {fileID: 7450884251833034876}
+  frontBody: {fileID: 2720201700839140401}
   legsController: {fileID: 2099600900075649835}
   midBodyBuoyancy: {fileID: 7450884251833034874}
   midBoneTorqueCorrection: {fileID: 689872761}
   maxVecDisFromDown: 2
   disBetweenChecks: 0.36
-  frontCheckCenter: {x: 0, y: 0.18, z: 0.45}
-  frontCheckRadius: 0.1
+  frontCheckCenter: {x: 0, y: 0, z: 0.88}
+  frontCheckRadius: 0.23
   checkMask:
     serializedVersion: 2
     m_Bits: 1
@@ -9271,7 +9271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneTarget: {fileID: 2478193425965896669}
-  rotOffset: {x: 0, y: -180, z: 0}
+  rotOffset: {x: -6, y: -180, z: 0}
 --- !u!1 &2570141467828863624
 GameObject:
   m_ObjectHideFlags: 0
@@ -9990,7 +9990,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000000268219, y: -5.820766e-10, z: 0.44578493}
+  m_ConnectedAnchor: {x: 1.9016574e-12, y: 0.00000008975621, z: 0.44578516}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -11210,7 +11210,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boneTarget: {fileID: 6230605057761936566}
-  rotOffset: {x: -20, y: 0, z: 0}
+  rotOffset: {x: -40, y: 0, z: 0}
 --- !u!114 &4157397633548320491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11588,7 +11588,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000000089406655, y: -0.000000010652002, z: 0.50275576}
+  m_ConnectedAnchor: {x: 3.0967302e-13, y: 0.000000049127266, z: 0.502756}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12392,7 +12392,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.00000008940713, y: 0.0000000037252903, z: 0.077000834}
+  m_ConnectedAnchor: {x: 1.6518201e-13, y: 0.00000017415732, z: 0.07700174}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12416,7 +12416,7 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 62.932693
+    limit: 18.286057
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
@@ -12447,7 +12447,7 @@ ConfigurableJoint:
     positionSpring: 0
     positionDamper: 0
     maximumForce: 3.4028233e+38
-  m_TargetRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_TargetRotation: {x: 0.0000032290827, y: -0, z: -0, w: 1}
   m_TargetAngularVelocity: {x: 0, y: 0, z: 0}
   m_RotationDriveMode: 0
   m_AngularXDrive:
@@ -12716,7 +12716,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000014342368, y: 0, z: -0.017997196}
+  m_ConnectedAnchor: {x: 0, y: -0.000000059604645, z: -0.017997742}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -16502,7 +16502,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.000000074505806, y: -0.000000005355105, z: 0.40708005}
+  m_ConnectedAnchor: {x: -1.2325951e-33, y: 0.000000113621354, z: 0.40708002}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0

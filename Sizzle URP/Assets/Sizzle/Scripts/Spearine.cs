@@ -26,13 +26,24 @@ public class Spearine : MonoBehaviour
     [SerializeField] float midAlertRaise;
     [SerializeField] float farAlertRaise;
 
+    [Header("Attacking")]
+    [SerializeField] Animator animator;
+    [SerializeField] AnimationClip attackClip;
+
+    [SerializeField] float minFXTime;
+    [SerializeField] float maxFXTime;
+    [SerializeField] ParticleSystem groundClashFX;
+    [SerializeField] float groundHitRadius;
+
     [Header("Sounds")]
     [SerializeField] AudioClip alert;
     [SerializeField] AudioClip[] idles;
 
+
     private Transform player;
     // Target could be a player, but also any other charged entity 
     private Transform primaryTarget;
+    private bool attacking;
 
 
     // Used to calculate how aware spearine is to all
@@ -42,6 +53,7 @@ public class Spearine : MonoBehaviour
     // If reaches 100 then Spearine is alert to target 
     [Range(0, 100)]
     private float alertness;
+
 
     private enum DistanceZone
     {
@@ -66,17 +78,9 @@ public class Spearine : MonoBehaviour
     {
         if(primaryTarget != null)
         {
-            Vector3 targetVec = Vector3.ProjectOnPlane(primaryTarget.position - this.transform.position, Vector3.up).normalized;
-            //targetVec += boneForwardOffset;
-
-            float angleDifference = Vector3.Angle(this.transform.forward, targetVec);
-            float lerp = angleDifference / maxAngle;
-
-            float angleToTurn = turnCurve.Evaluate(lerp) * alertTurnSpeed;
-
-            Vector3 newDir = Vector3.RotateTowards(rotationBone.transform.forward, targetVec, angleToTurn * Time.deltaTime, 0.0f);
-            rotationBone.transform.rotation = Quaternion.LookRotation(newDir);
-            //torque.Target = -targetVec;
+            // Target has been decided 
+            AimTowardsTarget();
+            AttackWhenInRange();
         }
         else
         {
@@ -93,6 +97,21 @@ public class Spearine : MonoBehaviour
             primaryTarget = player;
         }
 
+    }
+
+    private void AimTowardsTarget()
+    {
+        Vector3 targetVec = Vector3.ProjectOnPlane(primaryTarget.position - this.transform.position, Vector3.up).normalized;
+        //targetVec += boneForwardOffset;
+
+        float angleDifference = Vector3.Angle(this.transform.forward, targetVec);
+        float lerp = angleDifference / maxAngle;
+
+        float angleToTurn = turnCurve.Evaluate(lerp) * alertTurnSpeed;
+
+        Vector3 newDir = Vector3.RotateTowards(rotationBone.transform.forward, targetVec, angleToTurn * Time.deltaTime, 0.0f);
+        rotationBone.transform.rotation = Quaternion.LookRotation(newDir);
+        //torque.Target = -targetVec;
     }
 
     /// <summary>
@@ -133,28 +152,61 @@ public class Spearine : MonoBehaviour
         switch(zone)
         {
             case DistanceZone.close:
-                alertness += closeAlertRaise;
+                alertness += closeAlertRaise * Time.deltaTime;
                 break;
             case DistanceZone.mid:
-                alertness += midAlertRaise;
+                alertness += midAlertRaise * Time.deltaTime;
                 break;
             case DistanceZone.far:
-                alertness += farAlertRaise;
+                alertness += farAlertRaise * Time.deltaTime;
                 break;
             default:
                 // Out of range 
                 alertness = 0;
                 break;
         }
-        
+    }
+
+    private void AttackWhenInRange()
+    {
+        if((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && !attacking)
+        {
+            attacking = true;
+            StartCoroutine(Attack());
+        }
     }
 
     /// <summary>
     /// Spearine attacks the player via animation 
     /// </summary>
-    private void Attack()
+    private IEnumerator Attack()
     {
         // Lunges head towards target according to range 
+        animator.SetBool("attacking", true);
+
+
+
+        float timer = 0; 
+        while(timer < attackClip.length)
+        {
+            // Attack Logic 
+            RaycastHit hit;
+            // Particles
+            if ((timer >= minFXTime) && (timer <= maxFXTime))
+            {
+                //groundClashFX.Play();
+                //ParticleSystem temp = Instantiate(groundClashFX, groundClashFX.transform.position, groundClashFX.transform.rotation);
+                //temp.Play();
+            }
+            //print(timer);
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        attacking = false;
+        animator.SetBool("attacking", false);
+        //groundClashFX.Stop();
     }
 
     /// <summary>
@@ -185,5 +237,8 @@ public class Spearine : MonoBehaviour
 
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(this.transform.position, farRange);
+
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(groundClashFX.transform.position, groundHitRadius);
     }
 }
