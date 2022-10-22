@@ -261,7 +261,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2662472829910571088
 Transform:
   m_ObjectHideFlags: 0
@@ -647,7 +647,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2073084848724869987
 Transform:
   m_ObjectHideFlags: 0
@@ -1032,7 +1032,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2402565474616426784}
   - component: {fileID: 2402565474616426785}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Spearine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1066,11 +1066,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 932ce143e8486224eb140fe75a895680, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rotationBone: {fileID: 2811149331669670229}
+  rotationBone: {fileID: 0}
   boneForwardOffset: {x: 0, y: 1, z: 0}
   closeRange: 6.16
-  midRange: 8.05
-  farRange: 14.36
+  midRange: 9.9
+  farRange: 14.6
   curiousTurnSpeed: 5
   alertTurnSpeed: 1
   maxAngle: 30
@@ -1232,6 +1232,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2800423047411992823}
+  - component: {fileID: 1211289214}
   m_Layer: 0
   m_Name: sizzleChar_spearine_rig_V01
   m_TagString: Untagged
@@ -1255,6 +1256,19 @@ Transform:
   m_Father: {fileID: 2402565474616426784}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: -90}
+--- !u!135 &1211289214
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3285034255926645325}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 4.73
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3731036395283521429
 GameObject:
   m_ObjectHideFlags: 0
