@@ -5,8 +5,8 @@ using UnityEngine;
 public class ForceController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] Rigidbody baseBody;
-    [SerializeField] Transform frontBody;
+    [SerializeField] Rigidbody frontBody;
+    [SerializeField] Transform neck;
     [SerializeField] LegsController legsController;
     [Tooltip("Used to get if grounded or not")]
     [SerializeField] Buoyancy midBodyBuoyancy;
@@ -149,7 +149,7 @@ public class ForceController : MonoBehaviour
         float VInput = Input.GetAxis("Vertical");
         float hInput = Input.GetAxis("Horizontal");
 
-        baseBody.AddTorque(torqueForce * baseBody.transform.up * hInput * Time.deltaTime, ForceMode.Acceleration);
+        frontBody.AddTorque(torqueForce * frontBody.transform.up * hInput * Time.deltaTime, ForceMode.Acceleration);
 
         if(VInput > 0)
         {
@@ -159,7 +159,7 @@ public class ForceController : MonoBehaviour
             }
         }
 
-        baseBody.AddForce(moveForce * baseBody.transform.forward * VInput * Time.deltaTime, ForceMode.Acceleration);
+        frontBody.AddForce(moveForce * frontBody.transform.forward * VInput * Time.deltaTime, ForceMode.Acceleration);
     }
 
     private void SurfaceLogic()
@@ -168,7 +168,7 @@ public class ForceController : MonoBehaviour
         // Get average between two points 
         RaycastHit hitA;
         RaycastHit hitB;
-        if (Physics.Raycast(baseBody.transform.position + baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(baseBody.transform.position - baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5))
+        if (Physics.Raycast(frontBody.transform.position + frontBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(frontBody.transform.position - frontBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5))
         {
             // Average normal 
             midBoneTorqueCorrection.Target = -(hitA.normal + hitB.normal).normalized;
@@ -176,7 +176,7 @@ public class ForceController : MonoBehaviour
             // Height from ground should be the line formed by the two hit points 
             Vector3 midPoint = Vector3.Lerp(hitA.point, hitB.point, 0.5f);
 
-            float totalDis = Mathf.Abs(baseBody.position.y - midPoint.y);
+            float totalDis = Mathf.Abs(frontBody.position.y - midPoint.y);
             float b = totalDis - midBodyBuoyancy.startingHeight; // B value that needs to be eliminated 
             float unitValueOfB = b / midBodyBuoyancy.startingHeight;
 
@@ -188,7 +188,7 @@ public class ForceController : MonoBehaviour
 
 
         RaycastHit hit;
-        if (Physics.Raycast(baseBody.transform.position, Vector3.down, out hit, 5))
+        if (Physics.Raycast(frontBody.transform.position, Vector3.down, out hit, 5))
         {
             // Get the distance between down and hit.normal 
             float disSquared = (Vector3.up - hit.normal).sqrMagnitude;
@@ -232,8 +232,8 @@ public class ForceController : MonoBehaviour
         if (Input.GetKeyDown(dashKey) && DashCo == null && isGrounded)
         {
             SizzleState = states.action;
-            baseBody.AddForce(dashForceImpulse * baseBody.transform.forward, ForceMode.Impulse);
-            legsController.Dash(baseBody); // Activates the dash leg animations 
+            frontBody.AddForce(dashForceImpulse * frontBody.transform.forward, ForceMode.Impulse);
+            legsController.Dash(frontBody); // Activates the dash leg animations 
 
             DashCo = StartCoroutine(DashSubroutine());
         }
@@ -247,7 +247,7 @@ public class ForceController : MonoBehaviour
         if(Input.GetKeyDown(jumpKey) && JumpCo == null && isGrounded)
         {
             //SizzleState = states.action;
-            baseBody.AddForce(-midBoneTorqueCorrection.Target.normalized * jumpForceImpulse, ForceMode.Impulse);
+            frontBody.AddForce(-midBoneTorqueCorrection.Target.normalized * jumpForceImpulse, ForceMode.Impulse);
 
             JumpCo = StartCoroutine(JumpSubroutine(-midBoneTorqueCorrection.Target.normalized));
         }
@@ -255,8 +255,8 @@ public class ForceController : MonoBehaviour
 
     private bool CanMoveForwad()
     {
-        Vector3 pos = frontBody.TransformDirection(frontCheckCenter);
-        return !Physics.CheckSphere(frontBody.position + pos, frontCheckRadius, checkMask);
+        Vector3 pos = neck.TransformDirection(frontCheckCenter);
+        return !Physics.CheckSphere(neck.position + pos, frontCheckRadius, checkMask);
     }
 
 
@@ -280,7 +280,7 @@ public class ForceController : MonoBehaviour
                 break;
             }
 
-            baseBody.AddForce(dashForceContinuous * dashForceoverLerp.Evaluate((timer / dashTime)) * baseBody.transform.forward * Time.deltaTime, ForceMode.Acceleration);
+            frontBody.AddForce(dashForceContinuous * dashForceoverLerp.Evaluate((timer / dashTime)) * frontBody.transform.forward * Time.deltaTime, ForceMode.Acceleration);
 
             timer -= Time.deltaTime;
             yield return null;
@@ -299,8 +299,8 @@ public class ForceController : MonoBehaviour
     /// </summary>
     private void BounceBack()
     {
-        baseBody.velocity = Vector3.zero; // Sets main part of body to 0
-        baseBody.AddForce(-baseBody.transform.forward * dashBounceBackImpulse + Vector3.up * dashBounceBackVertical, ForceMode.Impulse);
+        frontBody.velocity = Vector3.zero; // Sets main part of body to 0
+        frontBody.AddForce(-frontBody.transform.forward * dashBounceBackImpulse + Vector3.up * dashBounceBackVertical, ForceMode.Impulse);
     }
 
     private IEnumerator JumpSubroutine(Vector3 dir)
@@ -312,7 +312,7 @@ public class ForceController : MonoBehaviour
         while (timer >= 0)
         {
             // Jumps away from surface 
-            baseBody.AddForce(jumpForceContinuous * jumpForceOverLerp.Evaluate((timer / dashTime)) * dir * Time.deltaTime, ForceMode.Acceleration);
+            frontBody.AddForce(jumpForceContinuous * jumpForceOverLerp.Evaluate((timer / dashTime)) * dir * Time.deltaTime, ForceMode.Acceleration);
 
             timer -= Time.deltaTime;
             yield return null;
@@ -327,15 +327,15 @@ public class ForceController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Vector3 pos = frontBody.TransformDirection(frontCheckCenter);
-        Gizmos.DrawWireSphere(frontBody.position + pos, frontCheckRadius);
+        Vector3 pos = neck.TransformDirection(frontCheckCenter);
+        Gizmos.DrawWireSphere(neck.position + pos, frontCheckRadius);
 
-        Gizmos.DrawSphere(baseBody.transform.position + baseBody.transform.forward * (disBetweenChecks / 2), 0.01f);
-        Gizmos.DrawSphere(baseBody.transform.position - baseBody.transform.forward * (disBetweenChecks / 2), 0.01f);
+        Gizmos.DrawSphere(frontBody.transform.position + frontBody.transform.forward * (disBetweenChecks / 2), 0.01f);
+        Gizmos.DrawSphere(frontBody.transform.position - frontBody.transform.forward * (disBetweenChecks / 2), 0.01f);
 
         RaycastHit hitA;
         RaycastHit hitB;
-        if (Physics.Raycast(baseBody.transform.position + baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(baseBody.transform.position - baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5))
+        if (Physics.Raycast(frontBody.transform.position + frontBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(frontBody.transform.position - frontBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5))
         {
             Gizmos.DrawLine(hitA.point, hitB.point);
 
