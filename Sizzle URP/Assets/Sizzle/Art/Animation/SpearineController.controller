@@ -49,7 +49,11 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Take 001
+<<<<<<< HEAD
+  m_Speed: 0.5
+=======
   m_Speed: 1
+>>>>>>> parent of bd018d7 (Revert "Ready to solve conflict")
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 1468429304853008903}
@@ -107,7 +111,11 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
+<<<<<<< HEAD
+    m_Controller: {fileID: 9100000}
+=======
     m_Controller: {fileID: 0}
+>>>>>>> parent of bd018d7 (Revert "Ready to solve conflict")
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer

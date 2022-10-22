@@ -6,7 +6,7 @@ public class Spearine : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] Transform rotationBone;
-    [SerializeField] Vector3 boneForwardOffset;
+    [SerializeField] Transform spike;
 
     [Header("Ranges")]
     [SerializeField] float closeRange;
@@ -29,7 +29,10 @@ public class Spearine : MonoBehaviour
     [Header("Attacking")]
     [SerializeField] Animator animator;
     [SerializeField] AnimationClip attackClip;
-
+    [Space]
+    [SerializeField] Vector3 hitCheckOffset;
+    [SerializeField] float hitCheckRadius;
+    [Space]
     [SerializeField] float minFXTime;
     [SerializeField] float maxFXTime;
     [SerializeField] ParticleSystem groundClashFX;
@@ -192,13 +195,18 @@ public class Spearine : MonoBehaviour
             // Attack Logic 
             RaycastHit hit;
             // Particles
-            if ((timer >= minFXTime) && (timer <= maxFXTime))
+            /*if ((timer >= minFXTime) && (timer <= maxFXTime))
             {
                 //groundClashFX.Play();
                 //ParticleSystem temp = Instantiate(groundClashFX, groundClashFX.transform.position, groundClashFX.transform.rotation);
                 //temp.Play();
             }
-            //print(timer);
+            //print(timer);*/
+
+            if(IsHittingSizzle())
+            {
+
+            }
 
             timer += Time.deltaTime;
             yield return null;
@@ -227,6 +235,11 @@ public class Spearine : MonoBehaviour
         return true;
     }
 
+    private bool IsHittingSizzle()
+    {
+        return Physics.CheckSphere(spike.transform.position + spike.InverseTransformDirection(hitCheckOffset), hitCheckRadius);
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -238,7 +251,14 @@ public class Spearine : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(this.transform.position, farRange);
 
-        Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere(groundClashFX.transform.position, groundHitRadius);
+        if(IsHittingSizzle())
+        {
+            Gizmos.color = Color.red;
+        }
+        else
+        {
+            Gizmos.color = Color.white;
+        }
+        Gizmos.DrawWireSphere(spike.transform.position + spike.InverseTransformDirection(hitCheckOffset), hitCheckRadius);
     }
 }
