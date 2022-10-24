@@ -7,6 +7,12 @@ public class Spearine : MonoBehaviour
     [Header("References")]
     [SerializeField] Transform rotationBone;
     [SerializeField] Transform spike;
+    [SerializeField] LayerMask sizzleMask;
+
+    [Header("Animation")]
+    [SerializeField] Animator animator;
+    [SerializeField] AnimationClip alertClip;
+    [SerializeField] AnimationClip attackClip;
 
     [Header("Ranges")]
     [SerializeField] float closeRange;
@@ -16,7 +22,6 @@ public class Spearine : MonoBehaviour
     [Header("Speeds")]
     [SerializeField] float curiousTurnSpeed;
     [SerializeField] float alertTurnSpeed;
-
     [Space]
     [SerializeField] float maxAngle;
     [SerializeField] AnimationCurve turnCurve;
@@ -26,36 +31,38 @@ public class Spearine : MonoBehaviour
     [SerializeField] float midAlertRaise;
     [SerializeField] float farAlertRaise;
 
+    [SerializeField] GameObject viewCam;
+
     [Header("Attacking")]
-    [SerializeField] Animator animator;
-    [SerializeField] AnimationClip attackClip;
-    [Space]
     [SerializeField] Vector3 hitCheckOffset;
     [SerializeField] float hitCheckRadius;
-    [Space]
     [SerializeField] float minFXTime;
     [SerializeField] float maxFXTime;
     [SerializeField] ParticleSystem groundClashFX;
     [SerializeField] float groundHitRadius;
 
-    [Header("Sounds")]
-    [SerializeField] AudioClip alert;
-    [SerializeField] AudioClip[] idles;
+    [Header("Distaction")]
 
+    [Header("Sounds")]
+    [SerializeField] AudioClip alertSound;
+    [SerializeField] AudioClip[] idlesSounds;
+
+    [Header("Debug")]
+    [SerializeField] bool showRange;
+    [SerializeField] bool showHitSphere;
 
     private Transform player;
-    // Target could be a player, but also any other charged entity 
-    private Transform primaryTarget;
-    private bool attacking;
+    private Transform primaryTarget; // Target could be a player, but also any other charged entity 
 
-
-    // Used to calculate how aware spearine is to all
-    // targets in its vicinity 
-    private List<Transform> sparks;
+    private CamManager cm;
 
     // If reaches 100 then Spearine is alert to target 
     [Range(0, 100)]
     private float alertness;
+    private bool attacking;
+
+
+    private Coroutine currentCo;
 
 
     private enum DistanceZone
@@ -71,15 +78,13 @@ public class Spearine : MonoBehaviour
     {
         // Gets player rather than Sizzle because Sizzle is a folder that doesn't represent the tru position 
         player = GameObject.FindWithTag("Player").transform;
-
-        // TESTING ONLY 
-        //primaryTarget = player;
-    } // Test
+        cm = GameObject.FindObjectOfType<CamManager>();
+    }
 
     // Update is called once per frame
     void Update()
     {
-        if(primaryTarget != null)
+        if (primaryTarget != null)
         {
             // Target has been decided 
             AimTowardsTarget();
@@ -89,18 +94,16 @@ public class Spearine : MonoBehaviour
         {
             UpdateAlertness();
 
-            // Get target with largest alert 
-            // Curious rotate towards that 
-        }
-
-
-        // Moving towards target but alerted towards player 
-        if (primaryTarget != player && alertness >= 90)
-        {
-            primaryTarget = player;
+            // Moving towards target but alerted towards player 
+            if (alertness >= 90 && currentCo == null)
+            {
+                currentCo = StartCoroutine(StartAlertPhase());
+            }
         }
 
     }
+
+
 
     private void AimTowardsTarget()
     {
@@ -152,7 +155,7 @@ public class Spearine : MonoBehaviour
     {
         DistanceZone zone = GetZone(player.position);
 
-        switch(zone)
+        switch (zone)
         {
             case DistanceZone.close:
                 alertness += closeAlertRaise * Time.deltaTime;
@@ -172,11 +175,30 @@ public class Spearine : MonoBehaviour
 
     private void AttackWhenInRange()
     {
-        if((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && !attacking)
+        if ((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && !attacking && currentCo == null)
         {
             attacking = true;
-            StartCoroutine(Attack());
+            currentCo = StartCoroutine(Attack());
         }
+    }
+
+    private IEnumerator StartAlertPhase()
+    {
+        animator.SetBool("alert", true);
+        cm.ChangeCam(viewCam);
+        float timer = alertClip.length;
+        while (timer >= 0)
+        {
+            // Logic during alert 
+
+            timer -= Time.deltaTime;
+            yield return null;
+        }
+
+        // Begins the attack phase 
+        primaryTarget = player;
+        cm.ReturnToCommon();
+        currentCo = null;
     }
 
     /// <summary>
@@ -187,10 +209,8 @@ public class Spearine : MonoBehaviour
         // Lunges head towards target according to range 
         animator.SetBool("attacking", true);
 
-
-
-        float timer = 0; 
-        while(timer < attackClip.length)
+        float timer = 0;
+        while (timer < attackClip.length)
         {
             // Attack Logic 
             RaycastHit hit;
@@ -203,9 +223,10 @@ public class Spearine : MonoBehaviour
             }
             //print(timer);*/
 
-            if(IsHittingSizzle())
+            if (IsHittingSizzle())
             {
-
+                print("Hitting Sizzle");
+                LevelManager.Reload();
             }
 
             timer += Time.deltaTime;
@@ -214,7 +235,7 @@ public class Spearine : MonoBehaviour
 
         attacking = false;
         animator.SetBool("attacking", false);
-        //groundClashFX.Stop();
+        currentCo = null;
     }
 
     /// <summary>
@@ -237,28 +258,35 @@ public class Spearine : MonoBehaviour
 
     private bool IsHittingSizzle()
     {
-        return Physics.CheckSphere(spike.transform.position + spike.InverseTransformDirection(hitCheckOffset), hitCheckRadius);
+        return Physics.CheckSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius, sizzleMask);
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(this.transform.position, closeRange);
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(this.transform.position, midRange);
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(this.transform.position, farRange);
-
-        if(IsHittingSizzle())
+        if (showRange)
         {
             Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(this.transform.position, closeRange);
+
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(this.transform.position, midRange);
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(this.transform.position, farRange);
         }
-        else
+
+        if (showHitSphere)
         {
-            Gizmos.color = Color.white;
+            if (IsHittingSizzle())
+            {
+                Gizmos.color = Color.red;
+            }
+            else
+            {
+                Gizmos.color = Color.white;
+            }
+            Gizmos.DrawWireSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius);
         }
-        Gizmos.DrawWireSphere(spike.transform.position + spike.InverseTransformDirection(hitCheckOffset), hitCheckRadius);
+
     }
 }

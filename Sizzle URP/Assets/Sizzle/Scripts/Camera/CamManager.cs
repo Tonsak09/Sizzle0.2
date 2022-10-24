@@ -56,6 +56,11 @@ public class CamManager : MonoBehaviour
         ChangeCam(commonCam);
     }
 
+    public void ChangeCommonCamLookAt(Transform target)
+    {
+        commonCam.GetComponent<CinemachineFreeLook>().LookAt = target;
+    }
+
     private void ChangeFOV()
     {
         if(current == commonCam)
