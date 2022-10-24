@@ -48,7 +48,9 @@ public class LegIKSolver : MonoBehaviour
     [SerializeField] float maxAngularVelInfluence;
     [Tooltip("The rate that the angular velocity will impact the compass")]
     [SerializeField] AnimationCurve angularVelEffectOnTurnAmout;
-    [SerializeField] bool isBackwards;
+
+    [Header("Sounds")]
+    [SerializeField] AudioClip stepSound;
 
     [Header("GUI")]
     [SerializeField] bool showGizmos;
@@ -97,6 +99,7 @@ public class LegIKSolver : MonoBehaviour
     }
 
     private Rigidbody rb;
+    private SoundManager sm;
 
     // Info for moving the limb from one spot to next 
     private Vector3[] processedRangePlane;
@@ -122,6 +125,8 @@ public class LegIKSolver : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        sm = GameObject.FindObjectOfType<SoundManager>();
+
         //target = offsetedStart;
         lerp = 0;
         processedRangePlane = GetLocalizedRangePlane();
@@ -209,6 +214,7 @@ public class LegIKSolver : MonoBehaviour
         }
 
         // Once point is reached 
+        //sm.PlaySoundFX(stepSound, this.transform.position, this.gameObject.name);
 
         // Sets new plane 
         processedRangePlane = GetLocalizedRangePlane();
@@ -258,15 +264,6 @@ public class LegIKSolver : MonoBehaviour
         // Get the magnitude of the next step 
         float mag = linearVelEffectOnMag.Evaluate(Mathf.Clamp01(lVel.magnitude / maxLinearVel)) * maxMagnitudeOfCompass;
         return dir * mag;
-
-        /*if (isBackwards)
-        {
-            return -dir * mag;
-        }
-        else
-        {
-            return dir * mag;
-        }*/
     }
 
     /// <summary>

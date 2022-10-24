@@ -28,8 +28,12 @@ public class LegsController : MonoBehaviour
     [SerializeField] float maxVel;
     [SerializeField] AnimationCurve feetToTargetCurve;
 
+    [Header("Sounds")]
+    [SerializeField] AudioClip dashSound;
+
     private BodyAnimationManager animManager;
     private ForceController controller;
+    private SoundManager sm;
 
     private LegIKSolver[] frontPair;
     private LegIKSolver[] backPair;
@@ -45,6 +49,7 @@ public class LegsController : MonoBehaviour
     {
         animManager = GameObject.FindObjectOfType<BodyAnimationManager>();
         controller = this.GetComponent<ForceController>();
+        sm = GameObject.FindObjectOfType<SoundManager>();
 
         frontPair = new LegIKSolver[] { frontLeft, frontRight };
         backPair = new LegIKSolver[] { backLeft, backRight };
@@ -59,6 +64,7 @@ public class LegsController : MonoBehaviour
 
     private IEnumerator DashCo(Rigidbody body)
     {
+        sm.PlaySoundFX(dashSound, this.transform.position, "DASH");
         // Only animates during aciton state 
         while (controller.CurrentSizzleState == ForceController.states.action)
         {

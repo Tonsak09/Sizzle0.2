@@ -675,7 +675,7 @@ GameObject:
   - component: {fileID: 116090725}
   - component: {fileID: 116090726}
   m_Layer: 0
-  m_Name: CM vcam1
+  m_Name: SpearineCam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10192,7 +10192,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  m_CustomBlends: {fileID: 0}
+  m_CustomBlends: {fileID: 11400000, guid: 240d5f6a32cf4fa41bd8e79cd9ca09a8, type: 2}
   m_CameraCutEvent:
     m_PersistentCalls:
       m_Calls: []
@@ -14807,13 +14807,25 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1536415208, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: dashTime
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1536415208, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
       propertyPath: frontCheckRadius
       value: 0.19
+      objectReference: {fileID: 0}
+    - target: {fileID: 1536415208, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: dashForceContinuous
+      value: 6000
       objectReference: {fileID: 0}
     - target: {fileID: 2056318916, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
       propertyPath: commonCam
       value: 
       objectReference: {fileID: 1961425963}
+    - target: {fileID: 1288643250232588780, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: stepSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
     - target: {fileID: 1614706803544236438, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -14858,9 +14870,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2099600900075649835, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: dashSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 36bce9fe3d46b8b4e83f771ae6f1dd12, type: 3}
     - target: {fileID: 2099600900075649836, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
       propertyPath: m_Name
       value: Sizzle
+      objectReference: {fileID: 0}
+    - target: {fileID: 8843495952028720266, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: root
+      value: 
+      objectReference: {fileID: 1773359375}
+    - target: {fileID: 8843495952028720266, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: terrain.m_Bits
+      value: 195
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
@@ -17171,6 +17195,11 @@ Transform:
   m_Father: {fileID: 534894171}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1773359375 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1288643249838922682, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+  m_PrefabInstance: {fileID: 1207000445}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1780702868
 GameObject:
   m_ObjectHideFlags: 0
@@ -54153,12 +54182,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2402565474616426785, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
       propertyPath: showRange
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2402565474616426785, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
+      propertyPath: alertSound
+      value: 
+      objectReference: {fileID: 8300000, guid: f940cb95d7d0c0d408abbdd1d5887115, type: 3}
     - target: {fileID: 2402565474616426785, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
       propertyPath: farAlertRaise
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 2402565474616426785, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
+      propertyPath: idlesSounds.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2402565474616426785, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
+      propertyPath: idlesSounds.Array.data[0]
+      value: 
+      objectReference: {fileID: 8300000, guid: 40c208b5648195c4abe6effe53a31b22, type: 3}
+    - target: {fileID: 2402565474616426785, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
+      propertyPath: idlesSounds.Array.data[1]
+      value: 
+      objectReference: {fileID: 8300000, guid: abeb4faa80b23b64bacf7f8c97de2ab2, type: 3}
     - target: {fileID: 2402565474616426799, guid: ec0043cc6634d46458bcf247ac21c3f8, type: 3}
       propertyPath: m_Name
       value: Spearine

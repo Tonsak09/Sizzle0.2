@@ -55,6 +55,7 @@ public class Spearine : MonoBehaviour
     private Transform primaryTarget; // Target could be a player, but also any other charged entity 
 
     private CamManager cm;
+    private SoundManager sm;
 
     // If reaches 100 then Spearine is alert to target 
     [Range(0, 100)]
@@ -79,6 +80,7 @@ public class Spearine : MonoBehaviour
         // Gets player rather than Sizzle because Sizzle is a folder that doesn't represent the tru position 
         player = GameObject.FindWithTag("Player").transform;
         cm = GameObject.FindObjectOfType<CamManager>();
+        sm = GameObject.FindObjectOfType<SoundManager>();
     }
 
     // Update is called once per frame
@@ -186,6 +188,9 @@ public class Spearine : MonoBehaviour
     {
         animator.SetBool("alert", true);
         cm.ChangeCam(viewCam);
+
+        sm.PlaySoundFX(alertSound, this.transform.position, "SpearineAlert");
+
         float timer = alertClip.length;
         while (timer >= 0)
         {
