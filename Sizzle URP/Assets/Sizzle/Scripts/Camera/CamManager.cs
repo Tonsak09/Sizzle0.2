@@ -32,6 +32,7 @@ public class CamManager : MonoBehaviour
     {
         current = commonCam;
         commonFreeLook = commonCam.GetComponent<CinemachineFreeLook>();
+        FOV = commonCam.GetComponent<CinemachineFreeLook>().m_Lens.FieldOfView;
     }
 
     private void Update()

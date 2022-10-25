@@ -42,10 +42,23 @@ public class Spearine : MonoBehaviour
     [SerializeField] float groundHitRadius;
 
     [Header("Distaction")]
+    [Tooltip("How long will Spearine be distracted by the charged object")]
+    [SerializeField] float distractionTime;
+    [Tooltip("After no longer being distracted how long can it be before Spearine can be distracted again")]
+    [SerializeField] float distractionCoolDown;
+    [Tooltip("How often to check for distraction")]
+    [SerializeField] float checkTime;
+
+    [Space]
+    private Transform distractionRef;
+    [SerializeField] float checkTimer;
+    [SerializeField] float coolDownTimer;
+    private bool distracted; 
 
     [Header("Sounds")]
     [SerializeField] AudioClip alertSound;
     [SerializeField] AudioClip[] idlesSounds;
+    [SerializeField] float alertSoundDelay;
 
     [Header("Debug")]
     [SerializeField] bool showRange;
@@ -62,9 +75,11 @@ public class Spearine : MonoBehaviour
     private float alertness;
     private bool attacking;
 
+    
 
-    private Coroutine currentCo;
 
+    private Coroutine coAlertAndAttack;
+    private Coroutine distractionCo;
 
     private enum DistanceZone
     {
@@ -81,6 +96,10 @@ public class Spearine : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
         cm = GameObject.FindObjectOfType<CamManager>();
         sm = GameObject.FindObjectOfType<SoundManager>();
+
+
+        checkTimer = checkTime;
+        coolDownTimer = distractionCoolDown;
     }
 
     // Update is called once per frame
@@ -89,27 +108,80 @@ public class Spearine : MonoBehaviour
         if (primaryTarget != null)
         {
             // Target has been decided 
-            AimTowardsTarget();
-            AttackWhenInRange();
+
+            if(!distracted)
+            {
+                // Logic when not distracted 
+                AimTowardsPlayer();
+                AttackWhenInRange();
+
+                // Can only be distracted once reaches 0 
+                if(coolDownTimer <= 0)
+                {
+                    // How often does Spearine check for a distraction 
+                    if (checkTimer <= 0)
+                    {
+                        // Check is a distraction is around
+                        ChargeObj[] distractions = GameObject.FindObjectsOfType<ChargeObj>();
+                        if (distractions.Length > 0)
+                        {
+
+                            // Distraction has been found 
+                            distractionRef = distractions[0].transform;
+                            distracted = true;
+                        }
+
+                        // Reset timer 
+                        checkTimer = checkTime;
+                    }
+                    else
+                    {
+                        // Continues to countdown 
+                        checkTimer -= Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    coolDownTimer -= Time.deltaTime;
+                }
+                
+            }
+            else
+            {
+                // Checks if need to initialize 
+                if(distractionCo == null)
+                {
+                    distractionCo = StartCoroutine(Distraction(distractionRef));
+                }
+            }
+
+            
         }
         else
         {
             UpdateAlertness();
 
             // Moving towards target but alerted towards player 
-            if (alertness >= 90 && currentCo == null)
+            if (alertness >= 90 && coAlertAndAttack == null)
             {
-                currentCo = StartCoroutine(StartAlertPhase());
+                coAlertAndAttack = StartCoroutine(StartAlertPhase());
             }
         }
 
     }
 
 
-
-    private void AimTowardsTarget()
+    /// <summary>
+    /// Directs the stem of Spearine towrads its target 
+    /// </summary>
+    private void AimTowardsPlayer()
     {
-        Vector3 targetVec = Vector3.ProjectOnPlane(primaryTarget.position - this.transform.position, Vector3.up).normalized;
+        AimTowardsTarget(player.transform.position);
+    }
+
+    private void AimTowardsTarget(Vector3 target)
+    {
+        Vector3 targetVec = Vector3.ProjectOnPlane(target - this.transform.position, Vector3.up).normalized;
         //targetVec += boneForwardOffset;
 
         float angleDifference = Vector3.Angle(this.transform.forward, targetVec);
@@ -119,7 +191,6 @@ public class Spearine : MonoBehaviour
 
         Vector3 newDir = Vector3.RotateTowards(rotationBone.transform.forward, targetVec, angleToTurn * Time.deltaTime, 0.0f);
         rotationBone.transform.rotation = Quaternion.LookRotation(newDir);
-        //torque.Target = -targetVec;
     }
 
     /// <summary>
@@ -174,14 +245,39 @@ public class Spearine : MonoBehaviour
                 break;
         }
     }
-
+    /// <summary>
+    /// When the target is within range activate the attack coroutine 
+    /// </summary>
     private void AttackWhenInRange()
     {
-        if ((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && !attacking && currentCo == null)
+        if ((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && !attacking && coAlertAndAttack == null)
         {
             attacking = true;
-            currentCo = StartCoroutine(Attack());
+            coAlertAndAttack = StartCoroutine(Attack());
         }
+    }
+
+    /// <summary>
+    /// Brings the player back and then resets the alertness
+    /// </summary>
+    private void ResetPosition()
+    {
+
+    }
+
+    /// <summary>
+    /// Whether or not the Spearine can see the target 
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    private bool CanDetect(Vector3 pos)
+    {
+        return true;
+    }
+
+    private bool IsHittingSizzle()
+    {
+        return Physics.CheckSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius, sizzleMask);
     }
 
     private IEnumerator StartAlertPhase()
@@ -189,7 +285,7 @@ public class Spearine : MonoBehaviour
         animator.SetBool("alert", true);
         cm.ChangeCam(viewCam);
 
-        sm.PlaySoundFX(alertSound, this.transform.position, "SpearineAlert");
+        sm.PlaySoundFXAfterDelay(alertSound, this.transform.position, "SpearineAlert", alertSoundDelay);
 
         float timer = alertClip.length;
         while (timer >= 0)
@@ -203,7 +299,7 @@ public class Spearine : MonoBehaviour
         // Begins the attack phase 
         primaryTarget = player;
         cm.ReturnToCommon();
-        currentCo = null;
+        coAlertAndAttack = null;
     }
 
     /// <summary>
@@ -240,30 +336,35 @@ public class Spearine : MonoBehaviour
 
         attacking = false;
         animator.SetBool("attacking", false);
-        currentCo = null;
+        coAlertAndAttack = null;
     }
 
-    /// <summary>
-    /// Brings the player back and then resets the alertness
-    /// </summary>
-    private void ResetPosition()
+    private IEnumerator Distraction(Transform distaction)
     {
+        float timer = distractionTime;
 
-    }
+        Transform distractionHold = distaction;
+        Vector3 pos = distractionHold.position;
+        print("Distracted");
+        while (timer >= 0)
+        {
+            AimTowardsTarget(pos);
 
-    /// <summary>
-    /// Whether or not the Spearine can see the target 
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    private bool CanDetect(Vector3 pos)
-    {
-        return true;
-    }
+            // Will continue to look at the last known position even if the distraction obj
+            // has been destroyed 
+            if(distractionHold != null)
+            {
+                // Sets new position to look at 
+                pos = distractionHold.position;
+            }
 
-    private bool IsHittingSizzle()
-    {
-        return Physics.CheckSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius, sizzleMask);
+            timer -= Time.deltaTime;
+            yield return null;
+        }
+
+        coolDownTimer = distractionCoolDown;
+        distracted = false;
+        distractionCo = null;
     }
 
     private void OnDrawGizmos()

@@ -51,6 +51,7 @@ public class LegIKSolver : MonoBehaviour
 
     [Header("Sounds")]
     [SerializeField] AudioClip stepSound;
+    [SerializeField] Vector2 pitchRange;
 
     [Header("GUI")]
     [SerializeField] bool showGizmos;
@@ -214,7 +215,7 @@ public class LegIKSolver : MonoBehaviour
         }
 
         // Once point is reached 
-        //sm.PlaySoundFX(stepSound, this.transform.position, this.gameObject.name);
+        sm.PlaySoundFX(stepSound, this.transform.position, "STEP", Random.Range(pitchRange.x, pitchRange.y), 1, 2);
 
         // Sets new plane 
         processedRangePlane = GetLocalizedRangePlane();

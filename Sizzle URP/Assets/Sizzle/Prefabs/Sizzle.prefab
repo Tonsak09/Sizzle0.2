@@ -5058,7 +5058,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: -0.000000059604645, z: 0.016044617}
+  m_ConnectedAnchor: {x: -0.000000011175871, y: 0, z: 0.016045384}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -6761,7 +6761,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  isBackwards: 0
+  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  pitchRange: {x: 1, y: 5}
   showGizmos: 0
   rotValueTest: 2.17
 --- !u!1 &1288643250091984820
@@ -6964,7 +6965,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  isBackwards: 0
+  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  pitchRange: {x: 1, y: 5}
   showGizmos: 0
   rotValueTest: 0
 --- !u!1 &1288643250127403162
@@ -7237,7 +7239,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  isBackwards: 0
+  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  pitchRange: {x: 1, y: 5}
   showGizmos: 0
   rotValueTest: 2.17
 --- !u!1 &1288643250248906569
@@ -7530,7 +7533,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  isBackwards: 1
+  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  pitchRange: {x: 1, y: 5}
   showGizmos: 0
   rotValueTest: 0
 --- !u!1 &1317025280457187570
@@ -8258,6 +8262,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  dashSound: {fileID: 8300000, guid: 36bce9fe3d46b8b4e83f771ae6f1dd12, type: 3}
 --- !u!114 &1536415208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8279,7 +8284,7 @@ MonoBehaviour:
   maxVecDisFromDown: 2
   disBetweenChecks: 0.36
   frontCheckCenter: {x: 0, y: 0.18, z: 0.45}
-  frontCheckRadius: 0.1
+  frontCheckRadius: 0.19
   checkMask:
     serializedVersion: 2
     m_Bits: 513
@@ -8294,10 +8299,10 @@ MonoBehaviour:
   bManager: {fileID: 1739393106}
   dashKey: 32
   dashForceImpulse: 0
-  dashForceContinuous: 4000
+  dashForceContinuous: 6000
   dashBounceBackImpulse: 500
   dashBounceBackVertical: 600
-  dashTime: 0.5
+  dashTime: 0.3
   minSqrtSpeedForDash: 0
   dashForceoverLerp:
     serializedVersion: 2
@@ -9991,7 +9996,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 1.9016574e-12, y: 0.00000008975621, z: 0.44578516}
+  m_ConnectedAnchor: {x: -0.000000268219, y: -5.820766e-10, z: 0.44578493}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -11589,7 +11594,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 3.0967302e-13, y: 0.000000049127266, z: 0.502756}
+  m_ConnectedAnchor: {x: -0.000000089406655, y: -0.000000010652002, z: 0.50275576}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12393,7 +12398,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 1.6518201e-13, y: 0.00000017415732, z: 0.07700174}
+  m_ConnectedAnchor: {x: 0.00000008940713, y: 0.0000000037252903, z: 0.077000834}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12717,7 +12722,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0, y: -0.000000059604645, z: -0.017997742}
+  m_ConnectedAnchor: {x: -0.00000014342368, y: 0, z: -0.017997196}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -16503,7 +16508,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -1.2325951e-33, y: 0.000000113621354, z: 0.40708002}
+  m_ConnectedAnchor: {x: 0.000000074505806, y: -0.000000005355105, z: 0.40708005}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -17016,7 +17021,7 @@ MonoBehaviour:
   root: {fileID: 1288643249838922682}
   terrain:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 195
 --- !u!1 &8933498518475196232
 GameObject:
   m_ObjectHideFlags: 0

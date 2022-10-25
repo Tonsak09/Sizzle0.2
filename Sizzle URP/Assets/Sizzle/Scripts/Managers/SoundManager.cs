@@ -43,10 +43,33 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    public void PlaySoundFXAfterDelay(AudioClip sound, Vector3 pos, string category, float delay, float pitch = 1, float volume = 1)
+    {
+        GameObject temp = Instantiate(soundSourceReference, pos, Quaternion.identity);
+
+        AudioSource source = temp.GetComponent<AudioSource>();
+
+        source.clip = sound;
+        source.pitch = pitch;
+        source.volume = volume * 0.5f * soundMultiplier;
+        source.Play();
+
+        StartCoroutine(SoundDelayCoroutineSoundCoroutine(temp, category, sound.length, delay));
+    }
+
     private IEnumerator SoundCoroutine(GameObject obj, string category, float time)
     {
         yield return new WaitForSeconds(time);
-        effects[category].Remove(obj);
+        if(effects.ContainsKey(category))
+        {
+            effects[category].Remove(obj);
+        }
         Destroy(obj);
+    }
+
+    private IEnumerator SoundDelayCoroutineSoundCoroutine(GameObject obj, string category, float time, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        StartCoroutine(SoundCoroutine(obj, category, time));
     }
 }
