@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Spearine : MonoBehaviour
 {
-    [Header("References")]
+    [Header("General")]
     [SerializeField] Transform rotationBone;
     [SerializeField] Transform spike;
     [SerializeField] LayerMask sizzleMask;
@@ -13,6 +13,14 @@ public class Spearine : MonoBehaviour
     [SerializeField] Animator animator;
     [SerializeField] AnimationClip alertClip;
     [SerializeField] AnimationClip attackClip;
+
+    [Header("Head Turning")]
+    [SerializeField] Transform parentNeck;
+    [SerializeField] Transform spearineNeck;
+    [SerializeField] Transform sizzleBod;
+    [SerializeField] Vector3 neckRotOffset;
+    [SerializeField] float maxTurnAngle;
+    [SerializeField] float neckTurnSpeed;
 
     [Header("Ranges")]
     [SerializeField] float closeRange;
@@ -66,6 +74,7 @@ public class Spearine : MonoBehaviour
 
     private Transform player;
     private Transform primaryTarget; // Target could be a player, but also any other charged entity 
+    private SpearineStates state;
 
     private CamManager cm;
     private SoundManager sm;
@@ -73,9 +82,6 @@ public class Spearine : MonoBehaviour
     // If reaches 100 then Spearine is alert to target 
     [Range(0, 100)]
     private float alertness;
-    private bool attacking;
-
-    
 
 
     private Coroutine coAlertAndAttack;
@@ -89,6 +95,14 @@ public class Spearine : MonoBehaviour
         NotWithinRange
     }
 
+    private enum SpearineStates
+    {
+        passive,
+        aggressive,
+        distracted,
+        attacking
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -97,6 +111,8 @@ public class Spearine : MonoBehaviour
         cm = GameObject.FindObjectOfType<CamManager>();
         sm = GameObject.FindObjectOfType<SoundManager>();
 
+        primaryTarget = player;
+        state = SpearineStates.passive;
 
         checkTimer = checkTime;
         coolDownTimer = distractionCoolDown;
@@ -105,69 +121,83 @@ public class Spearine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (primaryTarget != null)
+        AimTowardsPlayer();
+        AimBone(parentNeck, sizzleBod, maxTurnAngle, neckTurnSpeed);
+
+        //spearineNeck.transform.rotation = parentNeck.transform.rotation;
+        //spearineNeck.transform.eulerAngles += neckRotOffset;
+        /*switch(state)
         {
-            // Target has been decided 
+            case SpearineStates.passive:
 
-            if(!distracted)
-            {
-                // Logic when not distracted 
-                AimTowardsPlayer();
-                AttackWhenInRange();
+                UpdateAlertness();
 
-                // Can only be distracted once reaches 0 
-                if(coolDownTimer <= 0)
+                // Moving towards target but alerted towards player 
+                if (alertness >= 90 && coAlertAndAttack == null)
                 {
-                    // How often does Spearine check for a distraction 
-                    if (checkTimer <= 0)
-                    {
-                        // Check is a distraction is around
-                        ChargeObj[] distractions = GameObject.FindObjectsOfType<ChargeObj>();
-                        if (distractions.Length > 0)
-                        {
-
-                            // Distraction has been found 
-                            distractionRef = distractions[0].transform;
-                            distracted = true;
-                        }
-
-                        // Reset timer 
-                        checkTimer = checkTime;
-                    }
-                    else
-                    {
-                        // Continues to countdown 
-                        checkTimer -= Time.deltaTime;
-                    }
-                }
-                else
-                {
-                    coolDownTimer -= Time.deltaTime;
+                    coAlertAndAttack = StartCoroutine(StartAlertPhase());
                 }
                 
-            }
-            else
-            {
+                
+
+                break;
+            case SpearineStates.aggressive:
+
+                Agressive();
+
+                break;
+            case SpearineStates.attacking:
+                break;
+            case SpearineStates.distracted:
+
                 // Checks if need to initialize 
-                if(distractionCo == null)
+                if (distractionCo == null)
                 {
                     distractionCo = StartCoroutine(Distraction(distractionRef));
                 }
-            }
 
-            
+                break;
+        }*/
+    }
+
+    /// <summary>
+    /// Logic that plays when Spearine is in an aggressive state 
+    /// </summary>
+    private void Agressive()
+    {
+        // Logic when not distracted 
+        AimTowardsPlayer();
+        AttackWhenInRange();
+
+        // Can only be distracted once reaches 0 
+        if (coolDownTimer <= 0)
+        {
+            // How often does Spearine check for a distraction 
+            if (checkTimer <= 0)
+            {
+                // Check is a distraction is around
+                ChargeObj[] distractions = GameObject.FindObjectsOfType<ChargeObj>();
+                if (distractions.Length > 0)
+                {
+
+                    // Distraction has been found 
+                    distractionRef = distractions[0].transform;
+                    distracted = true;
+                }
+
+                // Reset timer 
+                checkTimer = checkTime;
+            }
+            else
+            {
+                // Continues to countdown 
+                checkTimer -= Time.deltaTime;
+            }
         }
         else
         {
-            UpdateAlertness();
-
-            // Moving towards target but alerted towards player 
-            if (alertness >= 90 && coAlertAndAttack == null)
-            {
-                coAlertAndAttack = StartCoroutine(StartAlertPhase());
-            }
+            coolDownTimer -= Time.deltaTime;
         }
-
     }
 
 
@@ -179,6 +209,10 @@ public class Spearine : MonoBehaviour
         AimTowardsTarget(player.transform.position);
     }
 
+    /// <summary>
+    /// Rotates the stem of the spearine towards the player
+    /// </summary>
+    /// <param name="target"></param>
     private void AimTowardsTarget(Vector3 target)
     {
         Vector3 targetVec = Vector3.ProjectOnPlane(target - this.transform.position, Vector3.up).normalized;
@@ -250,34 +284,50 @@ public class Spearine : MonoBehaviour
     /// </summary>
     private void AttackWhenInRange()
     {
-        if ((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && !attacking && coAlertAndAttack == null)
+        if ((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && coAlertAndAttack == null)
         {
-            attacking = true;
+            state = SpearineStates.attacking;
             coAlertAndAttack = StartCoroutine(Attack());
         }
-    }
-
-    /// <summary>
-    /// Brings the player back and then resets the alertness
-    /// </summary>
-    private void ResetPosition()
-    {
-
-    }
-
-    /// <summary>
-    /// Whether or not the Spearine can see the target 
-    /// </summary>
-    /// <param name="pos"></param>
-    /// <returns></returns>
-    private bool CanDetect(Vector3 pos)
-    {
-        return true;
     }
 
     private bool IsHittingSizzle()
     {
         return Physics.CheckSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius, sizzleMask);
+    }
+
+    /// <summary>
+    /// Adjusts the head to look towards the target position 
+    /// </summary>
+    private void AimBone(Transform bone, Transform target, float maxTurnAngle, float turnSpeed)
+    {
+        // Store the current head rotation since we will be resetting it
+        Quaternion currentLocalRotation = bone.localRotation;
+        // Reset the head rotation so our world to local space transformation will use the head's zero rotation. 
+        // Note: Quaternion.Identity is the quaternion equivalent of "zero"
+        bone.localRotation = Quaternion.identity;
+
+        Vector3 targetWorldLookDir = target.position - bone.position;
+        Vector3 targetLocalLookDir = bone.InverseTransformDirection(targetWorldLookDir);
+
+        // Apply angle limit
+        targetLocalLookDir = Vector3.RotateTowards(
+          Vector3.forward,
+          targetLocalLookDir,
+          Mathf.Deg2Rad * maxTurnAngle, // Note we multiply by Mathf.Deg2Rad here to convert degrees to radians
+          0 // We don't care about the length here, so we leave it at zero
+        );
+
+        // Get the local rotation by using LookRotation on a local directional vector
+        Quaternion targetLocalRotation = Quaternion.LookRotation(targetLocalLookDir, Vector3.up);
+
+        // Apply smoothing
+        bone.localRotation = Quaternion.Slerp(
+          currentLocalRotation,
+          targetLocalRotation,
+          1 - Mathf.Exp(-turnSpeed * Time.deltaTime)
+        );
+
     }
 
     private IEnumerator StartAlertPhase()
@@ -297,7 +347,7 @@ public class Spearine : MonoBehaviour
         }
 
         // Begins the attack phase 
-        primaryTarget = player;
+        state = SpearineStates.aggressive;
         cm.ReturnToCommon();
         coAlertAndAttack = null;
     }
@@ -334,7 +384,8 @@ public class Spearine : MonoBehaviour
             yield return null;
         }
 
-        attacking = false;
+        // Sets back to aggressive state 
+        state = SpearineStates.aggressive;
         animator.SetBool("attacking", false);
         coAlertAndAttack = null;
     }
