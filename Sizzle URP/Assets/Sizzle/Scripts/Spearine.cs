@@ -141,6 +141,10 @@ public class Spearine : MonoBehaviour
 
                 UpdateAlertness();
 
+                AimTowardsPlayer();
+                AimBone(parentNeck, sizzleBod, maxTurnAngle, neckTurnSpeed);
+                spearineNeck.eulerAngles = spearineRotOffset + (parentNeck.eulerAngles - neckRotOffset);
+
                 // Moving towards target but alerted towards player 
                 if (alertness >= 90 && coAlertAndAttack == null)
                 {
