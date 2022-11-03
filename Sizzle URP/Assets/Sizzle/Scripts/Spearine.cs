@@ -7,6 +7,8 @@ public class Spearine : MonoBehaviour
     [Header("General")]
     [SerializeField] Transform rotationBone;
     [SerializeField] Transform spike;
+    [SerializeField] Transform trueNeck;
+    [SerializeField] Transform headVisual;
     [SerializeField] LayerMask sizzleMask;
 
     [Header("Head Turning")]
@@ -73,6 +75,18 @@ public class Spearine : MonoBehaviour
     [SerializeField] AnimationClip alertClip;
     [SerializeField] AnimationClip attackClip;
 
+    [Space]
+    [Tooltip("The bones that actually get rendered")]
+    [SerializeField] List<Transform> visualBones;
+    [Tooltip("The bones that are being animated")]
+    [SerializeField] List<Transform> trueBones;
+
+    [Space]
+    [SerializeField] AnimationCurve animToLookLogicCurve;
+    [SerializeField] float animToLookLogicSpeed;
+
+    [SerializeField] float lerpAnimLookLogic;
+
     [Header("Debug")]
     [SerializeField] bool showRange;
     [SerializeField] bool showHitSphere;
@@ -93,6 +107,7 @@ public class Spearine : MonoBehaviour
     private float holdTimeForAttack; // The time at which was last attacked 
     public bool canAttack;
 
+    private Coroutine animToLookLogicCo;
     private Coroutine coAlertAndAttack;
     private Coroutine distractionCo;
 
@@ -133,21 +148,16 @@ public class Spearine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        
-
+        UpdateAnimation();
+        print(animToLookLogicCo == null);
         //spearineNeck.transform.rotation = parentNeck.transform.rotation;
         //spearineNeck.transform.eulerAngles += neckRotOffset;
-        switch(state)
+        switch (state)
         {
             case SpearineStates.passive:
 
                 UpdateAlertness();
-
                 AimTowardsPlayer();
-                AimBone(parentNeck, sizzleBod, maxTurnAngle, neckTurnSpeed);
-                spearineNeck.eulerAngles = spearineRotOffset + (parentNeck.eulerAngles - neckRotOffset);
-
                 // Moving towards target but alerted towards player 
                 if (alertness >= 90 && coAlertAndAttack == null)
                 {
@@ -160,11 +170,9 @@ public class Spearine : MonoBehaviour
 
                 Agressive();
 
-
-
                 break;
-            case SpearineStates.attacking: //spearineRig:Spine3_M
-                
+            case SpearineStates.attacking: 
+
                 break;
             case SpearineStates.distracted:
 
@@ -179,15 +187,32 @@ public class Spearine : MonoBehaviour
     }
 
     /// <summary>
+    /// Updates what is being hard animated and what is done procedurally
+    /// </summary>
+    private void UpdateAnimation()
+    {
+        AimBone(parentNeck, sizzleBod, maxTurnAngle, neckTurnSpeed);
+        headVisual.position = trueNeck.position;
+
+        // Makes the visual either cloer to 
+        // what is being animated or programmed 
+        headVisual.rotation = Quaternion.Lerp(trueNeck.rotation, Quaternion.Euler(spearineRotOffset + (parentNeck.eulerAngles - neckRotOffset)), animToLookLogicCurve.Evaluate(lerpAnimLookLogic));
+
+        // Sets rest of bones after the root to the animation 
+        // since parent bone is the only thing we need to govern 
+        for (int i = 0; i < visualBones.Count; i++)
+        {
+            visualBones[i].localRotation = trueBones[i].localRotation;
+        }
+    }
+
+    /// <summary>
     /// Logic that plays when Spearine is in an aggressive state 
     /// </summary>
     private void Agressive()
     {
         // Logic when not distracted 
         AimTowardsPlayer();
-        AimBone(parentNeck, sizzleBod, maxTurnAngle, neckTurnSpeed);
-        spearineNeck.eulerAngles = spearineRotOffset + (parentNeck.eulerAngles - neckRotOffset);
-
         AttackWhenInRange();
 
         // Can only be distracted once reaches 0 
@@ -326,6 +351,7 @@ public class Spearine : MonoBehaviour
         {
             state = SpearineStates.attacking;
             canAttack = false;
+            //ChangeToLookLogic(false);
             coAlertAndAttack = StartCoroutine(Attack());
         }
     }
@@ -369,9 +395,17 @@ public class Spearine : MonoBehaviour
 
     }
 
+    public void ChangeToLookLogic(bool toLook = true)
+    {
+        //StartCoroutine(AnimToLookLogicCo(toLook));
+        if (animToLookLogicCo == null)
+        {
+            animToLookLogicCo = StartCoroutine(AnimToLookLogicCo(toLook));
+        }
+    }
+
     private IEnumerator StartAlertPhase()
     {
-        mainAnimator.enabled = true;
         mainAnimator.SetBool("alert", true);
         
         cm.ChangeCam(viewCam);
@@ -393,7 +427,6 @@ public class Spearine : MonoBehaviour
     {
         // Lunges head towards target according to range 
         mainAnimator.SetBool("attacking", true);
-        mainAnimator.enabled = true;
         /* float timer = 0;
          while (timer < attackClip.length)
          {
@@ -424,13 +457,7 @@ public class Spearine : MonoBehaviour
         state = SpearineStates.aggressive;
         holdTimeForAttack = Time.realtimeSinceStartup;
         
-        
         coAlertAndAttack = null;
-    }
-
-    public void DisableAnimator()
-    {
-        mainAnimator.enabled = false;
     }
 
     private IEnumerator Distraction(Transform distaction)
@@ -459,6 +486,36 @@ public class Spearine : MonoBehaviour
         distractionCoolDownTimer = distractionCoolDown;
         distracted = false;
         distractionCo = null;
+    }
+
+    private IEnumerator AnimToLookLogicCo(bool toLook = true)
+    {
+        print(toLook);
+        if(toLook)
+        {
+            while (lerpAnimLookLogic < 1)
+            {
+                lerpAnimLookLogic += animToLookLogicSpeed * Time.deltaTime;
+                print(lerpAnimLookLogic);
+                yield return null;
+            }
+
+            lerpAnimLookLogic = 1;
+        }
+        else
+        {
+            while (lerpAnimLookLogic >= 0)
+            {
+                lerpAnimLookLogic -= animToLookLogicSpeed * Time.deltaTime;
+                print(lerpAnimLookLogic);
+                yield return null;
+            }
+
+            lerpAnimLookLogic = 0;
+        }
+
+        StopCoroutine(animToLookLogicCo);
+        animToLookLogicCo = null;
     }
 
     private void OnDrawGizmos()

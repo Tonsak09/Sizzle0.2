@@ -16,4 +16,14 @@ public class SpearineAnimEvents : MonoBehaviour
     {
         spearine.state = newState;
     }
+
+    public void ChangeToLookLogic()
+    {
+        spearine.ChangeToLookLogic();
+    }
+
+    public void ChangeToAnim()
+    {
+        spearine.ChangeToLookLogic(false);
+    }
 }
