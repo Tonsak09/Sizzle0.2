@@ -9,11 +9,6 @@ public class Spearine : MonoBehaviour
     [SerializeField] Transform spike;
     [SerializeField] LayerMask sizzleMask;
 
-    [Header("Animation")]
-    [SerializeField] Animator animator;
-    [SerializeField] AnimationClip alertClip;
-    [SerializeField] AnimationClip attackClip;
-
     [Header("Head Turning")]
     [SerializeField] Transform parentNeck;
     [SerializeField] Transform spearineNeck;
@@ -44,12 +39,14 @@ public class Spearine : MonoBehaviour
     [SerializeField] Vector3 hitCheckOffset;
     [SerializeField] float hitCheckRadius;
     [SerializeField] float attackCooldown;
-        /*
-    [SerializeField] float minFXTime;
-    [SerializeField] float maxFXTime;
-    [SerializeField] ParticleSystem groundClashFX;
-    [SerializeField] float groundHitRadius;
-    */
+    /*
+[SerializeField] float minFXTime;
+[SerializeField] float maxFXTime;
+[SerializeField] ParticleSystem groundClashFX;
+[SerializeField] float groundHitRadius;
+*/
+    [SerializeField] GameObject dangerDisplay;
+    [SerializeField] List<Vector3> dangerPoints;
 
     [Header("Distaction")]
     [Tooltip("How long will Spearine be distracted by the charged object")]
@@ -70,13 +67,19 @@ public class Spearine : MonoBehaviour
     [SerializeField] AudioClip[] idlesSounds;
     [SerializeField] float alertSoundDelay;
 
+    [Header("Animation")]
+    [SerializeField] Animator mainAnimator;
+    [SerializeField] Animator headAnimator;
+    [SerializeField] AnimationClip alertClip;
+    [SerializeField] AnimationClip attackClip;
+
     [Header("Debug")]
     [SerializeField] bool showRange;
     [SerializeField] bool showHitSphere;
 
     private Transform player;
     private Transform primaryTarget; // Target could be a player, but also any other charged entity 
-    [SerializeField] SpearineStates state;
+    public SpearineStates state;
 
     private CamManager cm;
     private SoundManager sm;
@@ -101,7 +104,7 @@ public class Spearine : MonoBehaviour
         NotWithinRange
     }
 
-    private enum SpearineStates
+    public enum SpearineStates
     {
         passive,
         aggressive,
@@ -150,15 +153,18 @@ public class Spearine : MonoBehaviour
                 {
                     coAlertAndAttack = StartCoroutine(StartAlertPhase());
                 }
-                
+
 
                 break;
             case SpearineStates.aggressive:
 
                 Agressive();
 
+
+
                 break;
             case SpearineStates.attacking: //spearineRig:Spine3_M
+                
                 break;
             case SpearineStates.distracted:
 
@@ -223,7 +229,7 @@ public class Spearine : MonoBehaviour
         else
         {
             // Band-aid solution that makes sure double attacks dont' happen 
-            animator.SetBool("attacking", false);
+            mainAnimator.SetBool("attacking", false);
         }
     }
 
@@ -365,19 +371,14 @@ public class Spearine : MonoBehaviour
 
     private IEnumerator StartAlertPhase()
     {
-        animator.SetBool("alert", true);
+        mainAnimator.enabled = true;
+        mainAnimator.SetBool("alert", true);
+        
         cm.ChangeCam(viewCam);
-
+        
         sm.PlaySoundFXAfterDelay(alertSound, this.transform.position, "SpearineAlert", alertSoundDelay);
 
-        float timer = alertClip.length;
-        while (timer >= 0)
-        {
-            // Logic during alert 
-
-            timer -= Time.deltaTime;
-            yield return null;
-        }
+        yield return new WaitForSeconds(alertClip.length);
 
         // Begins the attack phase 
         state = SpearineStates.aggressive;
@@ -391,8 +392,8 @@ public class Spearine : MonoBehaviour
     private IEnumerator Attack()
     {
         // Lunges head towards target according to range 
-        animator.SetBool("attacking", true);
-
+        mainAnimator.SetBool("attacking", true);
+        mainAnimator.enabled = true;
         /* float timer = 0;
          while (timer < attackClip.length)
          {
@@ -417,13 +418,19 @@ public class Spearine : MonoBehaviour
              yield return null;
          }*/
 
-        yield return new WaitForSeconds(attackClip.length * 0.5f); // Continues right before the end so it doesn't loop 
+        yield return new WaitForSeconds(attackClip.length); // Continues right before the end so it doesn't loop 
 
         // Sets back to aggressive state 
         state = SpearineStates.aggressive;
         holdTimeForAttack = Time.realtimeSinceStartup;
         
+        
         coAlertAndAttack = null;
+    }
+
+    public void DisableAnimator()
+    {
+        mainAnimator.enabled = false;
     }
 
     private IEnumerator Distraction(Transform distaction)
@@ -479,6 +486,12 @@ public class Spearine : MonoBehaviour
                 Gizmos.color = Color.white;
             }
             Gizmos.DrawWireSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius);
+        }
+
+        for (int i = 0; i < dangerPoints.Count; i++)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(this.transform.position + rotationBone.transform.TransformDirection(dangerPoints[i]), 0.1f);
         }
 
     }

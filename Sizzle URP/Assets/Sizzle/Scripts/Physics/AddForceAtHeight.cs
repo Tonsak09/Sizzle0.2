@@ -15,6 +15,12 @@ public class AddForceAtHeight : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if(height <= Mathf.Epsilon)
+        {
+            rb.AddForce(Vector3.down * force, ForceMode.Acceleration);
+            return;
+        }
+
         RaycastHit hit;
         if(!Physics.Raycast(this.transform.position, Vector3.down, out hit, height))
         {
