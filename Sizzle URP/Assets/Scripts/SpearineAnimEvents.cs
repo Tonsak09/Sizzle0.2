@@ -7,6 +7,9 @@ public class SpearineAnimEvents : MonoBehaviour
     [SerializeField] Spearine spearine;
     [SerializeField] Animator mainAnimator;
 
+    [SerializeField] ParticleSystem questionFX;
+    [SerializeField] ParticleSystem alarmFX;
+
     public void DisableAnimator()
     {
         mainAnimator.enabled = false;
@@ -25,5 +28,14 @@ public class SpearineAnimEvents : MonoBehaviour
     public void ChangeToAnim()
     {
         spearine.ChangeToLookLogic(false);
+    }
+
+    public void PlayEffectQuestion()
+    {
+        questionFX.Play();
+    }
+    public void PlayEffectAlarm()
+    {
+        alarmFX.Play();
     }
 }

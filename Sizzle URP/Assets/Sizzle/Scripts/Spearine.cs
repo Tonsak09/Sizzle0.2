@@ -15,6 +15,7 @@ public class Spearine : MonoBehaviour
     [SerializeField] Transform parentNeck;
     [SerializeField] Transform spearineNeck;
     [SerializeField] Transform sizzleBod;
+    [SerializeField] Vector3 sizzlePointOffset;
     [SerializeField] float maxTurnAngle;
     [SerializeField] float neckTurnSpeed;
 
@@ -24,7 +25,6 @@ public class Spearine : MonoBehaviour
     [SerializeField] float farRange;
 
     [Header("Speeds")]
-    [SerializeField] float curiousTurnSpeed;
     [SerializeField] float alertTurnSpeed;
     [Space]
     [SerializeField] float maxAngle;
@@ -41,28 +41,27 @@ public class Spearine : MonoBehaviour
     [SerializeField] Vector3 hitCheckOffset;
     [SerializeField] float hitCheckRadius;
     [SerializeField] float attackCooldown;
-    /*
-[SerializeField] float minFXTime;
-[SerializeField] float maxFXTime;
-[SerializeField] ParticleSystem groundClashFX;
-[SerializeField] float groundHitRadius;
-*/
     [SerializeField] GameObject dangerDisplay;
     [SerializeField] List<Vector3> dangerPoints;
 
     [Header("Distaction")]
+    [SerializeField] Vector3 distractionPointOffset;
     [Tooltip("How long will Spearine be distracted by the charged object")]
     [SerializeField] float distractionTime;
     [Tooltip("After no longer being distracted how long can it be before Spearine can be distracted again")]
     [SerializeField] float distractionCoolDown;
-    [Tooltip("How often to check for distraction")]
-    [SerializeField] float checkTime;
+    [SerializeField] float lingerTime;
 
-    [Space]
-    private Transform distractionRef;
-    [SerializeField] float distractionCheckTimer;
     [SerializeField] float distractionCoolDownTimer;
-    private bool distracted; 
+    private Transform distractionRef;
+
+    [Header("Head Bobbing")]
+    [SerializeField] float bobSpeed;
+    [SerializeField] float bobMag;
+
+    [Header("Effects")]
+    [SerializeField] ParticleSystem questionFX;
+    [SerializeField] ParticleSystem alarmFX;
 
     [Header("Sounds")]
     [SerializeField] AudioClip alertSound;
@@ -71,7 +70,6 @@ public class Spearine : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField] Animator mainAnimator;
-    [SerializeField] Animator headAnimator;
     [SerializeField] AnimationClip alertClip;
     [SerializeField] AnimationClip attackClip;
 
@@ -85,14 +83,13 @@ public class Spearine : MonoBehaviour
     [SerializeField] AnimationCurve animToLookLogicCurve;
     [SerializeField] float animToLookLogicSpeed;
 
-    [SerializeField] float lerpAnimLookLogic;
+    private float lerpAnimLookLogic;
 
     [Header("Debug")]
     [SerializeField] bool showRange;
     [SerializeField] bool showHitSphere;
 
     private Transform player;
-    private Transform primaryTarget; // Target could be a player, but also any other charged entity 
     public SpearineStates state;
 
     private CamManager cm;
@@ -135,21 +132,21 @@ public class Spearine : MonoBehaviour
         cm = GameObject.FindObjectOfType<CamManager>();
         sm = GameObject.FindObjectOfType<SoundManager>();
 
-        primaryTarget = player;
         state = SpearineStates.passive;
 
-        distractionCheckTimer = checkTime;
         distractionCoolDownTimer = distractionCoolDown;
 
         neckRotOffset = parentNeck.eulerAngles;
         spearineRotOffset = spearineNeck.eulerAngles;
+
+        lerpAnimLookLogic = 1; // Set to look at player 
     }
 
     // Update is called once per frame
     void Update()
     {
         UpdateAnimation();
-        print(animToLookLogicCo == null);
+        
         //spearineNeck.transform.rotation = parentNeck.transform.rotation;
         //spearineNeck.transform.eulerAngles += neckRotOffset;
         switch (state)
@@ -164,22 +161,29 @@ public class Spearine : MonoBehaviour
                     coAlertAndAttack = StartCoroutine(StartAlertPhase());
                 }
 
+                AimBone(parentNeck, sizzleBod.position + sizzleBod.TransformDirection(sizzlePointOffset), maxTurnAngle, neckTurnSpeed);
 
                 break;
             case SpearineStates.aggressive:
 
                 Agressive();
-
+                CheckForDistraction();
+                AimBone(parentNeck, sizzleBod.position + sizzleBod.TransformDirection(sizzlePointOffset), maxTurnAngle, neckTurnSpeed);
                 break;
-            case SpearineStates.attacking: 
-
+            case SpearineStates.attacking:
+                AimBone(parentNeck, sizzleBod.position + sizzleBod.TransformDirection(sizzlePointOffset), maxTurnAngle, neckTurnSpeed);;
                 break;
             case SpearineStates.distracted:
-
                 // Checks if need to initialize 
                 if (distractionCo == null)
                 {
+                    questionFX.Play();
                     distractionCo = StartCoroutine(Distraction(distractionRef));
+                }
+
+                if(distractionRef != null)
+                {
+                    AimBone(parentNeck, distractionRef.position + distractionRef.TransformDirection(distractionPointOffset), maxTurnAngle, neckTurnSpeed);
                 }
 
                 break;
@@ -191,12 +195,15 @@ public class Spearine : MonoBehaviour
     /// </summary>
     private void UpdateAnimation()
     {
-        AimBone(parentNeck, sizzleBod, maxTurnAngle, neckTurnSpeed);
+        
         headVisual.position = trueNeck.position;
 
         // Makes the visual either cloer to 
         // what is being animated or programmed 
         headVisual.rotation = Quaternion.Lerp(trueNeck.rotation, Quaternion.Euler(spearineRotOffset + (parentNeck.eulerAngles - neckRotOffset)), animToLookLogicCurve.Evaluate(lerpAnimLookLogic));
+
+        // Apply bobbing 
+        headVisual.rotation = Quaternion.Euler(headVisual.eulerAngles.x + Mathf.Lerp(0, Mathf.Sin(Time.time * bobSpeed) * bobMag, lerpAnimLookLogic), headVisual.eulerAngles.y, headVisual.eulerAngles.z);
 
         // Sets rest of bones after the root to the animation 
         // since parent bone is the only thing we need to govern 
@@ -215,35 +222,7 @@ public class Spearine : MonoBehaviour
         AimTowardsPlayer();
         AttackWhenInRange();
 
-        // Can only be distracted once reaches 0 
-        if (distractionCoolDownTimer <= 0)
-        {
-            // How often does Spearine check for a distraction 
-            if (distractionCheckTimer <= 0)
-            {
-                // Check is a distraction is around
-                ChargeObj[] distractions = GameObject.FindObjectsOfType<ChargeObj>();
-                if (distractions.Length > 0)
-                {
-
-                    // Distraction has been found 
-                    distractionRef = distractions[0].transform;
-                    distracted = true;
-                }
-
-                // Reset timer 
-                distractionCheckTimer = checkTime;
-            }
-            else
-            {
-                // Continues to countdown 
-                distractionCheckTimer -= Time.deltaTime;
-            }
-        }
-        else
-        {
-            distractionCoolDownTimer -= Time.deltaTime;
-        }
+        
 
 
         // Allows to attack Sizzle during these times 
@@ -258,6 +237,28 @@ public class Spearine : MonoBehaviour
         }
     }
 
+
+    private void CheckForDistraction()
+    {
+        // Can only be distracted once reaches 0 
+        if (distractionCoolDownTimer <= 0)
+        {
+
+            // Check is a distraction is around
+            ChargeObj[] distractions = GameObject.FindObjectsOfType<ChargeObj>();
+            if (distractions.Length > 0)
+            {
+
+                // Distraction has been found 
+                distractionRef = distractions[0].transform;
+                state = SpearineStates.distracted;
+            }
+        }
+        else
+        {
+            distractionCoolDownTimer -= Time.deltaTime;
+        }
+    }
 
     /// <summary>
     /// Directs the stem of Spearine towrads its target 
@@ -352,6 +353,8 @@ public class Spearine : MonoBehaviour
             state = SpearineStates.attacking;
             canAttack = false;
             //ChangeToLookLogic(false);
+
+            //alarmFX.Play();
             coAlertAndAttack = StartCoroutine(Attack());
         }
     }
@@ -366,13 +369,18 @@ public class Spearine : MonoBehaviour
     /// </summary>
     private void AimBone(Transform bone, Transform target, float maxTurnAngle, float turnSpeed)
     {
+        AimBone(bone, target.position, maxTurnAngle, turnSpeed);
+    }
+
+    private void AimBone(Transform bone, Vector3 target, float maxTurnAngle, float turnSpeed)
+    {
         // Store the current head rotation since we will be resetting it
         Quaternion currentLocalRotation = bone.localRotation;
         // Reset the head rotation so our world to local space transformation will use the head's zero rotation. 
         // Note: Quaternion.Identity is the quaternion equivalent of "zero"
         bone.localRotation = Quaternion.identity;
 
-        Vector3 targetWorldLookDir = target.position - bone.position;
+        Vector3 targetWorldLookDir = target - bone.position;
         Vector3 targetLocalLookDir = bone.InverseTransformDirection(targetWorldLookDir);
 
         // Apply angle limit
@@ -392,7 +400,6 @@ public class Spearine : MonoBehaviour
           targetLocalRotation,
           1 - Mathf.Exp(-turnSpeed * Time.deltaTime)
         );
-
     }
 
     public void ChangeToLookLogic(bool toLook = true)
@@ -466,7 +473,7 @@ public class Spearine : MonoBehaviour
 
         Transform distractionHold = distaction;
         Vector3 pos = distractionHold.position;
-        print("Distracted");
+
         while (timer >= 0)
         {
             AimTowardsTarget(pos);
@@ -477,14 +484,28 @@ public class Spearine : MonoBehaviour
             {
                 // Sets new position to look at 
                 pos = distractionHold.position;
+
+                // Aims the head towards the sparks 
+
+            }
+            else
+            {
+                yield return new WaitForSeconds(lingerTime);
+                break;
             }
 
             timer -= Time.deltaTime;
             yield return null;
         }
 
+        // Reset variables 
         distractionCoolDownTimer = distractionCoolDown;
-        distracted = false;
+
+        // Set state 
+        state = SpearineStates.aggressive;
+
+        // Cleanup
+        StopCoroutine(distractionCo);
         distractionCo = null;
     }
 
@@ -496,7 +517,6 @@ public class Spearine : MonoBehaviour
             while (lerpAnimLookLogic < 1)
             {
                 lerpAnimLookLogic += animToLookLogicSpeed * Time.deltaTime;
-                print(lerpAnimLookLogic);
                 yield return null;
             }
 
@@ -507,7 +527,6 @@ public class Spearine : MonoBehaviour
             while (lerpAnimLookLogic >= 0)
             {
                 lerpAnimLookLogic -= animToLookLogicSpeed * Time.deltaTime;
-                print(lerpAnimLookLogic);
                 yield return null;
             }
 
