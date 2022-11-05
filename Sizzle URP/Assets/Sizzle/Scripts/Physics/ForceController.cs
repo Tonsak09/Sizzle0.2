@@ -100,6 +100,8 @@ public class ForceController : MonoBehaviour
 
         bManager.AdjustHeights(crouchLerp * baseHeightLerp);
         //bManager.ProjectHeights();
+
+        print(CanMoveForwad());
     }
 
     private void Statemachine()

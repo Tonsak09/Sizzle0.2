@@ -87,7 +87,7 @@ MonoBehaviour:
   CurrentCharge: 0
   co: {fileID: -4762966131257001015}
   jumpStartoffset: {x: 0, y: 1, z: 0}
-  jumpForce: 10
+  jumpForce: 5
   dir: {x: 0, y: 0, z: 0}
 --- !u!114 &-4762966131257001015
 MonoBehaviour:
