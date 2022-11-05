@@ -5058,7 +5058,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000000011175871, y: 0, z: 0.016045384}
+  m_ConnectedAnchor: {x: -0.0000040037557, y: -0.0000004172325, z: 0.016045097}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -6640,7 +6640,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1041
   IKHint: {fileID: 1288643249564821937}
   end: {fileID: 1288643249465121790}
   forwardBone: {fileID: 2720201700839140401}
@@ -6762,7 +6762,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
-  pitchRange: {x: 1, y: 5}
+  pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 2.17
 --- !u!1 &1288643250091984820
@@ -6854,7 +6854,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1041
   IKHint: {fileID: 1288643249499294471}
   end: {fileID: 1288643249179058016}
   forwardBone: {fileID: 2478193425965896669}
@@ -6966,7 +6966,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
-  pitchRange: {x: 1, y: 5}
+  pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 0
 --- !u!1 &1288643250127403162
@@ -7118,7 +7118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1025
   IKHint: {fileID: 1288643250355465147}
   end: {fileID: 1288643250127403161}
   forwardBone: {fileID: 2720201700839140401}
@@ -7240,7 +7240,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
-  pitchRange: {x: 1, y: 5}
+  pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 2.17
 --- !u!1 &1288643250248906569
@@ -7422,7 +7422,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mask:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1041
   IKHint: {fileID: 1288643249651790171}
   end: {fileID: 1288643250156359206}
   forwardBone: {fileID: 2478193425965896669}
@@ -7534,7 +7534,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
-  pitchRange: {x: 1, y: 5}
+  pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 0
 --- !u!1 &1317025280457187570
@@ -7678,14 +7678,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1399940379051320885}
-  m_LocalRotation: {x: -0.12222123, y: -1.7477736e-11, z: -1.9856936e-11, w: 0.99250287}
+  m_LocalRotation: {x: 0.026489591, y: -0.00000003275054, z: 0.00000003775394, w: 0.9996491}
   m_LocalPosition: {x: 1.2267119e-10, y: 0.000018042, z: 0.4457534}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 831428212618069436}
   m_Father: {fileID: 8394278853945101430}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 3.036, y: 0, z: 0}
 --- !u!114 &1399940379051320886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8186,6 +8186,7 @@ GameObject:
   - component: {fileID: 403004731}
   - component: {fileID: 2056318916}
   - component: {fileID: 1739393106}
+  - component: {fileID: 115309721}
   m_Layer: 3
   m_Name: Sizzle
   m_TagString: Sizzle
@@ -8231,7 +8232,7 @@ MonoBehaviour:
   minlerpBeforePair: 0.5
   mask:
     serializedVersion: 2
-    m_Bits: 513
+    m_Bits: 1537
   frontDashTarget: {x: 0.31, y: 0, z: 0.24}
   backDashTarget: {x: 0, y: 0, z: 0}
   frontSlowedTarget: {x: 0, y: 0, z: 0}
@@ -8287,15 +8288,15 @@ MonoBehaviour:
   frontCheckRadius: 0.19
   checkMask:
     serializedVersion: 2
-    m_Bits: 513
+    m_Bits: 1537
   moveForce: 900
-  torqueForce: 8000
+  torqueForce: 10000
   crouchkey: 306
   moveForceCrouch: 400
   torqueForceCrouch: 5000
-  crouchSpeed: 3
-  unCrouchSpeed: 4
-  minLerp: 0.7
+  crouchSpeed: 6
+  unCrouchSpeed: 5
+  minLerp: 0.6
   bManager: {fileID: 1739393106}
   dashKey: 32
   dashForceImpulse: 0
@@ -8339,8 +8340,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   jumpKey: 32
   jumpForceImpulse: 0
-  jumpForceContinuous: 2000
-  jumpTime: 0.8
+  jumpForceContinuous: 7000
+  jumpTime: 0.3
   jumpForceOverLerp:
     serializedVersion: 2
     m_Curve:
@@ -8727,6 +8728,18 @@ MonoBehaviour:
   - {fileID: 60308823624366467}
   - {fileID: 8394278853945101430}
   - {fileID: 2235749625968689226}
+--- !u!114 &115309721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099600900075649836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7c1bf6173dff71409d38b5b90b0bb39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2180877788356225499
 GameObject:
   m_ObjectHideFlags: 0
@@ -9254,7 +9267,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2525517118131272096}
-  m_LocalRotation: {x: 5.766607e-17, y: 0.9983949, z: -0.056636557, w: -6.460205e-17}
+  m_LocalRotation: {x: -0.000000011175868, y: 0.99526674, z: 0.09718155, w: -9.271542e-13}
   m_LocalPosition: {x: -1.026191e-15, y: -0.00004210119, z: -0.01799501}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -9263,7 +9276,7 @@ Transform:
   - {fileID: 1106685191992691348}
   m_Father: {fileID: 60308823624366467}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -11.154, y: 180, z: 0}
 --- !u!114 &2525517118131272097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9996,7 +10009,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000000268219, y: -5.820766e-10, z: 0.44578493}
+  m_ConnectedAnchor: {x: -0.0000026822072, y: 0.0000003784662, z: 0.4457823}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -11195,14 +11208,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4157397633548320489}
-  m_LocalRotation: {x: 0.07100948, y: 7.65132e-11, z: -3.65361e-12, w: 0.9974756}
+  m_LocalRotation: {x: 0.019540349, y: -0.000000030168135, z: 0.000000004535673, w: 0.9998091}
   m_LocalPosition: {x: 6.280284e-11, y: -0.0001265953, z: 0.50307316}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4866639225646671797}
   m_Father: {fileID: 2456617566572475993}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 2.239, y: 0, z: 0}
 --- !u!114 &4157397633548320490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11575,7 +11588,7 @@ Rigidbody:
   m_GameObject: {fileID: 4531368848170516751}
   serializedVersion: 2
   m_Mass: 0.3
-  m_Drag: 2
+  m_Drag: 5
   m_AngularDrag: 0.05
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -11594,7 +11607,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.000000089406655, y: -0.000000010652002, z: 0.50275576}
+  m_ConnectedAnchor: {x: -0.00000040233104, y: -0.0000002787856, z: 0.5027559}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -11654,12 +11667,12 @@ ConfigurableJoint:
   m_RotationDriveMode: 0
   m_AngularXDrive:
     serializedVersion: 3
-    positionSpring: 20
+    positionSpring: 10
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_AngularYZDrive:
     serializedVersion: 3
-    positionSpring: 15
+    positionSpring: 30
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
@@ -11900,7 +11913,7 @@ MonoBehaviour:
   root: {fileID: 1288643250248906568}
   terrain:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1217
 --- !u!1 &4623486151470463352
 GameObject:
   m_ObjectHideFlags: 0
@@ -11940,7 +11953,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4623486151470463352}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b2d8418b0b9634b1892b0268dd9c2743, type: 3}
   m_Name: 
@@ -12398,7 +12411,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.00000008940713, y: 0.0000000037252903, z: 0.077000834}
+  m_ConnectedAnchor: {x: 0.0000013113023, y: 0.00000040233135, z: 0.07700108}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12722,7 +12735,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000014342368, y: 0, z: -0.017997196}
+  m_ConnectedAnchor: {x: 0.000001156237, y: -0.00000011920929, z: -0.017997583}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12782,12 +12795,12 @@ ConfigurableJoint:
   m_RotationDriveMode: 0
   m_AngularXDrive:
     serializedVersion: 3
-    positionSpring: 100
+    positionSpring: 40
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_AngularYZDrive:
     serializedVersion: 3
-    positionSpring: 100
+    positionSpring: 10
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
@@ -12953,7 +12966,7 @@ MonoBehaviour:
   root: {fileID: 1288643249788872010}
   terrain:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1217
 --- !u!1 &5228324772673977238
 GameObject:
   m_ObjectHideFlags: 0
@@ -13571,7 +13584,7 @@ MonoBehaviour:
   root: {fileID: 1288643250277840183}
   terrain:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1217
 --- !u!1 &5671273366718145777
 GameObject:
   m_ObjectHideFlags: 0
@@ -15347,12 +15360,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb2a0fcbccbc48f4b9e8e91efb0c540a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxBuoyancyForce: 1000
+  maxBuoyancyForce: 5000
   fallForce: 1000
   height: 0.3509396
   layer:
     serializedVersion: 2
-    m_Bits: 55
+    m_Bits: 1041
   buoyancyForceCurve:
     serializedVersion: 2
     m_Curve:
@@ -15406,8 +15419,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ece443d9c0548d14d9f4a0bca0a564ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  force: 30
-  height: 0.7
+  force: 20
+  height: 0
 --- !u!1 &7476109143484114246
 GameObject:
   m_ObjectHideFlags: 0
@@ -16508,7 +16521,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.000000074505806, y: -0.000000005355105, z: 0.40708005}
+  m_ConnectedAnchor: {x: -0.0000018179417, y: -0.0000005529728, z: 0.40707812}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -16568,12 +16581,12 @@ ConfigurableJoint:
   m_RotationDriveMode: 0
   m_AngularXDrive:
     serializedVersion: 3
-    positionSpring: 100
+    positionSpring: 30
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_AngularYZDrive:
     serializedVersion: 3
-    positionSpring: 10
+    positionSpring: 4
     positionDamper: 0
     maximumForce: 3.4028233e+38
   m_SlerpDrive:
@@ -17021,7 +17034,7 @@ MonoBehaviour:
   root: {fileID: 1288643249838922682}
   terrain:
     serializedVersion: 2
-    m_Bits: 195
+    m_Bits: 1217
 --- !u!1 &8933498518475196232
 GameObject:
   m_ObjectHideFlags: 0

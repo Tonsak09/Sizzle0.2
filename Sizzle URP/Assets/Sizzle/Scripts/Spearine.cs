@@ -52,6 +52,9 @@ public class Spearine : MonoBehaviour
     [SerializeField] float distractionCoolDown;
     [SerializeField] float lingerTime;
 
+    [SerializeField] float disCheckRange;
+    [SerializeField] LayerMask disCheckLayers;
+
     [SerializeField] float distractionCoolDownTimer;
     private Transform distractionRef;
 
@@ -83,11 +86,12 @@ public class Spearine : MonoBehaviour
     [SerializeField] AnimationCurve animToLookLogicCurve;
     [SerializeField] float animToLookLogicSpeed;
 
-    private float lerpAnimLookLogic;
+    public float lerpAnimLookLogic;
 
     [Header("Debug")]
     [SerializeField] bool showRange;
     [SerializeField] bool showHitSphere;
+    [SerializeField] bool showDistractionCheckRange;
 
     private Transform player;
     public SpearineStates state;
@@ -102,7 +106,7 @@ public class Spearine : MonoBehaviour
     private Vector3 spearineRotOffset;
 
     private float holdTimeForAttack; // The time at which was last attacked 
-    public bool canAttack;
+    private bool canAttack;
 
     private Coroutine animToLookLogicCo;
     private Coroutine coAlertAndAttack;
@@ -245,13 +249,18 @@ public class Spearine : MonoBehaviour
         {
 
             // Check is a distraction is around
-            ChargeObj[] distractions = GameObject.FindObjectsOfType<ChargeObj>();
-            if (distractions.Length > 0)
-            {
+            Collider[] distractionChecks = Physics.OverlapSphere(this.transform.position, disCheckRange, disCheckLayers);
 
-                // Distraction has been found 
-                distractionRef = distractions[0].transform;
-                state = SpearineStates.distracted;
+            for (int i = 0; i < distractionChecks.Length; i++)
+            {
+                if(distractionChecks[i].GetComponent<ChargeObj>() != null)
+                {
+                    // Distraction has been found 
+                    print("New distraction " + distractionChecks[i].name);
+                    distractionRef = distractionChecks[i].transform;
+                    state = SpearineStates.distracted;
+                    break;
+                }
             }
         }
         else
@@ -533,7 +542,11 @@ public class Spearine : MonoBehaviour
             lerpAnimLookLogic = 0;
         }
 
-        StopCoroutine(animToLookLogicCo);
+        // Error can someonehow make this null????
+        if(animToLookLogicCo != null)
+        {
+            StopCoroutine(animToLookLogicCo);
+        }
         animToLookLogicCo = null;
     }
 
@@ -570,5 +583,15 @@ public class Spearine : MonoBehaviour
             Gizmos.DrawSphere(this.transform.position + rotationBone.transform.TransformDirection(dangerPoints[i]), 0.1f);
         }
 
+        if(showDistractionCheckRange)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(this.transform.position, disCheckRange);
+        }
+
+        if(distractionRef != null)
+        {
+            Gizmos.DrawSphere(distractionRef.position, 0.1f);
+        }
     }
 }
