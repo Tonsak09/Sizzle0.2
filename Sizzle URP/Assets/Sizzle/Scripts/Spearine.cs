@@ -86,7 +86,7 @@ public class Spearine : MonoBehaviour
     [SerializeField] AnimationCurve animToLookLogicCurve;
     [SerializeField] float animToLookLogicSpeed;
 
-    public float lerpAnimLookLogic;
+    private float lerpAnimLookLogic;
 
     [Header("Debug")]
     [SerializeField] bool showRange;
@@ -237,7 +237,7 @@ public class Spearine : MonoBehaviour
         else
         {
             // Band-aid solution that makes sure double attacks dont' happen 
-            mainAnimator.SetBool("attacking", false);
+            //mainAnimator.SetBool("attacking", false);
         }
     }
 
@@ -256,7 +256,6 @@ public class Spearine : MonoBehaviour
                 if(distractionChecks[i].GetComponent<ChargeObj>() != null)
                 {
                     // Distraction has been found 
-                    print("New distraction " + distractionChecks[i].name);
                     distractionRef = distractionChecks[i].transform;
                     state = SpearineStates.distracted;
                     break;
@@ -270,7 +269,7 @@ public class Spearine : MonoBehaviour
     }
 
     /// <summary>
-    /// Directs the stem of Spearine towrads its target 
+    /// Directs the stem of Spearine towards its target 
     /// </summary>
     private void AimTowardsPlayer()
     {
@@ -352,14 +351,15 @@ public class Spearine : MonoBehaviour
     /// </summary>
     private void AttackWhenInRange()
     {
-        if(!canAttack)
+        if(!canAttack || coAlertAndAttack != null)
         {
             return;
         }
 
         if ((this.transform.position - player.position).sqrMagnitude < Mathf.Pow(midRange, 2) && coAlertAndAttack == null)
         {
-            state = SpearineStates.attacking;
+            // attackstate is now decided during animation
+            //state = SpearineStates.attacking;
             canAttack = false;
             //ChangeToLookLogic(false);
 

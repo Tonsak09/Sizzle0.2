@@ -38,4 +38,9 @@ public class SpearineAnimEvents : MonoBehaviour
     {
         alarmFX.Play();
     }
+
+    public void SetAnimatorAttackingToFalse()
+    {
+        mainAnimator.SetBool("attacking", false);
+    }
 }

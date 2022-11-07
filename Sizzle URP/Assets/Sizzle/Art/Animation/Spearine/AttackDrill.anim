@@ -66160,7 +66160,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0
-    functionName: ChangeToLookLogic
+    functionName: ChangeToAnim
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
@@ -66168,6 +66168,34 @@ AnimationClip:
     messageOptions: 0
   - time: 0
     functionName: PlayEffectAlarm
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 0
+    functionName: SetState
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 3
+    messageOptions: 0
+  - time: 2.6666667
+    functionName: ChangeToLookLogic
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 4
+    functionName: SetState
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 1
+    messageOptions: 0
+  - time: 4.2916665
+    functionName: SetAnimatorAttackingToFalse
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
