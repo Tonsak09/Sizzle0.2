@@ -30160,6 +30160,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sizzle
       objectReference: {fileID: 0}
+    - target: {fileID: 4623486151470463353, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: boneColor.b
+      value: 0.13737096
+      objectReference: {fileID: 0}
+    - target: {fileID: 4623486151470463353, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: boneColor.g
+      value: 0.5943396
+      objectReference: {fileID: 0}
+    - target: {fileID: 4623486151470463353, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
+      propertyPath: boneColor.r
+      value: 0.21036112
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0bea6fe6e1de93443925ffa0428ac264, type: 3}
 --- !u!4 &1207000446 stripped
@@ -77971,7 +77983,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6705507020591936803, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.017906213
+      value: 0.017906219
       objectReference: {fileID: 0}
     - target: {fileID: 6705507020591936803, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.y
@@ -77979,7 +77991,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6705507020591936803, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.034444187
+      value: -0.034444194
       objectReference: {fileID: 0}
     - target: {fileID: 8113342293943506955, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalPosition.x
