@@ -7,8 +7,10 @@ public class SpearineAnimEvents : MonoBehaviour
     [SerializeField] Spearine spearine;
     [SerializeField] Animator mainAnimator;
 
+    [Header("Effects")]
     [SerializeField] ParticleSystem questionFX;
     [SerializeField] ParticleSystem alarmFX;
+    [SerializeField] ParticleSystem trailFX;
 
     public void DisableAnimator()
     {
@@ -30,6 +32,17 @@ public class SpearineAnimEvents : MonoBehaviour
         spearine.ChangeToLookLogic(false);
     }
 
+    public void SetAnimatorAttackingToFalse()
+    {
+        mainAnimator.SetBool("attacking", false);
+    }
+
+    public void ShakeCam()
+    {
+
+    }
+
+
     public void PlayEffectQuestion()
     {
         questionFX.Play();
@@ -39,8 +52,9 @@ public class SpearineAnimEvents : MonoBehaviour
         alarmFX.Play();
     }
 
-    public void SetAnimatorAttackingToFalse()
+    public void PlayEffectTrail()
     {
-        mainAnimator.SetBool("attacking", false);
+        trailFX.Play();
     }
+
 }
