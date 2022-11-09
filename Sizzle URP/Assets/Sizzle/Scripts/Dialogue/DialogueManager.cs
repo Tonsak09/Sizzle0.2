@@ -6,25 +6,56 @@ using UnityEngine.UI;
 
 public class DialogueManager : MonoBehaviour
 {
+    [Header("Display")]
     [SerializeField] RectTransform display;
-    [SerializeField] RectTransform offScreen;
-    [SerializeField] RectTransform onScreen;
     [SerializeField] TextMeshProUGUI textMesh;
 
+    [Header("Animation")]
+
+    [SerializeField] Vector3 offsetPos;
+    [SerializeField] AnimationCurve positionCurve;
+    [SerializeField] float posLerpSpeed;
+    [Space]
+    [SerializeField] Vector3 startScale;
+    [SerializeField] Vector3 targetedScale;
+    [SerializeField] AnimationCurve scaleCurve;
+    [SerializeField] float scaleLerpSpeed;
+
+    [Header("General Settings")]
     [SerializeField] KeyCode nextKey;
-    [SerializeField] float displaySpeed;
 
     private bool moving;
     private Coroutine dialogueCoroutine;
+
+    private Vector3 startPos;
+    private Vector3 offsetedPos;
+    private Vector3 offsetedScale;
 
     public bool Running { get { return dialogueCoroutine != null; } }
 
     private void Start()
     {
         display.gameObject.SetActive(true);
-        display.position = offScreen.position;
+
+        startPos = display.position;
+        offsetedPos = startPos + offsetPos;
+
+        offsetedScale = targetedScale;
+
+        StartCoroutine(Appear());
 
         textMesh.text = "";
+
+        
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(nextKey))
+        {
+            print("INPUT READ");
+            StartCoroutine(Appear());
+        }   
     }
 
     public void RunText(List<string> texts)
@@ -35,6 +66,7 @@ public class DialogueManager : MonoBehaviour
             StartCoroutine(Appear());
             dialogueCoroutine = StartCoroutine(TextEnumerator(texts));
         }
+
     }
 
     private IEnumerator TextEnumerator(List<string> texts)
@@ -83,13 +115,16 @@ public class DialogueManager : MonoBehaviour
     private IEnumerator Appear()
     {
         moving = true;
-        float lerp = 0;
+        float posLerp = 0;
+        float scaleLerp = 0;
 
-        while (lerp <= 1)
+        while (posLerp <= 1 || scaleLerp <= 1)
         {
-            lerp += displaySpeed * Time.deltaTime;
+            display.position = Vector3.Lerp(startPos, offsetedPos, positionCurve.Evaluate(posLerp));
+            display.localScale = Vector3.Lerp(startScale, offsetedScale, scaleCurve.Evaluate(scaleLerp));
 
-            display.position = Vector3.Lerp(offScreen.position, onScreen.position, lerp);
+            posLerp += posLerpSpeed * Time.deltaTime;
+            scaleLerp += scaleLerpSpeed * Time.deltaTime;
 
             yield return null;
         }
@@ -98,16 +133,14 @@ public class DialogueManager : MonoBehaviour
     }
     private IEnumerator Dissapear()
     {
-        print("test");
-
         moving = true;
         float lerp = 0;
 
         while (lerp <= 1)
         {
-            lerp += displaySpeed * Time.deltaTime;
+            //lerp += displaySpeed * Time.deltaTime;
 
-            display.position = Vector3.Lerp(onScreen.position, offScreen.position, lerp);
+            //display.position = Vector3.Lerp(onScreen.position, offScreen.position, lerp);
 
             yield return null;
         }

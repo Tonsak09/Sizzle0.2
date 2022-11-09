@@ -116,7 +116,7 @@ public class Spearling : MonoBehaviour
         targetLocalLookDir = Vector3.RotateTowards(
           Vector3.forward,
           targetLocalLookDir,
-          Mathf.Deg2Rad * maxTurnAngle, // Note we multiply by Mathf.Deg2Rad here to convert degrees to radians
+          Mathf.Deg2Rad * maxTurnAngle, // Note we multiply by Mathf.Deg2Rad here to convert dwd to radians
           0 // We don't care about the length here, so we leave it at zero
         );
 
