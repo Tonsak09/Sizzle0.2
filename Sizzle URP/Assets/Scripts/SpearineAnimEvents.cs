@@ -42,6 +42,15 @@ public class SpearineAnimEvents : MonoBehaviour
 
     }
 
+    public void TryKillSizzle()
+    {
+        if(spearine.IsHittingSizzle())
+        {
+            // Reset the screen 
+            print("Hitting Sizzle");
+            LevelManager.Reload();
+        }
+    }
 
     public void PlayEffectQuestion()
     {

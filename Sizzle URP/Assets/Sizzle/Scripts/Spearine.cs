@@ -368,7 +368,7 @@ public class Spearine : MonoBehaviour
         }
     }
 
-    private bool IsHittingSizzle()
+    public bool IsHittingSizzle()
     {
         return Physics.CheckSphere(spike.transform.position + spike.TransformDirection(hitCheckOffset), hitCheckRadius, sizzleMask);
     }
