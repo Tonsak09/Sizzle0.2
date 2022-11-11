@@ -6,12 +6,14 @@ using UnityEngine.UI;
 
 public class DialogueManager : MonoBehaviour
 {
+
+    [SerializeField] List<string> sampleText;
     [Header("Display")]
     [SerializeField] RectTransform display;
     [SerializeField] TextMeshProUGUI textMesh;
 
     [Header("Animation")]
-
+    [Header("Appearing")]
     [SerializeField] Vector3 offsetPos;
     [SerializeField] AnimationCurve positionCurve;
     [SerializeField] float posLerpSpeed;
@@ -20,16 +22,24 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] Vector3 targetedScale;
     [SerializeField] AnimationCurve scaleCurve;
     [SerializeField] float scaleLerpSpeed;
+    [Header("Dissapearing")]
+    [SerializeField] AnimationCurve dissapearCurve;
+    [SerializeField] float dissapearSpeed;
 
     [Header("General Settings")]
     [SerializeField] KeyCode nextKey;
+    [SerializeField] float textSpeed;
 
     private bool moving;
+    private bool currentTextFinished;
+    private Coroutine displayAppearanceCo;
     private Coroutine dialogueCoroutine;
 
     private Vector3 startPos;
     private Vector3 offsetedPos;
     private Vector3 offsetedScale;
+
+    int index = 0;
 
     public bool Running { get { return dialogueCoroutine != null; } }
 
@@ -42,20 +52,16 @@ public class DialogueManager : MonoBehaviour
 
         offsetedScale = targetedScale;
 
-        StartCoroutine(Appear());
-
+        currentTextFinished = true;
         textMesh.text = "";
 
-        
+        displayAppearanceCo = StartCoroutine(Appear());
+        dialogueCoroutine = StartCoroutine(RunDialogue(sampleText));   
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(nextKey))
-        {
-            print("INPUT READ");
-            StartCoroutine(Appear());
-        }   
+
     }
 
     public void RunText(List<string> texts)
@@ -63,54 +69,77 @@ public class DialogueManager : MonoBehaviour
         // Makes sure it doesn't overide 
         if(Running == false)
         {
+
             StartCoroutine(Appear());
-            dialogueCoroutine = StartCoroutine(TextEnumerator(texts));
+
+            dialogueCoroutine = StartCoroutine(RunDialogue(texts));
         }
 
     }
 
-    private IEnumerator TextEnumerator(List<string> texts)
+    private IEnumerator RunDialogue(List<string> texts)
     {
-        // Holds this position until moving has finished 
-        while(moving)
+        index = 0;
+        while (index < texts.Count)
         {
-            yield return null;  
-        }
-
-        int current = 0;
-        while(true)
-        {
-            textMesh.text = texts[current];
-
-            if(Input.GetKeyDown(nextKey))
+            if(!currentTextFinished)
             {
-                current++;
-
-                // When to end the dialgue 
-                if(current >= texts.Count)
-                {
-                    EndDialogue();
-                    break;
-                }
+                yield return null;
             }
+            else
+            {
+                currentTextFinished = false;
+                StartCoroutine(ProcessDialogue(texts[index], textSpeed));
 
-            yield return null;
+            }
         }
+
+        // End Text
+        StartCoroutine(Dissapear());
     }
 
     /// <summary>
-    /// End the current dialgoue if possible 
+    /// Plays the dialogue to the display and includes effects
     /// </summary>
-    public void EndDialogue()
+    /// <param name="dialogue"></param>
+    private IEnumerator ProcessDialogue(string dialogue, float pauseTime)
     {
-        if(dialogueCoroutine != null)
+        string[] processed = dialogue.Split();
+
+        for (int i = 0; i < processed.Length; i++)
         {
-            textMesh.text = "";
-            StartCoroutine(Dissapear());
-            StopCoroutine(dialogueCoroutine);
-            dialogueCoroutine = null;
+            // Check if event 
+            if(processed[i][0] == '<')
+            {
+                // Play effect 
+            }
+            else
+            {
+                for (int j = 0; j < processed[i].Length; j++)
+                {
+                    textMesh.text += processed[i][j];
+                    yield return new WaitForSeconds(pauseTime);
+                }
+
+                textMesh.text += " ";
+            }
         }
+
+        while(true)
+        {
+            if (Input.GetKeyDown(nextKey))
+            {
+                textMesh.text = "";
+                index++;
+
+                break;
+            }
+            yield return null;
+        }
+
+        currentTextFinished = true;
     }
+
 
     private IEnumerator Appear()
     {
@@ -135,17 +164,19 @@ public class DialogueManager : MonoBehaviour
     {
         moving = true;
         float lerp = 0;
+        Vector3 startScale = display.localScale;
 
         while (lerp <= 1)
         {
-            //lerp += displaySpeed * Time.deltaTime;
+            lerp += dissapearSpeed * Time.deltaTime;
 
-            //display.position = Vector3.Lerp(onScreen.position, offScreen.position, lerp);
+            display.localScale = Vector3.Lerp(Vector3.zero, startScale, dissapearCurve.Evaluate(lerp));
 
             yield return null;
         }
 
         moving = false;
+        dialogueCoroutine = null;
     }
 
 
