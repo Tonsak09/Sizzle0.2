@@ -16,6 +16,9 @@ public class Spearling : MonoBehaviour
     [SerializeField] Vector3 playerPosOffset;
     [SerializeField] float maxTurnAngle;
     [SerializeField] float turnSpeed;
+    [Space]
+    [SerializeField] Vector3 distractionPosOffset;
+
 
     [Header("Attacking")]
     [SerializeField] Rigidbody[] flickBones;
@@ -23,6 +26,7 @@ public class Spearling : MonoBehaviour
     [SerializeField] Vector3 neckFlickPos;
     [SerializeField] float flickForce;
     [SerializeField] float flickTime;
+    [SerializeField] Vector2 flickLingerTimeRand;
     [SerializeField] AnimationCurve flickCurve;
 
 
@@ -37,6 +41,7 @@ public class Spearling : MonoBehaviour
     private Vector3 spearineRotOffset;
 
     private Coroutine attackCo;
+    private Coroutine distractionCo;
 
     // Start is called before the first frame update
     void Start()
@@ -54,8 +59,15 @@ public class Spearling : MonoBehaviour
     {
         if(aware)
         {
-            AimTowardsTarget(player.transform.position);
-            AimBone(neckLooker, player.transform.position + playerPosOffset, maxTurnAngle, turnSpeed);
+
+            // Make sure that head is not being taken
+            // towards distraction 
+            if(distractionCo == null)
+            {
+                AimTowardsTarget(player.transform.position);
+                AimBone(neckLooker, player.transform.position + player.TransformDirection(playerPosOffset), maxTurnAngle, turnSpeed);
+            }
+            
 
             headBone.rotation = Quaternion.Euler(spearineRotOffset + (neckLooker.eulerAngles - neckRotOffset));
 
@@ -63,7 +75,7 @@ public class Spearling : MonoBehaviour
             if (attackTimer <= 0)
             {
                 Attack();
-                attackTimer = attackCooldown;
+                attackTimer = attackCooldown + Random.Range(flickLingerTimeRand.x, flickLingerTimeRand.y);
             }
             else
             {
@@ -129,6 +141,41 @@ public class Spearling : MonoBehaviour
           targetLocalRotation,
           1 - Mathf.Exp(-turnSpeed * Time.deltaTime)
         );
+    }
+
+    public void SetDistraction(Transform point, float distractionMaxTime, float distractionHold)
+    {
+        if(distractionCo == null)
+        {
+            distractionCo = StartCoroutine(Distraction(point, distractionMaxTime, distractionHold));
+        }
+    }
+
+    private IEnumerator Distraction(Transform point, float distractionMaxTime, float distractionHold)
+    {
+        float time = distractionMaxTime;
+
+        while(time > 0)
+        {
+            // Make sure obj still exists 
+            if(point == null)
+            {
+                break;
+            }
+
+            AimTowardsTarget(point.position);
+            AimBone(neckLooker, point.position + point.TransformDirection(distractionPosOffset), maxTurnAngle, turnSpeed);
+
+
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(distractionHold);
+
+        // Cleanup
+        StopCoroutine(distractionCo);
+        distractionCo = null;
+
     }
 
     private IEnumerator FlickAttackCo()

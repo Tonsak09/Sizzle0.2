@@ -244,7 +244,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.19008803, y: -0.000000011114121, z: 0.00000018812716}
+  m_ConnectedAnchor: {x: -0.19008814, y: 0.00000046572305, z: -0.0000007580966}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -620,7 +620,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.0130930245, y: -0.00083976984, z: -1.02842164e-19}
+  m_ConnectedAnchor: {x: -0.013093017, y: -0.0008378625, z: -1.0260859e-19}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -885,7 +885,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2822354111139553435}
   - component: {fileID: 2822354111139553434}
-  - component: {fileID: 2822354111139553432}
   m_Layer: 1
   m_Name: Spearling
   m_TagString: Untagged
@@ -953,13 +952,15 @@ MonoBehaviour:
   neckLooker: {fileID: 2822354111432121129}
   playerPosOffset: {x: 0, y: 0.3, z: 0.1}
   maxTurnAngle: 180
-  turnSpeed: 30
+  turnSpeed: 4
+  distractionPosOffset: {x: 0, y: 2, z: 0}
   flickBones:
   - {fileID: 7201236873594466611}
   - {fileID: 6327250804185573062}
   neckFlickPos: {x: 0, y: 0, z: 0}
   flickForce: -45000
   flickTime: 0.1
+  flickLingerTimeRand: {x: 1, y: 2}
   flickCurve:
     serializedVersion: 2
     m_Curve:
@@ -986,19 +987,6 @@ MonoBehaviour:
     m_RotationOrder: 4
   attackCooldown: 5
   aware: 1
---- !u!135 &2822354111139553432
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2822354111139553637}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 1.55
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2822354111432121128
 GameObject:
   m_ObjectHideFlags: 0
@@ -1994,7 +1982,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.20133731, y: 0.0000000782893, z: -0.0000002635643}
+  m_ConnectedAnchor: {x: -0.20133786, y: 0.00000055512646, z: 0.0000005331822}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -2445,7 +2433,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.11943877, y: -0.0000001899316, z: 0.00000018591527}
+  m_ConnectedAnchor: {x: -0.11943865, y: 0.0000012405799, z: 0.00000022316817}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
