@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class DialogueManager : MonoBehaviour
 {
 
-    [SerializeField] List<string> sampleText;
     [Header("Display")]
     [SerializeField] RectTransform display;
     [SerializeField] TextMeshProUGUI textMesh;
@@ -57,7 +56,7 @@ public class DialogueManager : MonoBehaviour
 
         //displayAppearanceCo = StartCoroutine(Appear());
         //dialogueCoroutine = StartCoroutine(RunDialogue(sampleText));   
-        StartCoroutine(Dissapear());
+        //StartCoroutine(Dissapear());
     }
 
     private void Update()
