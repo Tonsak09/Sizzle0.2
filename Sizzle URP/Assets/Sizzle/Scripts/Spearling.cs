@@ -18,7 +18,7 @@ public class Spearling : MonoBehaviour
     [SerializeField] float turnSpeed;
 
     [Header("Attacking")]
-    [SerializeField] Rigidbody flickBone;
+    [SerializeField] Rigidbody[] flickBones;
 
     [SerializeField] Vector3 neckFlickPos;
     [SerializeField] float flickForce;
@@ -76,7 +76,7 @@ public class Spearling : MonoBehaviour
     {
         // Flicks the spearling forward 
         //flickBone.AddTorque(-flickForce * Vector3.right, ForceMode.Impulse);
-
+        
         if(attackCo == null)
         {
             attackCo = StartCoroutine(FlickAttackCo());
@@ -89,10 +89,10 @@ public class Spearling : MonoBehaviour
     /// <param name="target"></param>
     private void AimTowardsTarget(Vector3 target)
     {
-        Vector3 targetVec = Vector3.ProjectOnPlane(target - this.transform.position, Vector3.up).normalized;
+        Vector3 targetVec = Vector3.ProjectOnPlane(target - rotationBone.transform.position, Vector3.up).normalized;
         //targetVec += boneForwardOffset;
 
-        float angleDifference = Vector3.Angle(this.transform.forward, targetVec);
+        float angleDifference = Vector3.Angle(rotationBone.transform.forward, targetVec);
         float lerp = angleDifference / maxAngle;
 
         float angleToTurn = turnCurve.Evaluate(lerp) * alertTurnSpeed;
@@ -137,7 +137,10 @@ public class Spearling : MonoBehaviour
 
         while(timer >= 0)
         {
-            flickBone.AddRelativeTorque(flickForce * flickCurve.Evaluate(1 - (timer / attackTimer)) * Time.deltaTime * Vector3.right, ForceMode.Force);
+            for (int i = 0; i < flickBones.Length; i++)
+            {
+                flickBones[i].AddRelativeTorque(flickForce * flickCurve.Evaluate(1 - (timer / attackTimer)) * Time.deltaTime * Vector3.up, ForceMode.Force);
+            }
 
             timer -= Time.deltaTime;
             yield return null;

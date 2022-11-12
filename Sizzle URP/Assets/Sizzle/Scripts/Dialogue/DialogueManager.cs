@@ -55,8 +55,9 @@ public class DialogueManager : MonoBehaviour
         currentTextFinished = true;
         textMesh.text = "";
 
-        displayAppearanceCo = StartCoroutine(Appear());
-        dialogueCoroutine = StartCoroutine(RunDialogue(sampleText));   
+        //displayAppearanceCo = StartCoroutine(Appear());
+        //dialogueCoroutine = StartCoroutine(RunDialogue(sampleText));   
+        StartCoroutine(Dissapear());
     }
 
     private void Update()

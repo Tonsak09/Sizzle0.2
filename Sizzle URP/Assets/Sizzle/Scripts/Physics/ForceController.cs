@@ -173,7 +173,7 @@ public class ForceController : MonoBehaviour
         // Get average between two points 
         RaycastHit hitA;
         RaycastHit hitB;
-        if (Physics.Raycast(baseBody.transform.position + baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(baseBody.transform.position - baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5))
+        if (Physics.Raycast(baseBody.transform.position + baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(baseBody.transform.position - baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5, checkMask))
         {
             // Average normal 
             midBoneTorqueCorrection.Target = -(hitA.normal + hitB.normal).normalized;
