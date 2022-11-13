@@ -112,6 +112,7 @@ public class Spearine : MonoBehaviour
     private Coroutine coAlertAndAttack;
     private Coroutine distractionCo;
 
+
     private enum DistanceZone
     {
         close,
