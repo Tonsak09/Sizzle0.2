@@ -57,6 +57,9 @@ public class DialogueManager : MonoBehaviour
         //displayAppearanceCo = StartCoroutine(Appear());
         //dialogueCoroutine = StartCoroutine(RunDialogue(sampleText));   
         //StartCoroutine(Dissapear());
+
+
+        display.localScale = Vector3.zero;
     }
 
     private void Update()

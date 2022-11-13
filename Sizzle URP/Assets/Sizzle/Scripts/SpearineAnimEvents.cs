@@ -12,6 +12,17 @@ public class SpearineAnimEvents : MonoBehaviour
     [SerializeField] ParticleSystem alarmFX;
     [SerializeField] ParticleSystem trailFX;
 
+    [Header("Values")]
+    [SerializeField] float pauseBeforeReload;
+
+    private InAndOut transition;
+
+
+    private void Start()
+    {
+        transition = GameObject.FindObjectOfType<InAndOut>();
+    }
+
     public void DisableAnimator()
     {
         mainAnimator.enabled = false;
@@ -46,9 +57,13 @@ public class SpearineAnimEvents : MonoBehaviour
     {
         if(spearine.IsHittingSizzle())
         {
-            // Reset the screen 
-            print("Hitting Sizzle");
-            LevelManager.Reload();
+
+            // Shake Sizzle
+
+
+            // Reset the screen
+            transition.TryBlackOut();
+            StartCoroutine(ResetScene(pauseBeforeReload));
         }
     }
 
@@ -64,6 +79,14 @@ public class SpearineAnimEvents : MonoBehaviour
     public void PlayEffectTrail()
     {
         trailFX.Play();
+    }
+
+    private IEnumerator ResetScene(float pauseBeforeReload)
+    {
+
+        yield return new WaitForSeconds(pauseBeforeReload);
+        LevelManager.Reload();
+
     }
 
 }
