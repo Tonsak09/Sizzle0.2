@@ -7,13 +7,9 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 5423326856329797512, guid: c703f7ad14c6fc948a32ecdce8f20511, type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: edbbb70f5c61c6544897c5e69767fbbb, type: 2}
     - target: {fileID: 7149274237349620419, guid: c703f7ad14c6fc948a32ecdce8f20511, type: 3}
       propertyPath: m_Name
-      value: Wall1 (10)
+      value: Wall1 overgrown
       objectReference: {fileID: 0}
     - target: {fileID: 7529037429494460537, guid: c703f7ad14c6fc948a32ecdce8f20511, type: 3}
       propertyPath: m_RootOrder
