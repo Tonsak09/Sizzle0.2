@@ -50,6 +50,7 @@ public class ForceController : MonoBehaviour
     [SerializeField] float dashTime;
     [Tooltip("The minimum speed that Sizzle must maintain to stay in dash")]
     [SerializeField] float minSqrtSpeedForDash;
+    [SerializeField] float coolDownTimeDash;
 
     [SerializeField] AnimationCurve dashForceoverLerp;
 
@@ -80,12 +81,15 @@ public class ForceController : MonoBehaviour
 
     // This is decided by the main buoyancy, midBody
     private bool isGrounded;
+    private float dashCoolDownTimer;
 
 
     // Start is called before the first frame update
     void Start()
     {
         SizzleState = states.movement;
+
+        dashCoolDownTimer = coolDownTimeDash;
     }
 
     // Update is called once per frame
@@ -232,15 +236,23 @@ public class ForceController : MonoBehaviour
     /// </summary>
     private void TryDash()
     {
-        
-        // Activates the dash state 
-        if (Input.GetKeyDown(dashKey) && DashCo == null && isGrounded)
+        if(dashCoolDownTimer <= 0)
         {
-            SizzleState = states.action;
-            baseBody.AddForce(dashForceImpulse * baseBody.transform.forward, ForceMode.Impulse);
-            legsController.Dash(baseBody); // Activates the dash leg animations 
+            // Activates the dash state 
+            if (Input.GetKeyDown(dashKey) && DashCo == null && isGrounded)
+            {
+                dashCoolDownTimer = coolDownTimeDash;
 
-            DashCo = StartCoroutine(DashSubroutine());
+                SizzleState = states.action;
+                baseBody.AddForce(dashForceImpulse * baseBody.transform.forward, ForceMode.Impulse);
+                legsController.Dash(baseBody); // Activates the dash leg animations 
+
+                DashCo = StartCoroutine(DashSubroutine());
+            }
+        }
+        else
+        {
+            dashCoolDownTimer -= Time.deltaTime;
         }
     }
 

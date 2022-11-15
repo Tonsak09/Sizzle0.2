@@ -41,6 +41,7 @@ public class DialogueManager : MonoBehaviour
     int index = 0;
 
     public bool Running { get { return dialogueCoroutine != null; } }
+    public int Index { get { return index; } }
 
     private void Start()
     {
@@ -64,7 +65,7 @@ public class DialogueManager : MonoBehaviour
 
     private void Update()
     {
-
+        
     }
 
     public void RunText(List<string> texts)
@@ -78,6 +79,16 @@ public class DialogueManager : MonoBehaviour
             dialogueCoroutine = StartCoroutine(RunDialogue(texts));
         }
 
+    }
+
+    public void Apeear()
+    {
+        StartCoroutine(Appear());
+    }
+
+    public void Disappear()
+    {
+        StartCoroutine(Dissapear());
     }
 
     private IEnumerator RunDialogue(List<string> texts)
@@ -112,7 +123,7 @@ public class DialogueManager : MonoBehaviour
         for (int i = 0; i < processed.Length; i++)
         {
             // Check if event 
-            if(processed[i][0] == '<')
+            if(processed[i].Length > 0 && processed[i][0] == '<')
             {
                 // Play effect 
             }
@@ -120,7 +131,29 @@ public class DialogueManager : MonoBehaviour
             {
                 for (int j = 0; j < processed[i].Length; j++)
                 {
+                    
+
+                    // Run Text
                     textMesh.text += processed[i][j];
+
+                    /*if (Input.GetKey(nextKey))
+                    {
+                        textMesh.text = dialogue; // If there are events in the future this needs to be changed 
+
+                        while(true)
+                        {
+                            // Does not continue logic until lifted 
+                            if(Input.GetKeyUp(nextKey))
+                            {
+                                break;
+                            }
+
+                            yield return null;
+                        }
+
+                        break;
+                    }*/
+
                     yield return new WaitForSeconds(pauseTime);
                 }
 

@@ -15,12 +15,12 @@ public class SpearineAnimEvents : MonoBehaviour
     [Header("Values")]
     [SerializeField] float pauseBeforeReload;
 
-    private InAndOut transition;
+    private Transitions transition;
 
 
     private void Start()
     {
-        transition = GameObject.FindObjectOfType<InAndOut>();
+        transition = GameObject.FindObjectOfType<Transitions>();
     }
 
     public void DisableAnimator()
