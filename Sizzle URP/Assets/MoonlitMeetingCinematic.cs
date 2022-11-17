@@ -38,8 +38,7 @@ public class MoonlitMeetingCinematic : MonoBehaviour
 
     private void Update()
     {
-        print(dialogue.Index);
-        if (!camSwapped)
+        if (!camSwapped && activated)
         {
 
             if (dialogue.Index == indexToSwapCam)

@@ -25,7 +25,7 @@ public class DialogueZone : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-            //dm.EndDialogue();
+            dm.EndDialogue();
         }
     }
 }

@@ -46,6 +46,30 @@ public class Transitions : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets the player to the last checkpoint 
+    /// </summary>
+    public void ResetToCheckPoint()
+    {
+        TryBlackOut();
+
+        if(animCo != null)
+        {
+            StartCoroutine(ResetAfterBlackOut());
+
+        }
+    }
+
+    private IEnumerator ResetAfterBlackOut()
+    {
+        while(animCo != null)
+        {
+            yield return null;
+        }
+        LevelManager.Reload();
+    }
+
+
     private IEnumerator BlackOut()
     {
         float lerp = 0; 
@@ -54,7 +78,7 @@ public class Transitions : MonoBehaviour
         {
             blackOut.sizeDelta = Vector2.Lerp(startWHB, targetWHB, blackOutCurve.Evaluate(lerp));
 
-            lerp += blackOutSpeed *Time.deltaTime;
+            lerp += blackOutSpeed * Time.deltaTime;
             yield return null;
         }
 

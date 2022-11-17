@@ -78,7 +78,14 @@ public class DialogueManager : MonoBehaviour
 
             dialogueCoroutine = StartCoroutine(RunDialogue(texts));
         }
+    }
 
+    public void EndDialogue()
+    {
+        StopCoroutine(dialogueCoroutine);
+        dialogueCoroutine = null;
+
+        Disappear();
     }
 
     public void Apeear()
@@ -210,6 +217,8 @@ public class DialogueManager : MonoBehaviour
 
             yield return null;
         }
+
+        index = 0;
 
         moving = false;
         dialogueCoroutine = null;
