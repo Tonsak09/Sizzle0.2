@@ -27,7 +27,7 @@ public class SizzleDataLoader : MonoBehaviour
         
     }
 
-    private void SetSizzleToSaveTransform()
+    public void SetSizzleToSaveTransform()
     {
         baseJoint.transform.position = GameData.SizzleSavePos;
         baseJoint.transform.rotation = GameData.SizzleSaveOrientation;

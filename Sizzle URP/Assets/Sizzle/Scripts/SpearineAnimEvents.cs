@@ -85,7 +85,7 @@ public class SpearineAnimEvents : MonoBehaviour
     {
 
         yield return new WaitForSeconds(pauseBeforeReload);
-        LevelManager.Reload();
+        GameObject.FindObjectOfType<Transitions>().ResetToCheckPoint();
 
     }
 

@@ -66,7 +66,12 @@ public class Transitions : MonoBehaviour
         {
             yield return null;
         }
-        LevelManager.Reload();
+
+        yield return new WaitForSeconds(1);
+
+        // Resets 
+        GameObject.FindObjectOfType<SizzleDataLoader>().SetSizzleToSaveTransform();
+        TryBlackIn();
     }
 
 

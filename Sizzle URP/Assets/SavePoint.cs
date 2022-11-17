@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SavePoint : MonoBehaviour
 {
+
     /// <summary>
     /// Saves this objects transform as Sizzle's transform data in GameData
     /// </summary>
