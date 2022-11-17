@@ -16,11 +16,13 @@ public class SpearineAnimEvents : MonoBehaviour
     [SerializeField] float pauseBeforeReload;
 
     private Transitions transition;
-
+    private bool reseting;
 
     private void Start()
     {
         transition = GameObject.FindObjectOfType<Transitions>();
+
+        reseting = false;
     }
 
     public void DisableAnimator()
@@ -55,14 +57,14 @@ public class SpearineAnimEvents : MonoBehaviour
 
     public void TryKillSizzle()
     {
-        if(spearine.IsHittingSizzle())
+        if(spearine.IsHittingSizzle() && !reseting)
         {
-
+            reseting = true;
             // Shake Sizzle
 
 
             // Reset the screen
-            transition.TryBlackOut();
+            //transition.TryBlackOut();
             StartCoroutine(ResetScene(pauseBeforeReload));
         }
     }
@@ -83,10 +85,10 @@ public class SpearineAnimEvents : MonoBehaviour
 
     private IEnumerator ResetScene(float pauseBeforeReload)
     {
-
-        yield return new WaitForSeconds(pauseBeforeReload);
         GameObject.FindObjectOfType<Transitions>().ResetToCheckPoint();
 
+        yield return new WaitForSeconds(pauseBeforeReload);
+        reseting = false;
     }
 
 }
