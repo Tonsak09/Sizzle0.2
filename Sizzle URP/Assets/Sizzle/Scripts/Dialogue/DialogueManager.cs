@@ -85,9 +85,15 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void EndDialogue()
     {
-        print("Ending Dialogue");
-        StopCoroutine(dialogueCoroutine);
-        StopCoroutine(currentDialogueCo);
+        if(dialogueCoroutine != null)
+        {
+            StopCoroutine(dialogueCoroutine);
+        }
+        if(currentTextFinished)
+        {
+            StopCoroutine(currentDialogueCo);
+        }
+        
 
         dialogueCoroutine = null;
         currentTextFinished = true;

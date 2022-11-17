@@ -76,13 +76,12 @@ public class MoonlitMeetingCinematic : MonoBehaviour
 
         // Fade back in 
         transition.TryBlackIn();
-
         cinematicSizzleAnimator.SetBool("begin", true);
 
         yield return new WaitForSeconds(dialogueDelay);
-        // Begin dialogue 
-        dialogue.Apeear();
         dialogue.RunText(snabianText);
+
+        // Begin dialogue 
     }
 
     private void OnTriggerEnter(Collider other)
