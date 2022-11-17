@@ -15,6 +15,9 @@ public class SavePoint : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        SaveTransform();
+        if(other.tag == "Player")
+        {
+            SaveTransform();
+        }
     }
 }

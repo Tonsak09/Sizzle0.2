@@ -44,15 +44,19 @@ public class ForceController : MonoBehaviour
     [SerializeField] KeyCode dashKey;
     [SerializeField] float dashForceImpulse;
     [SerializeField] float dashForceContinuous;
+    [Space]
+    [SerializeField] float dashTime;
+    [SerializeField] float coolDownTimeDash;
+    [Space]
     [Tooltip("When hitting an object before the dash ends Sizzle is set backwards")]
     [SerializeField] float dashBounceBackImpulse;
     [SerializeField] float dashBounceBackVertical;
-    [SerializeField] float dashTime;
-    [Tooltip("The minimum speed that Sizzle must maintain to stay in dash")]
-    [SerializeField] float minSqrtSpeedForDash;
-    [SerializeField] float coolDownTimeDash;
+    
 
     [SerializeField] AnimationCurve dashForceoverLerp;
+    [Space]
+    [SerializeField] float dashVerticalForce;
+    [SerializeField] AnimationCurve dashVerticalOverLerp;
 
     private Coroutine DashCo;
 
@@ -79,6 +83,9 @@ public class ForceController : MonoBehaviour
         action
     };
 
+
+    private Rigidbody frontRigid;
+
     // This is decided by the main buoyancy, midBody
     private bool isGrounded;
     private float dashCoolDownTimer;
@@ -88,6 +95,7 @@ public class ForceController : MonoBehaviour
     void Start()
     {
         SizzleState = states.movement;
+        frontRigid = frontBody.GetComponent<Rigidbody>();
 
         dashCoolDownTimer = coolDownTimeDash;
     }
@@ -171,6 +179,9 @@ public class ForceController : MonoBehaviour
         baseBody.AddForce(moveForce * Vector3.ProjectOnPlane(frontBody.transform.forward, -base.transform.up) * VInput * Time.deltaTime, ForceMode.Acceleration);
     }
 
+    /// <summary>
+    /// Oritentates the body to the current surface, or lack thereof, that Sizzle is above 
+    /// </summary>
     private void SurfaceLogic()
     {
 
@@ -298,6 +309,8 @@ public class ForceController : MonoBehaviour
             }
 
             baseBody.AddForce(dashForceContinuous * dashForceoverLerp.Evaluate((timer / dashTime)) * baseBody.transform.forward * Time.deltaTime, ForceMode.Acceleration);
+            baseBody.AddForce(dashVerticalForce * dashVerticalOverLerp.Evaluate((timer / dashTime)) * Vector3.up * Time.deltaTime, ForceMode.Acceleration);
+            frontRigid.AddForce(dashVerticalForce * dashVerticalOverLerp.Evaluate((timer / dashTime)) * Vector3.up * Time.deltaTime, ForceMode.Acceleration);
 
             timer -= Time.deltaTime;
             yield return null;
@@ -330,6 +343,7 @@ public class ForceController : MonoBehaviour
         {
             // Jumps away from surface 
             baseBody.AddForce(jumpForceContinuous * jumpForceOverLerp.Evaluate((timer / dashTime)) * dir * Time.deltaTime, ForceMode.Acceleration);
+            frontRigid.AddForce(jumpForceContinuous * jumpForceOverLerp.Evaluate((timer / dashTime)) * dir * Time.deltaTime, ForceMode.Acceleration);
 
             timer -= Time.deltaTime;
             yield return null;
