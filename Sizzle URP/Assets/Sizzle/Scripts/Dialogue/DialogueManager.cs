@@ -32,7 +32,8 @@ public class DialogueManager : MonoBehaviour
     private bool moving;
     private bool currentTextFinished;
     private Coroutine displayAppearanceCo;
-    private Coroutine dialogueCoroutine;
+    private Coroutine dialogueCoroutine; // Main coroutine manager 
+    private Coroutine currentDialogueCo; // Runs to display what is being said 
 
     private Vector3 startPos;
     private Vector3 offsetedPos;
@@ -63,11 +64,10 @@ public class DialogueManager : MonoBehaviour
         display.localScale = Vector3.zero;
     }
 
-    private void Update()
-    {
-        
-    }
-
+    /// <summary>
+    /// Makes text appear and beings to run the text in box 
+    /// </summary>
+    /// <param name="texts"></param>
     public void RunText(List<string> texts)
     {
         // Makes sure it doesn't overide 
@@ -80,19 +80,34 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ends the dialogue where it currently is and makes box dissapear 
+    /// </summary>
     public void EndDialogue()
     {
+        print("Ending Dialogue");
         StopCoroutine(dialogueCoroutine);
+        StopCoroutine(currentDialogueCo);
+
         dialogueCoroutine = null;
+        currentTextFinished = true;
+        textMesh.text = "";
 
         Disappear();
     }
 
+    /// <summary>
+    /// Makes the text box appear 
+    /// </summary>
     public void Apeear()
     {
         StartCoroutine(Appear());
     }
 
+
+    /// <summary>
+    /// Makes the text box dissappear 
+    /// </summary>
     public void Disappear()
     {
         StartCoroutine(Dissapear());
@@ -100,6 +115,7 @@ public class DialogueManager : MonoBehaviour
 
     private IEnumerator RunDialogue(List<string> texts)
     {
+        print("Beginning");
         index = 0;
         while (index < texts.Count)
         {
@@ -110,8 +126,7 @@ public class DialogueManager : MonoBehaviour
             else
             {
                 currentTextFinished = false;
-                StartCoroutine(ProcessDialogue(texts[index], textSpeed));
-
+                currentDialogueCo = StartCoroutine(ProcessDialogue(texts[index], textSpeed));
             }
         }
 
@@ -125,6 +140,7 @@ public class DialogueManager : MonoBehaviour
     /// <param name="dialogue"></param>
     private IEnumerator ProcessDialogue(string dialogue, float pauseTime)
     {
+        print("Processing");
         string[] processed = dialogue.Split();
 
         for (int i = 0; i < processed.Length; i++)
@@ -138,7 +154,6 @@ public class DialogueManager : MonoBehaviour
             {
                 for (int j = 0; j < processed[i].Length; j++)
                 {
-                    
 
                     // Run Text
                     textMesh.text += processed[i][j];
@@ -168,6 +183,7 @@ public class DialogueManager : MonoBehaviour
             }
         }
 
+        // Waits to continue to next set of dialogue 
         while(true)
         {
             if (Input.GetKeyDown(nextKey))
@@ -205,6 +221,8 @@ public class DialogueManager : MonoBehaviour
     }
     private IEnumerator Dissapear()
     {
+        print("Dissapearing");
+
         moving = true;
         float lerp = 0;
         Vector3 startScale = display.localScale;
