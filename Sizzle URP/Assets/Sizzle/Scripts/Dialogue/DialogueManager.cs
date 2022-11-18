@@ -89,7 +89,7 @@ public class DialogueManager : MonoBehaviour
         {
             StopCoroutine(dialogueCoroutine);
         }
-        if(currentTextFinished)
+        if(currentDialogueCo != null)
         {
             StopCoroutine(currentDialogueCo);
         }
