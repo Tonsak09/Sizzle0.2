@@ -82,7 +82,7 @@ MonoBehaviour:
   desperseChargeSpeed: 15
   maxCharge: 40
   baseEmessiveColor: {r: 0.06886086, g: 0.5566038, b: 0, a: 1}
-  targetEmessiveColor: {r: 4.0156865, g: 95.87451, b: 0, a: 1}
+  targetEmessiveColor: {r: 2.0078433, g: 47.937256, b: 0, a: 1}
   renderer: {fileID: 6170951096067510578}
   CurrentCharge: 0
   co: {fileID: -4762966131257001015}
