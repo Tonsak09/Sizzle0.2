@@ -12,6 +12,9 @@ public class ForceController : MonoBehaviour
     [Tooltip("Used to get if grounded or not")]
     [SerializeField] Buoyancy midBodyBuoyancy;
 
+    [Header("Direction")]
+    [SerializeField] Transform cam;
+
     [Header("Orientation")]
     [SerializeField] TorqueTowardsRotation midBoneTorqueCorrection;
     [Tooltip("This is the maximum distance that the correction vec can be from Vector3.down")]
@@ -51,8 +54,6 @@ public class ForceController : MonoBehaviour
     [Tooltip("When hitting an object before the dash ends Sizzle is set backwards")]
     [SerializeField] float dashBounceBackImpulse;
     [SerializeField] float dashBounceBackVertical;
-    
-
     [SerializeField] AnimationCurve dashForceoverLerp;
     [Space]
     [SerializeField] float dashVerticalForce;
@@ -97,6 +98,11 @@ public class ForceController : MonoBehaviour
         SizzleState = states.movement;
         frontRigid = frontBody.GetComponent<Rigidbody>();
 
+        if(cam == null)
+        {
+            cam = GameObject.FindGameObjectWithTag("MainCamera").transform;
+        }
+
         dashCoolDownTimer = coolDownTimeDash;
     }
 
@@ -110,7 +116,8 @@ public class ForceController : MonoBehaviour
         SurfaceLogic();
         Statemachine();
 
-        bManager.AdjustHeights(crouchLerp * baseHeightLerp);
+        bManager.AdjustHeights(baseHeightLerp);
+        //bManager.AdjustHeights(crouchLerp * baseHeightLerp);
         //bManager.ProjectHeights();
 
     }
@@ -120,12 +127,15 @@ public class ForceController : MonoBehaviour
         switch (SizzleState)
         {
             case states.movement:
-                ForceControl(moveForce, torqueForce);
 
-                if (Input.GetKey(crouchkey))
+                ForceControl(moveForce);
+                RotateToCameraDirection(torqueForce);
+                TryDash(); // Checks whether the dash state should begin 
+
+                /*if (Input.GetKey(crouchkey))
                 {
                     // Change to crouch state 
-                    SizzleState = states.crouch;
+                    //SizzleState = states.crouch;
                 }
                 else
                 {
@@ -133,14 +143,13 @@ public class ForceController : MonoBehaviour
                 }
 
                 baseHeightLerp *= crouchLerp;
-
-                TryDash(); // Checks whether the dash state should begin 
+                */
 
 
                 break;
             case states.crouch:
 
-                ForceControl(moveForceCrouch, torqueForceCrouch); // Slower Movement 
+                //ForceControl(moveForceCrouch, torqueForceCrouch); // Slower Movement 
                 CrouchLogic();
                 TryJump();
 
@@ -157,17 +166,16 @@ public class ForceController : MonoBehaviour
     /// </summary>
     /// <param name="moveForce"></param>
     /// <param name="torqueForce"></param>
-    private void ForceControl(float moveForce, float torqueForce)
+    private void ForceControl(float moveForce)
     {
-
-
-
         // Get the input 
         float VInput = Input.GetAxis("Vertical");
         float hInput = Input.GetAxis("Horizontal");
 
+
         baseBody.AddTorque(torqueForce * baseBody.transform.up * hInput * Time.deltaTime, ForceMode.Acceleration);
 
+        // Make sure that there are no obstructions in front of Sizzle 
         if(VInput > 0)
         {
             if(!CanMoveForwad())
@@ -176,11 +184,20 @@ public class ForceController : MonoBehaviour
             }
         }
 
-        baseBody.AddForce(moveForce * Vector3.ProjectOnPlane(frontBody.transform.forward, -base.transform.up) * VInput * Time.deltaTime, ForceMode.Acceleration);
+        //baseBody.AddForce(moveForce * frontBody.transform.forward * VInput * Time.deltaTime, ForceMode.Acceleration);
+        baseBody.AddForce(moveForce * GetCamDirection() * VInput * Time.deltaTime, ForceMode.Acceleration);
     }
 
     /// <summary>
-    /// Oritentates the body to the current surface, or lack thereof, that Sizzle is above 
+    /// Aims Sizzle's body towards where the camera is looking 
+    /// </summary>
+    private void RotateToCameraDirection(float torqueForce)
+    {
+        //baseBody.AddTorque(Vector3.Cross(GetCamDirection(), this.transform.forward) * torqueForce * Time.deltaTime);
+    }
+
+    /// <summary>
+    /// Oritentates the body to the current surface, or lack thereof, that Sizzle is on 
     /// </summary>
     private void SurfaceLogic()
     {
@@ -287,7 +304,15 @@ public class ForceController : MonoBehaviour
         return !Physics.CheckSphere(neck.position + pos, frontCheckRadius, checkMask);
     }
 
+    private Vector3 GetCamDirection()
+    {
+        Vector3 camToMid = baseBody.position - cam.position;
 
+        // Project onto the forward vector allows for speed to be relative
+        // to how much the camera is faced towards the movement direciton
+        // Now when Sizzle is orientating themself speed should speed up as it's correcting its orientation
+        return Vector3.Project(camToMid, baseBody.transform.forward).normalized;
+    }
 
     private IEnumerator DashSubroutine()
     {

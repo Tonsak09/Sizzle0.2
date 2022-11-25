@@ -88,6 +88,12 @@ public class PoseCopyManager : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+
+        // Start by immitating the pose of the fbx 
+        for (int i = 0; i < body.Count; i++)
+        {
+            body[i].UpdateTarget();
+        }
     }
 
     // Update is called once per frame
