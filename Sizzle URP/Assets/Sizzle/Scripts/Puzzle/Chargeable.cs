@@ -12,9 +12,11 @@ public class Chargeable : MonoBehaviour
     [ColorUsage(false, true)]
     [SerializeField] Color targetEmessiveColor;
 
-    [SerializeField] Renderer renderer;
+    [SerializeField] protected Renderer renderer;
 
     protected private float currentCharge;
+    protected Color Base { get { return baseEmessiveColor; } }
+    protected Color Target { get { return targetEmessiveColor; } }
 
     // Only meant for debug to read 
     public float CurrentCharge;

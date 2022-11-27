@@ -361,10 +361,12 @@ MonoBehaviour:
   desperseChargeSpeed: 10
   maxCharge: 100
   baseEmessiveColor: {r: 1.7207954, g: 0.8919306, b: 0.225235, a: 0}
-  targetEmessiveColor: {r: 95.87451, g: 49.69412, b: 12.54902, a: 0}
+  targetEmessiveColor: {r: 53.132072, g: 9.458065, b: 0, a: 0}
   renderer: {fileID: 2888372213929856426}
   CurrentCharge: 0
   co: {fileID: 6429100535534518906}
+  fullyUnlockedCharge: 90
+  fullChargeSpeed: 1
 --- !u!135 &6429100535534518907
 SphereCollider:
   m_ObjectHideFlags: 0

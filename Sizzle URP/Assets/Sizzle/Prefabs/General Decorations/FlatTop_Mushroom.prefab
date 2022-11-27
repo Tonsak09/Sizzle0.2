@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 287188463805781319}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.79, y: -8.3681, z: -2.65}
+  m_LocalPosition: {x: 0, y: 2.577, z: 0}
   m_LocalScale: {x: 0.2566248, y: 0.2566248, z: 0.2566248}
   m_Children: []
   m_Father: {fileID: 1359832736852641806}
@@ -110,7 +110,7 @@ GameObject:
   m_Layer: 0
   m_Name: FlatTop_Mushroom
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -5938655980376293919, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -121,9 +121,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1843318084064826036}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -130.19, y: 134.46931, z: -113.020004}
-  m_LocalScale: {x: 0.91699, y: 0.91699, z: 0.91699}
+  m_LocalScale: {x: 0.95366955, y: 0.95366955, z: 0.95366955}
   m_Children:
   - {fileID: 2990163755731237112}
   - {fileID: 4464507649334141784}
@@ -171,7 +171,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4725581494061120990}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.79, y: -8.3681, z: -2.65}
+  m_LocalPosition: {x: 0, y: 2.5769968, z: 0}
   m_LocalScale: {x: 0.2566248, y: 0.2566248, z: 0.2566248}
   m_Children: []
   m_Father: {fileID: 1359832736852641806}

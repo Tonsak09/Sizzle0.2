@@ -209,6 +209,13 @@ public static class Maths
         return new Vector3(A.x * B.x, A.y * B.y, A.z * B.z);
     }
 
+    public static float InverseLerp(Vector4 a, Vector4 b, Vector4 value)
+    {
+        Vector4 AB = b - a;
+        Vector4 AV = value - a;
+        return Vector4.Dot(AV, AB) / Vector4.Dot(AB, AB);
+    }
+
     public static float InverseLerp(Vector3 a, Vector3 b, Vector3 value)
     {
         Vector3 AB = b - a;
