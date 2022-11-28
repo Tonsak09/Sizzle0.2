@@ -14,6 +14,7 @@ public class ForceController : MonoBehaviour
 
     [Header("Direction")]
     [SerializeField] Transform cam;
+    [SerializeField] float autoTurnSpeed;
 
     [Header("Orientation")]
     [SerializeField] TorqueTowardsRotation midBoneTorqueCorrection;
@@ -86,6 +87,7 @@ public class ForceController : MonoBehaviour
 
 
     private Rigidbody frontRigid;
+    private Vector3 normal;
 
     // This is decided by the main buoyancy, midBody
     private bool isGrounded;
@@ -193,7 +195,28 @@ public class ForceController : MonoBehaviour
     /// </summary>
     private void RotateToCameraDirection(float torqueForce)
     {
-        //baseBody.AddTorque(Vector3.Cross(GetCamDirection(), this.transform.forward) * torqueForce * Time.deltaTime);
+        //Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, 100, 0) * Time.deltaTime);
+        //baseBody.MoveRotation(baseBody.rotation * deltaRotation);
+
+        Vector3 camDir = GetCamDirection();
+        Vector3 localTarget = transform.InverseTransformPoint(baseBody.transform.position + camDir);
+
+        float angle = Vector3.Angle(-baseBody.transform.right, camDir);
+        Vector3 eulerAngleVelocity = new Vector3(0, angle, 0);
+
+        Vector3 angleDis = eulerAngleVelocity * autoTurnSpeed * Time.deltaTime;
+
+        if (Vector3.Dot(-baseBody.transform.right, camDir) > 0)
+        {
+            angleDis = -angleDis;
+        }
+
+
+        Quaternion deltaRotation = Quaternion.Euler(angleDis);
+        print(deltaRotation);
+
+
+        baseBody.MoveRotation(baseBody.rotation * deltaRotation );
     }
 
     /// <summary>
@@ -212,6 +235,7 @@ public class ForceController : MonoBehaviour
 
             // Height from ground should be the line formed by the two hit points 
             Vector3 midPoint = Vector3.Lerp(hitA.point, hitB.point, 0.5f);
+            normal = Vector3.Lerp(hitA.normal, hitB.normal, 0.5f);
 
             float totalDis = Mathf.Abs(baseBody.position.y - midPoint.y);
             float b = totalDis - midBodyBuoyancy.startingHeight; // B value that needs to be eliminated 
@@ -231,7 +255,9 @@ public class ForceController : MonoBehaviour
             float disSquared = (Vector3.up - hit.normal).sqrMagnitude;
             //print(Vector3.SignedAngle(Vector3.up, hit.normal, Vector3.up));
 
-            if(disSquared <= maxVecDisFromDown)
+            normal = hit.normal;
+
+            if (disSquared <= maxVecDisFromDown)
             {
                 midBoneTorqueCorrection.Target = -hit.normal;
             }
@@ -311,7 +337,7 @@ public class ForceController : MonoBehaviour
         // Project onto the forward vector allows for speed to be relative
         // to how much the camera is faced towards the movement direciton
         // Now when Sizzle is orientating themself speed should speed up as it's correcting its orientation
-        return Vector3.Project(camToMid, baseBody.transform.forward).normalized;
+        return Vector3.ProjectOnPlane(camToMid, normal).normalized;
     }
 
     private IEnumerator DashSubroutine()
@@ -352,7 +378,7 @@ public class ForceController : MonoBehaviour
     /// <summary>
     /// Bounces Sizzle in the opposite direction that they are facing 
     /// </summary>
-    private void BounceBack()
+    public void BounceBack()
     {
         baseBody.velocity = Vector3.zero; // Sets main part of body to 0
         baseBody.AddForce(-baseBody.transform.forward * dashBounceBackImpulse + Vector3.up * dashBounceBackVertical, ForceMode.Impulse);
@@ -400,5 +426,14 @@ public class ForceController : MonoBehaviour
             Vector3 midPoint = Vector3.Lerp(hitA.point, hitB.point, 0.5f);
             Gizmos.DrawWireSphere(midPoint, 0.03f);
         }
+
+        if(cam != null)
+        {
+            // Cam direction 
+            Vector3 camToBase = Vector3.ProjectOnPlane(baseBody.position - cam.position, normal).normalized * 2;
+            Gizmos.DrawLine(baseBody.position, baseBody.position + camToBase);
+            Gizmos.DrawWireSphere(baseBody.position + camToBase, 0.1f);
+        }
+        
     }
 }

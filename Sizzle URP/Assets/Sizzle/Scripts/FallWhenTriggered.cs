@@ -35,7 +35,6 @@ public class FallWhenTriggered : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        print(other.tag);
         if(!fallen && other.tag == "Player")
         {
             fallen = true;
