@@ -67,7 +67,15 @@ public class AmberSetGrowPath : AmberSet
         float lerp = 0;
         while(lerp <= 1)
         {
-            target.localScale = Vector3.Lerp(startScale, targetScale, lerp);
+            target.localScale =
+                new Vector3
+                (
+                    Mathf.Lerp(startScale.x, targetScale.x, XZCurve.Evaluate(lerp)),
+                    Mathf.Lerp(startScale.y, targetScale.y, YCurve.Evaluate(lerp)),
+                    Mathf.Lerp(startScale.y, targetScale.y, XZCurve.Evaluate(lerp))
+                );
+
+
             lerp += Time.deltaTime * growSpeed;
             yield return null;
         }

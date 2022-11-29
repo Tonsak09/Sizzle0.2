@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class Amber : Chargeable
 {
+    [Header("Amber Details")]
     [SerializeField] ChargeObj co;
     [SerializeField] float fullyUnlockedCharge;
     [SerializeField] float fullChargeSpeed;
     /*[Tooltip("Once the amber has been fully charged it will lerp between these two values ")]
     [SerializeField] Vector2 lerpValuesToGlow;
     [SerializeField] AnimationCurve glowCurve;*/
+
+    [Header("FX")]
+    [SerializeField] ParticleSystem unlockedFX;
 
     private bool fullyUnlocked;
     private float glowLerp;
@@ -27,6 +31,7 @@ public class Amber : Chargeable
             {
                 fullyUnlocked = true;
                 StartCoroutine(GoToFullCharge());
+                unlockedFX.Play();
                 //BeginGlow();
             }
         }
