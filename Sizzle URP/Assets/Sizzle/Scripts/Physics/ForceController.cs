@@ -175,7 +175,7 @@ public class ForceController : MonoBehaviour
         float hInput = Input.GetAxis("Horizontal");
 
 
-        baseBody.AddTorque(torqueForce * baseBody.transform.up * hInput * Time.deltaTime, ForceMode.Acceleration);
+        //baseBody.AddTorque(torqueForce * baseBody.transform.up * hInput * Time.deltaTime, ForceMode.Acceleration);
 
         // Make sure that there are no obstructions in front of Sizzle 
         if(VInput > 0)
@@ -187,7 +187,7 @@ public class ForceController : MonoBehaviour
         }
 
         //baseBody.AddForce(moveForce * frontBody.transform.forward * VInput * Time.deltaTime, ForceMode.Acceleration);
-        baseBody.AddForce(moveForce * GetCamDirection() * VInput * Time.deltaTime, ForceMode.Acceleration);
+        baseBody.AddForce(moveForce * baseBody.transform.forward * VInput * Time.deltaTime, ForceMode.Acceleration);
     }
 
     /// <summary>
@@ -198,25 +198,42 @@ public class ForceController : MonoBehaviour
         //Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, 100, 0) * Time.deltaTime);
         //baseBody.MoveRotation(baseBody.rotation * deltaRotation);
 
+        float hInput = Input.GetAxis("Horizontal");
+        Vector3 dir = baseBody.transform.forward;
+
         Vector3 camDir = GetCamDirection();
-        Vector3 localTarget = transform.InverseTransformPoint(baseBody.transform.position + camDir);
+        float dot = Vector3.Dot(-baseBody.transform.right, camDir);
 
-        float angle = Vector3.Angle(-baseBody.transform.right, camDir);
-        Vector3 eulerAngleVelocity = new Vector3(0, angle, 0);
-
-        Vector3 angleDis = eulerAngleVelocity * autoTurnSpeed * Time.deltaTime;
-
-        if (Vector3.Dot(-baseBody.transform.right, camDir) > 0)
+        print(hInput);
+        if (Mathf.Abs(hInput) >= Mathf.Epsilon)
         {
-            angleDis = -angleDis;
+            if(hInput > 0)
+            {
+                dir = -baseBody.transform.right;
+                dot = Vector3.Dot(-baseBody.transform.forward, camDir);
+            }
+            else
+            {
+                dir = baseBody.transform.right;
+                dot = Vector3.Dot(baseBody.transform.forward, camDir);
+            }
         }
 
 
+
+        float angle = Vector3.Angle(dir, camDir);
+
+        if (dot > 0)
+        {
+            angle = -angle;
+        }
+
+        Vector3 eulerAngleVelocity = new Vector3(0, angle, 0);
+        Vector3 angleDis = eulerAngleVelocity * autoTurnSpeed * Time.deltaTime;
+
         Quaternion deltaRotation = Quaternion.Euler(angleDis);
-        print(deltaRotation);
-
-
         baseBody.MoveRotation(baseBody.rotation * deltaRotation );
+        //baseBody.AddRelativeTorque(angleDis * torqueForce);
     }
 
     /// <summary>
