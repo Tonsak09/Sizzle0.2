@@ -8282,7 +8282,7 @@ MonoBehaviour:
   legsController: {fileID: 2099600900075649835}
   midBodyBuoyancy: {fileID: 7450884251833034874}
   cam: {fileID: 0}
-  autoTurnSpeed: 4
+  autoTurnSpeed: 5
   midBoneTorqueCorrection: {fileID: 689872761}
   maxVecDisFromDown: 2
   disBetweenChecks: 0.36
