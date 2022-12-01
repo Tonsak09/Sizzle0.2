@@ -15,6 +15,7 @@ public class ForceController : MonoBehaviour
     [Header("Direction")]
     [SerializeField] Transform cam;
     [SerializeField] float autoTurnSpeed;
+    [SerializeField] float minAngle;
 
     [Header("Orientation")]
     [SerializeField] TorqueTowardsRotation midBoneTorqueCorrection;
@@ -222,6 +223,11 @@ public class ForceController : MonoBehaviour
 
 
         float angle = Vector3.Angle(dir, camDir);
+
+        if(Mathf.Abs(angle) <= minAngle)
+        {
+            return;
+        }
 
         if (dot > 0)
         {
