@@ -8187,6 +8187,7 @@ GameObject:
   - component: {fileID: 2056318916}
   - component: {fileID: 1739393106}
   - component: {fileID: 1207000448}
+  - component: {fileID: 8589031295131876011}
   m_Layer: 3
   m_Name: Sizzle
   m_TagString: Sizzle
@@ -8283,6 +8284,7 @@ MonoBehaviour:
   midBodyBuoyancy: {fileID: 7450884251833034874}
   cam: {fileID: 0}
   autoTurnSpeed: 5
+  minAngle: 30
   midBoneTorqueCorrection: {fileID: 689872761}
   maxVecDisFromDown: 2
   disBetweenChecks: 0.36
@@ -8769,6 +8771,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   savePointOverride: {fileID: 0}
   baseJoint: {fileID: 2612658663291554151}
+--- !u!114 &8589031295131876011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099600900075649836}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 907bb5e7342f583428464ffd66bb8a70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  front: {fileID: 2720201700839140401}
+  frontPair: []
+  frontOffsetCenter: {x: 0, y: 0, z: 0.25}
+  back: {fileID: 0}
+  backPair: []
+  backOffsetCenter: {x: 0, y: 0, z: 0}
+  disToAngle: 400
+  frameCount: 4
+  wheelColor: {r: 0.6, g: 0.19607843, b: 0.8, a: 1}
+  wheelSideOffset: 0.34
+  wheelRadius: 0.52
 --- !u!1 &2180877788356225499
 GameObject:
   m_ObjectHideFlags: 0
