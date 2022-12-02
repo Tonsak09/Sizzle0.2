@@ -25,6 +25,7 @@ public class Water : MonoBehaviour
                 transition.ResetToCheckPoint();
                 break;
             case slimeTag:
+                other.GetComponent<Slime>().Pop();
                 break;
         }
     }

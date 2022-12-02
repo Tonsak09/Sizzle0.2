@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Chargeable : MonoBehaviour
 {
+    [Header("Chargeable")]
     [SerializeField] protected float desperseChargeSpeed;
     [SerializeField] protected float maxCharge;
 
@@ -11,8 +12,11 @@ public class Chargeable : MonoBehaviour
     [SerializeField] Color baseEmessiveColor;
     [ColorUsage(false, true)]
     [SerializeField] Color targetEmessiveColor;
+    [SerializeField] AnimationCurve colorCurve;
 
     [SerializeField] protected Renderer renderer;
+    [Space]
+
 
     protected private float currentCharge;
     protected Color Base { get { return baseEmessiveColor; } }

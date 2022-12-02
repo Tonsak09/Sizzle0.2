@@ -78,7 +78,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     private void GetFramFromWheel()
     {
-        print( (int)(frontRot / (360 / frameCount)));
+        //print( (int)(frontRot / (360 / frameCount)));
     }
 
 
