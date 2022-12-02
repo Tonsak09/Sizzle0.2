@@ -205,7 +205,6 @@ public class ForceController : MonoBehaviour
         Vector3 camDir = GetCamDirection();
         float dot = Vector3.Dot(-baseBody.transform.right, camDir);
 
-        print(hInput);
         if (Mathf.Abs(hInput) >= Mathf.Epsilon)
         {
             if(hInput > 0)
