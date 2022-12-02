@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AmberSetGrowPath : AmberSet
 {
+    [Header("Path")]
     [SerializeField] List<Transform> pathToGrow;
     [SerializeField] float pauseBetweenParts;
     [SerializeField] float growSpeed;
