@@ -70,9 +70,9 @@ public class AmberSetGrowPath : AmberSet
             target.localScale =
                 new Vector3
                 (
-                    Mathf.Lerp(startScale.x, targetScale.x, XZCurve.Evaluate(lerp)),
-                    Mathf.Lerp(startScale.y, targetScale.y, YCurve.Evaluate(lerp)),
-                    Mathf.Lerp(startScale.y, targetScale.y, XZCurve.Evaluate(lerp))
+                    Mathf.LerpUnclamped(startScale.x, targetScale.x, XZCurve.Evaluate(lerp)),
+                    Mathf.LerpUnclamped(startScale.y, targetScale.y, YCurve.Evaluate(lerp)),
+                    Mathf.LerpUnclamped(startScale.y, targetScale.y, XZCurve.Evaluate(lerp))
                 );
 
 
