@@ -14,6 +14,9 @@ public class AmberSetDoor : AmberSet
     [SerializeField] float closeSpeed;
     [SerializeField] AnimationCurve closeCurve;
 
+    [Header("Cam")]
+    [SerializeField] Transform targetCam;
+
     private Coroutine animCo;
     private Vector3 holdStart;
     private bool open;

@@ -61,7 +61,7 @@ public class SpearlingPack : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(this.transform.position, disCheckRange);
     }
