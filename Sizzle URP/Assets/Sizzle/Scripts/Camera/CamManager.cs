@@ -8,10 +8,10 @@ public class CamManager : MonoBehaviour
     [SerializeField] GameObject commonCam;
     [SerializeField] Transform pointOfInterest;
 
-    [Header("FOV")]
+    /*[Header("FOV")]
     [SerializeField] float maxFOV;
     [SerializeField] float minFOV;
-    [SerializeField] float scrollFOVSpeed;
+    [SerializeField] float scrollFOVSpeed;*/
 
     // Transitioning from current FOV to the desired one 
     [SerializeField] float minSmoothFOVSpeed;
@@ -26,6 +26,7 @@ public class CamManager : MonoBehaviour
     private CinemachineFreeLook commonFreeLook;
 
     public GameObject Current { get { return current; } }
+    public GameObject CommonCam { get { return commonCam; } }
 
     // Start is called before the first frame update
     void Start()
@@ -37,7 +38,7 @@ public class CamManager : MonoBehaviour
 
     private void Update()
     {
-        ChangeFOV();
+        //ChangeFOV();
         //SmoothFOVChange();
     }
 
@@ -62,7 +63,7 @@ public class CamManager : MonoBehaviour
         commonCam.GetComponent<CinemachineFreeLook>().LookAt = target;
     }
 
-    private void ChangeFOV()
+    /*private void ChangeFOV()
     {
         if(current == commonCam)
         {
@@ -75,7 +76,7 @@ public class CamManager : MonoBehaviour
                 commonCam.GetComponent<CinemachineFreeLook>().m_Lens.FieldOfView = FOV;
             }
         }
-    }
+    }*/
 
     private void SmoothFOVChange()
     {

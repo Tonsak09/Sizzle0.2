@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class ForceController : MonoBehaviour
 {
@@ -61,8 +62,17 @@ public class ForceController : MonoBehaviour
     [SerializeField] float dashVerticalForce;
     [SerializeField] AnimationCurve dashVerticalOverLerp;
     [SerializeField] AudioClip dashSound;
+    [Space]
+    [SerializeField] float camOutSpeed;
+    [SerializeField] AnimationCurve camOutCurve;
+    [SerializeField] float camBackSpeed;
+    [SerializeField] AnimationCurve camBackCurve;
+    [SerializeField] float dashTargetFOV;
 
     private Coroutine DashCo;
+    private Coroutine dashFOVCo;
+    float holdFOV;
+    private float dashFOVLerp;
 
     [Header("Jump")]
     [SerializeField] KeyCode jumpKey;
@@ -88,7 +98,11 @@ public class ForceController : MonoBehaviour
     };
 
     private SoundManager sm;
+    private CamManager cm;
+    private CinemachineFreeLook cc;
     private Rigidbody frontRigid;
+
+
     private Vector3 normal;
 
     // This is decided by the main buoyancy, midBody
@@ -102,6 +116,7 @@ public class ForceController : MonoBehaviour
         SizzleState = states.movement;
         frontRigid = frontBody.GetComponent<Rigidbody>();
         sm = GameObject.FindObjectOfType<SoundManager>();
+        cm = this.GetComponent<CamManager>();
 
 
         if (cam == null)
@@ -110,6 +125,9 @@ public class ForceController : MonoBehaviour
         }
 
         dashCoolDownTimer = coolDownTimeDash;
+
+        cc = cm.CommonCam.GetComponent<CinemachineFreeLook>();
+        holdFOV = cc.m_Lens.FieldOfView; 
     }
 
     // Update is called once per frame
@@ -328,6 +346,15 @@ public class ForceController : MonoBehaviour
 
                 sm.PlaySoundFX(dashSound, this.transform.position, "DASH");
                 DashCo = StartCoroutine(DashSubroutine());
+
+                if(dashFOVCo != null)
+                {
+                    StopCoroutine(dashFOVCo);
+                }
+
+                // Dash can sometimes occur before fov returns to normal so it
+                // needs to start with that offset in mind 
+                dashFOVCo = StartCoroutine(DashFOV(Mathf.InverseLerp(holdFOV, dashTargetFOV, cc.m_Lens.FieldOfView)));
             }
         }
         else
@@ -399,6 +426,32 @@ public class ForceController : MonoBehaviour
             StopCoroutine(DashCo);
         }
         DashCo = null;
+    }
+
+    /// <summary>
+    /// Changes the FOV of the common cam when dashing 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator DashFOV(float startLerp)
+    {
+
+        dashFOVLerp = startLerp; 
+        while(dashFOVLerp <= 1)
+        {
+            cc.m_Lens.FieldOfView = Mathf.LerpUnclamped(holdFOV, dashTargetFOV, camOutCurve.Evaluate(dashFOVLerp));
+
+            dashFOVLerp += Time.deltaTime * camOutSpeed;
+            yield return null;
+        }
+
+        dashFOVLerp = 0;
+        while (dashFOVLerp <= 1)
+        {
+            cc.m_Lens.FieldOfView = Mathf.LerpUnclamped(dashTargetFOV, holdFOV, camBackCurve.Evaluate(dashFOVLerp));
+
+            dashFOVLerp += Time.deltaTime * camBackSpeed;
+            yield return null;
+        }
     }
 
     /// <summary>

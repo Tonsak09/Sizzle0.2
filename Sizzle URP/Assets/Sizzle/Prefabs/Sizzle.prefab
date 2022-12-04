@@ -6688,7 +6688,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stepMaxHeight: 0.2
+  stepMaxHeight: 0.3
   MaxDisFromFloor: 100
   stepDistance: 0.3
   footOffset: 0.1
@@ -7166,7 +7166,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stepMaxHeight: 0.2
+  stepMaxHeight: 0.3
   MaxDisFromFloor: 100
   stepDistance: 0.3
   footOffset: 0.1
@@ -8228,7 +8228,7 @@ MonoBehaviour:
   frontRight: {fileID: 1288643250059305403}
   backLeft: {fileID: 1288643250091984816}
   backRight: {fileID: 1288643250391003844}
-  footSpeedMoving: 8
+  footSpeedMoving: 7
   footSpeedNotMoving: 4
   minlerpBeforePair: 0.5
   mask:
@@ -8264,7 +8264,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  dashSound: {fileID: 8300000, guid: 36bce9fe3d46b8b4e83f771ae6f1dd12, type: 3}
 --- !u!114 &1536415208
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8293,7 +8292,7 @@ MonoBehaviour:
   checkMask:
     serializedVersion: 2
     m_Bits: 1537
-  moveForce: 900
+  moveForce: 1100
   torqueForce: 10000
   crouchkey: 306
   moveForceCrouch: 400
@@ -8367,6 +8366,58 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  dashSound: {fileID: 8300000, guid: cb9398afb315e494e821dc354960d90e, type: 3}
+  camOutSpeed: 2
+  camOutCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  camBackSpeed: 1
+  camBackCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dashTargetFOV: 100
   jumpKey: 32
   jumpForceImpulse: 0
   jumpForceContinuous: 8000
@@ -8707,9 +8758,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   commonCam: {fileID: 0}
   pointOfInterest: {fileID: 0}
-  maxFOV: 90
-  minFOV: 60
-  scrollFOVSpeed: 100
   minSmoothFOVSpeed: 1
   maxSmoothFOVSpeed: 2
   maxDifferenceFOV: 10
