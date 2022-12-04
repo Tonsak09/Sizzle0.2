@@ -142,6 +142,7 @@ public class DialogueManager : MonoBehaviour
         
 
         dialogueCoroutine = null;
+        currentDialogueCo = null;
         currentTextFinished = true;
         textMesh.text = "";
 
@@ -153,7 +154,6 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void Apeear()
     {
-        print("Test");
         StartCoroutine(Appear());
     }
 
@@ -192,7 +192,6 @@ public class DialogueManager : MonoBehaviour
     /// <param name="dialogue"></param>
     private IEnumerator ProcessDialogue(string dialogue, float pauseTime)
     {
-        print("Processing");
         string[] processed = dialogue.Split();
         sm.PlaySoundFXAfterDelay(appearFX, Vector3.zero, "DM", appearFXDelay);
 
