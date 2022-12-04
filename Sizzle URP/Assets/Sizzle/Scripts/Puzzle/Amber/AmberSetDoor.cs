@@ -8,7 +8,8 @@ public class AmberSetDoor : AmberSet
     [Header("Door")]
     [SerializeField] Transform door;
     [SerializeField] Vector3 targetOffset;
-
+    [Space]
+    [SerializeField] float startDelay;
     [SerializeField] float openSpeed;
     [SerializeField] AnimationCurve openCurve;
     [SerializeField] float closeSpeed;
@@ -71,6 +72,8 @@ public class AmberSetDoor : AmberSet
 
     private IEnumerator OpenDoor()
     {
+        yield return new WaitForSeconds(startDelay);
+
         float lerp = 0; 
         while(lerp <= 1)
         {

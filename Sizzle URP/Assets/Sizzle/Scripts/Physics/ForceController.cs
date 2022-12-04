@@ -60,6 +60,7 @@ public class ForceController : MonoBehaviour
     [Space]
     [SerializeField] float dashVerticalForce;
     [SerializeField] AnimationCurve dashVerticalOverLerp;
+    [SerializeField] AudioClip dashSound;
 
     private Coroutine DashCo;
 
@@ -86,7 +87,7 @@ public class ForceController : MonoBehaviour
         action
     };
 
-
+    private SoundManager sm;
     private Rigidbody frontRigid;
     private Vector3 normal;
 
@@ -100,8 +101,10 @@ public class ForceController : MonoBehaviour
     {
         SizzleState = states.movement;
         frontRigid = frontBody.GetComponent<Rigidbody>();
+        sm = GameObject.FindObjectOfType<SoundManager>();
 
-        if(cam == null)
+
+        if (cam == null)
         {
             cam = GameObject.FindGameObjectWithTag("MainCamera").transform;
         }
@@ -323,6 +326,7 @@ public class ForceController : MonoBehaviour
                 baseBody.AddForce(dashForceImpulse * baseBody.transform.forward, ForceMode.Impulse);
                 legsController.Dash(baseBody); // Activates the dash leg animations 
 
+                sm.PlaySoundFX(dashSound, this.transform.position, "DASH");
                 DashCo = StartCoroutine(DashSubroutine());
             }
         }
