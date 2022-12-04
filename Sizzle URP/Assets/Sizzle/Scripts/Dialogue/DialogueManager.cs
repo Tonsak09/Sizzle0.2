@@ -9,6 +9,8 @@ public class DialogueManager : MonoBehaviour
 
     [Header("Display")]
     [SerializeField] RectTransform display;
+    [SerializeField] TextMeshProUGUI nameMesh;
+    [SerializeField] RectTransform nameDisplay;
     [SerializeField] TextMeshProUGUI textMesh;
 
     [Header("Animation")]
@@ -28,6 +30,9 @@ public class DialogueManager : MonoBehaviour
     [Header("General Settings")]
     [SerializeField] KeyCode nextKey;
     [SerializeField] float textSpeed;
+
+    private List<string> holdTexts;
+    private string holdName;
 
     private bool moving;
     private bool currentTextFinished;
@@ -64,19 +69,50 @@ public class DialogueManager : MonoBehaviour
         display.localScale = Vector3.zero;
     }
 
+    private void Update()
+    {
+        if(holdTexts != null)
+        {
+            // At some points a call tried to play a dialgoue but
+            // it was done during a transition 
+            RunText(holdTexts, holdName);
+        }
+    }
+
     /// <summary>
     /// Makes text appear and beings to run the text in box 
     /// </summary>
     /// <param name="texts"></param>
-    public void RunText(List<string> texts)
+    public void RunText(List<string> texts, string name = null)
     {
-        // Makes sure it doesn't overide 
-        if(Running == false)
+        if(moving == true)
         {
+            // Will also override previous hold if necessary 
+            holdTexts = texts;
+            holdName = name;
+            return;
+        }
+
+        // Makes sure it doesn't overide 
+        if(Running == false )
+        {
+            if(name != null)
+            {
+                nameDisplay.gameObject.SetActive(true);
+                nameMesh.text = name;
+            }
+            else
+            {
+                nameDisplay.gameObject.SetActive(false);
+            }
 
             StartCoroutine(Appear());
-
             dialogueCoroutine = StartCoroutine(RunDialogue(texts));
+
+
+            // No longer need to hold 
+            holdTexts = null;
+            holdName = null;
         }
     }
 
@@ -121,7 +157,6 @@ public class DialogueManager : MonoBehaviour
 
     private IEnumerator RunDialogue(List<string> texts)
     {
-        print("Beginning");
         index = 0;
         while (index < texts.Count)
         {
@@ -227,8 +262,6 @@ public class DialogueManager : MonoBehaviour
     }
     private IEnumerator Dissapear()
     {
-        print("Dissapearing");
-
         moving = true;
         float lerp = 0;
         Vector3 startScale = display.localScale;
@@ -246,6 +279,7 @@ public class DialogueManager : MonoBehaviour
 
         moving = false;
         dialogueCoroutine = null;
+
     }
 
 

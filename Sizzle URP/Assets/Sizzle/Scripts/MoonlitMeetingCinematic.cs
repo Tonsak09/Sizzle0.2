@@ -79,7 +79,7 @@ public class MoonlitMeetingCinematic : MonoBehaviour
         cinematicSizzleAnimator.SetBool("begin", true);
 
         yield return new WaitForSeconds(dialogueDelay);
-        dialogue.RunText(snabianText);
+        dialogue.RunText(snabianText, "Snabian");
 
         // Begin dialogue 
     }
