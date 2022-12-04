@@ -27,9 +27,15 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] AnimationCurve dissapearCurve;
     [SerializeField] float dissapearSpeed;
 
+    [Header("Audio")]
+    [SerializeField] AudioClip appearFX;
+    [SerializeField] float appearFXDelay;
+
     [Header("General Settings")]
     [SerializeField] KeyCode nextKey;
     [SerializeField] float textSpeed;
+
+
 
     private List<string> holdTexts;
     private string holdName;
@@ -44,6 +50,8 @@ public class DialogueManager : MonoBehaviour
     private Vector3 offsetedPos;
     private Vector3 offsetedScale;
 
+    private SoundManager sm;
+
     int index = 0;
 
     public bool Running { get { return dialogueCoroutine != null; } }
@@ -51,6 +59,8 @@ public class DialogueManager : MonoBehaviour
 
     private void Start()
     {
+        sm = GameObject.FindObjectOfType<SoundManager>();
+
         display.gameObject.SetActive(true);
 
         startPos = display.position;
@@ -143,6 +153,7 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void Apeear()
     {
+        print("Test");
         StartCoroutine(Appear());
     }
 
@@ -183,6 +194,7 @@ public class DialogueManager : MonoBehaviour
     {
         print("Processing");
         string[] processed = dialogue.Split();
+        sm.PlaySoundFXAfterDelay(appearFX, Vector3.zero, "DM", appearFXDelay);
 
         for (int i = 0; i < processed.Length; i++)
         {

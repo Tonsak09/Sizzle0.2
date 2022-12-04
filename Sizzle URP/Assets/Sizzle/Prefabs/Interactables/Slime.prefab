@@ -330,7 +330,7 @@ Transform:
   m_GameObject: {fileID: 6962746866279458599}
   m_LocalRotation: {x: 0, y: -0.6924706, z: 0, w: 0.72144616}
   m_LocalPosition: {x: 3.19, y: 4.75, z: 2.88}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.5054743, y: 2.5054739, z: 2.5054743}
   m_Children:
   - {fileID: 7433785054941196932}
   m_Father: {fileID: 0}
@@ -381,7 +381,7 @@ MonoBehaviour:
   desperseChargeSpeed: 15
   maxCharge: 40
   baseEmessiveColor: {r: 0.06886086, g: 0.5566038, b: 0, a: 1}
-  targetEmessiveColor: {r: 2.0078433, g: 47.937256, b: 0, a: 1}
+  targetEmessiveColor: {r: 1.0039216, g: 23.968628, b: 0, a: 1}
   colorCurve:
     serializedVersion: 2
     m_Curve:
