@@ -14,6 +14,7 @@ public class Amber : Chargeable
 
     [Header("FX")]
     [SerializeField] ParticleSystem unlockedFX;
+    [SerializeField] AudioClip unlockSound;
 
     private bool fullyUnlocked;
     private float glowLerp;
@@ -31,6 +32,8 @@ public class Amber : Chargeable
             {
                 fullyUnlocked = true;
                 StartCoroutine(GoToFullCharge());
+
+                GameObject.FindObjectOfType<SoundManager>().PlaySoundFX(unlockSound, this.transform.position, "UNLOCK", 1, 1, 1);
                 unlockedFX.Play();
                 //BeginGlow();
             }
@@ -65,7 +68,6 @@ public class Amber : Chargeable
         while(lerp <= 1)
         {
             renderer.material.SetColor("_EmissionColor", Color.Lerp(Base, Target, lerp));
-            print(lerp);
             lerp += Time.deltaTime * fullChargeSpeed;
             yield return null;
         }

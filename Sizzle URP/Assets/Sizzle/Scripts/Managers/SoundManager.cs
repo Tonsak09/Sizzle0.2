@@ -18,6 +18,61 @@ public class SoundManager : MonoBehaviour
         SoundMultiplier = 1;
     }
 
+    public void PlaySoundFX(AudioClip sound, Vector3 pos, string category)
+    {
+        float pitch = 1;
+        float volume = 1;
+        int maxSounds = 3;
+
+        if (!effects.ContainsKey(category))
+        {
+            effects.Add(category, new LinkedList<GameObject>());
+        }
+
+        // Makes sure there is a limit to how much sound 
+        if (effects[category].Count < maxSounds)
+        {
+            GameObject temp = Instantiate(soundSourceReference, pos, Quaternion.identity);
+
+            AudioSource source = temp.GetComponent<AudioSource>();
+
+            source.clip = sound;
+            source.pitch = pitch;
+            source.volume = volume * 0.5f * soundMultiplier;
+            source.Play();
+
+            effects[category].AddLast(temp);
+
+            StartCoroutine(SoundCoroutine(temp, category, sound.length));
+        }
+    }
+
+    public void PlaySoundFX(AudioClip sound, Vector3 pos, string category, float pitch = 1, float volume = 1, int priority = 128, int maxSounds = 3)
+    {
+        if (!effects.ContainsKey(category))
+        {
+            effects.Add(category, new LinkedList<GameObject>());
+        }
+
+        // Makes sure there is a limit to how much sound 
+        if (effects[category].Count < maxSounds)
+        {
+            GameObject temp = Instantiate(soundSourceReference, pos, Quaternion.identity);
+
+            AudioSource source = temp.GetComponent<AudioSource>();
+
+            source.clip = sound;
+            source.pitch = pitch;
+            source.volume = volume * 0.5f * soundMultiplier;
+            source.priority = priority;
+            source.Play();
+
+            effects[category].AddLast(temp);
+
+            StartCoroutine(SoundCoroutine(temp, category, sound.length));
+        }
+    }
+
     public void PlaySoundFX(AudioClip sound, Vector3 pos, string category, float pitch = 1, float volume = 1, int maxSounds = 3)
     {
         if(!effects.ContainsKey(category))

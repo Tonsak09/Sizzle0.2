@@ -5270,9 +5270,10 @@ MonoBehaviour:
   renderer: {fileID: 2888372213929856426}
   CurrentCharge: 0
   co: {fileID: 6429100535534518906}
-  fullyUnlockedCharge: 90
-  fullChargeSpeed: 1
+  fullyUnlockedCharge: 50
+  fullChargeSpeed: 0.1
   unlockedFX: {fileID: 1086166545}
+  unlockSound: {fileID: 8300000, guid: 5bfb1e62a2710034aaba41b74721e6c2, type: 3}
 --- !u!135 &6429100535534518907
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -5380,6 +5381,15 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   startScale: {x: 0, y: 0, z: 0}
+  minPitch: 0
+  maxPitch: 0
+  pitchVariation: 0
+  pitchCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &7008039464205255662
 GameObject:
   m_ObjectHideFlags: 0
@@ -5495,7 +5505,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.104
+      value: -0.267
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5529,7 +5539,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: FlatTop_Mushroom_Amber (1)
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1841033880214277710, guid: f318e5141196e094eb643662adde665c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f318e5141196e094eb643662adde665c, type: 3}
 --- !u!4 &1391919907307723260 stripped
 Transform:
@@ -5561,15 +5572,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.038
+      value: 0.712
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.182
+      value: 1.764
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.089
+      value: -0.395
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5619,7 +5630,8 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 2.3059
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1841033880214277710, guid: f318e5141196e094eb643662adde665c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f318e5141196e094eb643662adde665c, type: 3}
 --- !u!4 &109091657489463184 stripped
 Transform:
@@ -5659,7 +5671,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.089
+      value: -0.0117
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5693,7 +5705,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: FlatTop_Mushroom_Amber (4)
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1841033880214277710, guid: f318e5141196e094eb643662adde665c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f318e5141196e094eb643662adde665c, type: 3}
 --- !u!4 &3112285176618176284 stripped
 Transform:
@@ -5733,7 +5746,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.104
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5767,7 +5780,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: FlatTop_Mushroom_Amber (2)
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1841033880214277710, guid: f318e5141196e094eb643662adde665c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f318e5141196e094eb643662adde665c, type: 3}
 --- !u!4 &6731415047933487497 stripped
 Transform:
@@ -5799,15 +5813,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.613
+      value: -0.786
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.81
+      value: -0.167
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.103
+      value: -0.097
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5841,7 +5855,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: FlatTop_Mushroom_Amber
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1841033880214277710, guid: f318e5141196e094eb643662adde665c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f318e5141196e094eb643662adde665c, type: 3}
 --- !u!4 &8194936331550260225 stripped
 Transform:
@@ -5881,7 +5896,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.147
+      value: -0.362
       objectReference: {fileID: 0}
     - target: {fileID: 1359832736852641806, guid: f318e5141196e094eb643662adde665c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5915,7 +5930,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: FlatTop_Mushroom_Amber (3)
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1841033880214277710, guid: f318e5141196e094eb643662adde665c, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: f318e5141196e094eb643662adde665c, type: 3}
 --- !u!4 &7966066150682064412 stripped
 Transform:

@@ -18,6 +18,9 @@ public class AmberSetDoor : AmberSet
     [Header("Cam")]
     [SerializeField] Transform targetCam;
 
+    [Header("FX")]
+    [SerializeField] AudioClip doorOpenSound;
+
     private Coroutine animCo;
     private Vector3 holdStart;
     private bool open;
@@ -51,6 +54,7 @@ public class AmberSetDoor : AmberSet
         {
             if(animCo == null)
             {
+                GameObject.FindObjectOfType<SoundManager>().PlaySoundFX(doorOpenSound, this.transform.position, "DOOR", 1, 200, 3);
                 animCo = StartCoroutine(OpenDoor());
             }
         }
