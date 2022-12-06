@@ -54,7 +54,6 @@ public class AmberSetDoor : AmberSet
         {
             if(animCo == null)
             {
-                GameObject.FindObjectOfType<SoundManager>().PlaySoundFX(doorOpenSound, this.transform.position, "DOOR", 1, 200, 3);
                 animCo = StartCoroutine(OpenDoor());
             }
         }
@@ -77,6 +76,7 @@ public class AmberSetDoor : AmberSet
     private IEnumerator OpenDoor()
     {
         yield return new WaitForSeconds(startDelay);
+        GameObject.FindObjectOfType<SoundManager>().PlaySoundFX(doorOpenSound, this.transform.position, "DOOR", 1, 200, 3);
 
         float lerp = 0; 
         while(lerp <= 1)

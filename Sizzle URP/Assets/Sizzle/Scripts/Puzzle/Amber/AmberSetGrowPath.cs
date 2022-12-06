@@ -18,6 +18,7 @@ public class AmberSetGrowPath : AmberSet
     [SerializeField] float maxPitch;
     [SerializeField] float pitchVariation;
     [SerializeField] AnimationCurve pitchCurve;
+    [SerializeField] AudioClip completionClip;
 
     private Vector3[] targetScales;
     private bool started;
@@ -43,6 +44,10 @@ public class AmberSetGrowPath : AmberSet
             if(AllAmberUnlocked())
             {
                 started = true;
+                if(completionClip != null)
+                {
+                    GameObject.FindObjectOfType<SoundManager>().PlaySoundFXAfterDelay(completionClip, this.transform.position, "COMPLETE", 2);
+                }
                 StartCoroutine(GrowPath());
             }
         }
@@ -62,9 +67,9 @@ public class AmberSetGrowPath : AmberSet
             AudioSource audio = pathToGrow[index].GetComponent<AudioSource>();
             if (audio != null)
             {
-                print("sound");
                 float pitch = 1;//Mathf.Lerp(minPitch, maxPitch, pitchCurve.Evaluate(index / pathToGrow.Count));
                 GameObject.FindObjectOfType<SoundManager>().PlaySoundFX(audio.clip, pathToGrow[index].position, "MUSH", pitch + Random.Range(-pitchVariation, pitchVariation), audio.volume, 99);
+
             }
 
             index++;
