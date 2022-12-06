@@ -352,7 +352,7 @@ public class ForceController : MonoBehaviour
                     StopCoroutine(dashFOVCo);
                 }
 
-                // Dash can sometimes occur before fov returns to normal so it
+                // Dash can sometimes occur before fov returns to normalw so it
                 // needs to start with that offset in mind 
                 dashFOVCo = StartCoroutine(DashFOV(Mathf.InverseLerp(holdFOV, dashTargetFOV, cc.m_Lens.FieldOfView)));
             }

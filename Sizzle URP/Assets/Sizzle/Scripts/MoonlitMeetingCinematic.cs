@@ -15,6 +15,9 @@ public class MoonlitMeetingCinematic : MonoBehaviour
     [SerializeField] List<string> snabianText;
     [SerializeField] int indexToSwapCam;
 
+    [Header("Ending Text")]
+    [SerializeField] List<string> endText;
+
     private CamManager camManager;
     private Transitions transition;
     private DialogueManager dialogue;
@@ -82,6 +85,14 @@ public class MoonlitMeetingCinematic : MonoBehaviour
         dialogue.RunText(snabianText, "Snabian");
 
         // Begin dialogue 
+
+        while(dialogue.Running)
+        {
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(5);
+        dialogue.RunText(endText);
     }
 
     private void OnTriggerEnter(Collider other)

@@ -13,6 +13,8 @@ public class AmberSetGrowPath : AmberSet
     [Space]
     [SerializeField] Vector3 startScale;
 
+    [Header("Audio")]
+
     private Vector3[] targetScales;
     private bool started;
 
