@@ -6761,7 +6761,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  stepSound: {fileID: 8300000, guid: e48fb525cfb89734d8c3350e45aeb1f7, type: 3}
   pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 2.17
@@ -6965,7 +6965,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  stepSound: {fileID: 8300000, guid: e48fb525cfb89734d8c3350e45aeb1f7, type: 3}
   pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 0
@@ -7239,7 +7239,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  stepSound: {fileID: 8300000, guid: e48fb525cfb89734d8c3350e45aeb1f7, type: 3}
   pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 2.17
@@ -7533,7 +7533,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  stepSound: {fileID: 8300000, guid: 2a98bedea9376fd438ed9e712ebcc32c, type: 3}
+  stepSound: {fileID: 8300000, guid: e48fb525cfb89734d8c3350e45aeb1f7, type: 3}
   pitchRange: {x: 2, y: 3}
   showGizmos: 0
   rotValueTest: 0
@@ -8282,7 +8282,7 @@ MonoBehaviour:
   legsController: {fileID: 2099600900075649835}
   midBodyBuoyancy: {fileID: 7450884251833034874}
   cam: {fileID: 0}
-  autoTurnSpeed: 5
+  autoTurnSpeed: 3
   minAngle: 30
   midBoneTorqueCorrection: {fileID: 689872761}
   maxVecDisFromDown: 2
