@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.Animations.Rigging;
 
 public class SizzlePoseSystem : MonoBehaviour
 {
+    [Tooltip("Tells the system what time of mixing we want to apply to Sizzle:\nMix - Seperate bones can be mixed, only applys rotation thought\nProcedural or Hard - Makes the visual copy position and rotation of either chosen")]
+    [SerializeField] MixingModes mixMode = MixingModes.mix;
     [Tooltip("Used to change whether the visual Sizzle should mimic the procedural animation or hard animation on specific parts of their body")]
     [SerializeField] LerpValues lerpValues;
 
@@ -16,6 +18,11 @@ public class SizzlePoseSystem : MonoBehaviour
     [SerializeField] Transform hardRoot;
     //[SerializeField] ProceduralReferenceVariables proceduralReferences;
     //[SerializeField] HardReferenceVariables hardReferences;
+
+    [Header("Bone Renderers")]
+    [SerializeField] BoneRenderer visualBoneRenderer;
+    [SerializeField] BoneRenderer procedurualBoneRenderer;
+    [SerializeField] BoneRenderer hardBoneRenderer;
 
     /// <summary>
     /// The amount of sections that Sizzle is broken up into 
@@ -29,6 +36,14 @@ public class SizzlePoseSystem : MonoBehaviour
 
     // Used to hold a set of directions to each bone by its name 
     private Dictionary<string,List<int>> indexInstructions;
+
+
+    public enum MixingModes
+    {
+        mix, // Only mixes rotations, no positions 
+        procedurual,
+        hard
+    }
 
     private void Awake()
     {
@@ -55,8 +70,42 @@ public class SizzlePoseSystem : MonoBehaviour
     /// </summary>
     private void PoseCopy()
     {
+        float[] lerps = lerpValues.Lerps;
+        float sum = 0;
 
+        for (int i = 0; i < SECTIONCOUNT; i++)
+        {
+            for (int j = 0; j < visualSkeleton[i].Count; j++)
+            {
+                switch (mixMode)
+                {
+                    case MixingModes.mix:
+                        visualSkeleton[i][j].rotation = Quaternion.Lerp(proceduralSkeleton[i][j].rotation, hardSkeleton[i][j].rotation, lerps[i]);
+                        visualSkeleton[i][j].localPosition = Vector3.Lerp(proceduralSkeleton[i][j].localPosition, hardSkeleton[i][j].localPosition, lerps[i]);
+
+                        break;
+                    case MixingModes.procedurual:
+                        visualSkeleton[i][j].localRotation = proceduralSkeleton[i][j].localRotation;
+                        visualSkeleton[i][j].localPosition = proceduralSkeleton[i][j].localPosition;
+
+
+                        break;
+                    case MixingModes.hard:
+                        visualSkeleton[i][j].localRotation = hardSkeleton[i][j].localRotation;
+                        visualSkeleton[i][j].localPosition = hardSkeleton[i][j].localPosition;
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+            sum += lerps[i];
+        }
+
+        visualBoneRenderer.boneColor = Color.Lerp(procedurualBoneRenderer.boneColor, hardBoneRenderer.boneColor, sum / SECTIONCOUNT);
     }
+
+    
 
 
     /// <summary>
@@ -134,6 +183,7 @@ public class SizzlePoseSystem : MonoBehaviour
 
         } while (current.name != rootName);
 
+        // Order needs to be reversed because of the direction we find it 
         instructions.Reverse();
         return instructions;
     }
@@ -177,6 +227,8 @@ public class VisualReferenceVariables
 [System.Serializable]
 public class LerpValues
 {
+    
+
     [Range(0, 1)][SerializeField] public float mouthLerp;
     [Range(0, 1)][SerializeField] public float neckLerp;
     [Range(0, 1)][SerializeField] public float bodyLerp;
@@ -184,4 +236,27 @@ public class LerpValues
     [Range(0, 1)][SerializeField] public float legRFLerp;
     [Range(0, 1)][SerializeField] public float legLBLerp;
     [Range(0, 1)][SerializeField] public float legRBLerp;
+
+    /// <summary>
+    /// Get an array of all lerp values during the instance
+    /// of being called 
+    /// </summary>
+    public float[] Lerps
+    {
+        get
+        {
+            float[] info = new float[]
+            {
+                mouthLerp,
+                neckLerp,
+                bodyLerp,
+                legLFLerp,
+                legRFLerp,
+                legLBLerp,
+                legRBLerp
+            };
+
+            return info;
+        }
+    }
 }
