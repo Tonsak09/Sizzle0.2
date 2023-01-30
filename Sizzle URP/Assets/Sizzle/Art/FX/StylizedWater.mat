@@ -34,16 +34,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _IndexOfRefraction: 0.64
+    - _IndexOfRefraction: 1
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RefractionScale: 1
+    - _RefractionScale: 0.05
     - _RefractionSpeed: 0.01
-    - _RefractionStrength: 3.31
+    - _RefractionStrength: 0.6
     - _WaterDepth: 2
     m_Colors:
-    - _DeepWater: {r: 0, g: 0.2514969, b: 1, a: 0.40392157}
-    - _ShallowWater: {r: 0, g: 1, b: 0.89475226, a: 0.050980393}
+    - _DeepWater: {r: 0, g: 0.4327044, b: 0.8113208, a: 0.6666667}
+    - _ShallowWater: {r: 0.09341987, g: 0.5260666, b: 0.6320754, a: 0.1764706}
   m_BuildTextureStacks: []
 --- !u!114 &3493767695192235175
 MonoBehaviour:
