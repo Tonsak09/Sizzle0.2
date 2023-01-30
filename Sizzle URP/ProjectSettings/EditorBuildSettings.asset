@@ -12,6 +12,6 @@ EditorBuildSettings:
     path: Assets/Sizzle/Scenes/Caverns/Cavern1/Stories/Cavern1MM.unity
     guid: 7e8782b5f1aaa5047a822c70f1d9e111
   - enabled: 1
-    path: Assets/Sizzle/Scenes/Main.unity
+    path: Assets/Sizzle/Scenes/Prototype-MM.unity
     guid: 4502ff17a64c11349b9d5f16cfc22bbb
   m_configObjects: {}
