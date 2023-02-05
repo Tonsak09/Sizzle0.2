@@ -137,7 +137,7 @@ public class ForceController : MonoBehaviour
         Cursor.visible = false;*/
         isGrounded = midBodyBuoyancy.AddingBuoyancy;
 
-        SurfaceLogic();
+        //SurfaceLogic();
         Statemachine();
 
         bManager.AdjustHeights(baseHeightLerp);
@@ -274,7 +274,8 @@ public class ForceController : MonoBehaviour
         if (Physics.Raycast(baseBody.transform.position + baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitA, 5) && Physics.Raycast(baseBody.transform.position - baseBody.transform.forward * (disBetweenChecks / 2), Vector3.down, out hitB, 5, checkMask))
         {
             // Average normal 
-            midBoneTorqueCorrection.Target = -(hitA.normal + hitB.normal).normalized;
+            //midBoneTorqueCorrection.Target = -(hitA.normal + hitB.normal).normalized;
+            print(hitB.normal);
 
             // Height from ground should be the line formed by the two hit points 
             Vector3 midPoint = Vector3.Lerp(hitA.point, hitB.point, 0.5f);

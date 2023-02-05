@@ -28,6 +28,14 @@ public class CamManager : MonoBehaviour
     public GameObject Current { get { return current; } }
     public GameObject CommonCam { get { return commonCam; } }
 
+
+    private void Awake()
+    {
+        if(commonCam == null)
+        {
+            commonCam = GameObject.FindGameObjectWithTag("CommonCam");
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {

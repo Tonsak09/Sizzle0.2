@@ -12,17 +12,23 @@ public class SizzlePoseSystem : MonoBehaviour
 
     [Header("References")]
     [SerializeField] VisualReferenceVariables visualReferences;
-    [Tooltip("Used to construct procedural skeleton by referenceing the Visual Skeleton manually constructed")]
-    [SerializeField] Transform proceduralRoot;
+    
     [Tooltip("Used to construct hard skeleton by referenceing the Visual Skeleton manually constructed")] 
     [SerializeField] Transform hardRoot;
+
+    [Tooltip("Used to construct procedural skeleton by referenceing the Visual Skeleton manually constructed")]
+    [SerializeField] Transform proceduralRoot;
+    [SerializeField] List<Transform> legRoots;
+
+
     //[SerializeField] ProceduralReferenceVariables proceduralReferences;
     //[SerializeField] HardReferenceVariables hardReferences;
 
     [Header("Bone Renderers")]
     [SerializeField] BoneRenderer visualBoneRenderer;
-    [SerializeField] BoneRenderer procedurualBoneRenderer;
     [SerializeField] BoneRenderer hardBoneRenderer;
+    [SerializeField] BoneRenderer procedurualBoneRenderer;
+
 
     /// <summary>
     /// The amount of sections that Sizzle is broken up into 
@@ -57,12 +63,10 @@ public class SizzlePoseSystem : MonoBehaviour
         ProceduralAndHardSkeletonsSetUp();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void LateUpdate()
     {
         PoseCopy();
     }
-
 
     /// <summary>
     /// By using the lerp values changes the visual skeleton to copy 
@@ -81,7 +85,7 @@ public class SizzlePoseSystem : MonoBehaviour
                 {
                     case MixingModes.mix:
                         visualSkeleton[i][j].rotation = Quaternion.Lerp(proceduralSkeleton[i][j].rotation, hardSkeleton[i][j].rotation, lerps[i]);
-                        visualSkeleton[i][j].localPosition = Vector3.Lerp(proceduralSkeleton[i][j].localPosition, hardSkeleton[i][j].localPosition, lerps[i]);
+                        //visualSkeleton[i][j].localPosition = Vector3.Lerp(proceduralSkeleton[i][j].localPosition, hardSkeleton[i][j].localPosition, lerps[i]);
 
                         break;
                     case MixingModes.procedurual:
@@ -142,6 +146,10 @@ public class SizzlePoseSystem : MonoBehaviour
         proceduralSkeleton = new List<Transform>[SECTIONCOUNT];
         hardSkeleton = new List<Transform>[SECTIONCOUNT];
 
+        // Since the visual skeleton and the hard skeleton are essentially the same thing
+        // We can go through the tree formed by how the user makes the visual skelton
+        // and just apply that navigation to the hard skeleton to form it 
+
         // For each section 
         for (int i = 0; i < SECTIONCOUNT; i++)
         {
@@ -162,6 +170,12 @@ public class SizzlePoseSystem : MonoBehaviour
                 hardSkeleton[i].Add(GetChildFromInstructions(hardRoot, indexInstructions[visualSkeleton[i][j].name]));
             }
         }
+
+
+        // The procedurual skeleton is formed a little differently than the other two skeletons
+        // so it requires more manual set up but it can still be slightly automated 
+
+
     }
 
     /// <summary>
