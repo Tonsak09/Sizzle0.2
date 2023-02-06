@@ -13,16 +13,12 @@ public class SizzlePoseSystem : MonoBehaviour
     [Header("References")]
     [SerializeField] VisualReferenceVariables visualReferences;
     
-    [Tooltip("Used to construct hard skeleton by referenceing the Visual Skeleton manually constructed")] 
+    [Tooltip("Used to construct hard skeleton by referenceing how the visual skeleton is constructed")] 
     [SerializeField] Transform hardRoot;
 
-    [Tooltip("Used to construct procedural skeleton by referenceing the Visual Skeleton manually constructed")]
+    [Tooltip("Used to construct procedural skeleton by referenceing how the visual skeleton is constructed")]
     [SerializeField] Transform proceduralRoot;
-    [SerializeField] List<Transform> legRoots;
-
-
-    //[SerializeField] ProceduralReferenceVariables proceduralReferences;
-    //[SerializeField] HardReferenceVariables hardReferences;
+    [SerializeField] ProcedurualReferenceRoots proceduralReferences;
 
     [Header("Bone Renderers")]
     [SerializeField] BoneRenderer visualBoneRenderer;
@@ -175,6 +171,7 @@ public class SizzlePoseSystem : MonoBehaviour
         // The procedurual skeleton is formed a little differently than the other two skeletons
         // so it requires more manual set up but it can still be slightly automated 
 
+        // Body and neck can be 
 
     }
 
@@ -236,6 +233,13 @@ public class VisualReferenceVariables
     [SerializeField] public List<Transform> legRFVisual;
     [SerializeField] public List<Transform> legLBVisual;
     [SerializeField] public List<Transform> legRBVisual;
+}
+
+[System.Serializable]
+public class ProcedurualReferenceRoots
+{
+    [SerializeField] public Transform bodyRoot;
+    [SerializeField] public List<Transform> legRoots;
 }
 
 [System.Serializable]

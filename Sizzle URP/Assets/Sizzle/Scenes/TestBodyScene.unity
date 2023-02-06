@@ -227,7 +227,9 @@ MonoBehaviour:
     - {fileID: 934343905640714287}
   hardRoot: {fileID: 1434831559}
   proceduralRoot: {fileID: 0}
-  legRoots: []
+  proceduralReferences:
+    bodyRoot: {fileID: 0}
+    legRoots: []
   visualBoneRenderer: {fileID: 0}
   hardBoneRenderer: {fileID: 0}
   procedurualBoneRenderer: {fileID: 0}
@@ -670,7 +672,9 @@ MonoBehaviour:
     - {fileID: 2295313792992379625}
   hardRoot: {fileID: 543450652485188468}
   proceduralRoot: {fileID: 543450653535299273}
-  legRoots: []
+  proceduralReferences:
+    bodyRoot: {fileID: 0}
+    legRoots: []
   visualBoneRenderer: {fileID: 2086090186}
   hardBoneRenderer: {fileID: 1223171267}
   procedurualBoneRenderer: {fileID: 173113668}
@@ -12382,8 +12386,33 @@ MonoBehaviour:
   legsController: {fileID: 2099600900000620433}
   midBodyBuoyancy: {fileID: 7450884251894320320}
   cam: {fileID: 0}
-  autoTurnSpeed: 5
+  directionCorrectionSpeed: 5
   minAngle: 35
+  maxAngleConsideration: 70
+  greaterMinCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   midBoneTorqueCorrection: {fileID: 614955971}
   maxVecDisFromDown: 2
   disBetweenChecks: 0.36
@@ -20098,7 +20127,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   stepSound: {fileID: 8300000, guid: e48fb525cfb89734d8c3350e45aeb1f7, type: 3}
   pitchRange: {x: 2, y: 3}
-  showGizmos: 1
+  showGizmos: 0
   rotValueTest: 2.17
 --- !u!4 &1288643249963304196
 Transform:
@@ -20971,7 +21000,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   stepSound: {fileID: 8300000, guid: e48fb525cfb89734d8c3350e45aeb1f7, type: 3}
   pitchRange: {x: 2, y: 3}
-  showGizmos: 1
+  showGizmos: 0
   rotValueTest: 2.17
 --- !u!114 &1288643250326379863
 MonoBehaviour:
@@ -31527,7 +31556,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1544602730229085664}
   m_Layer: 3
-  m_Name: PlayerFolder
+  m_Name: Procedurual BodyRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38605,6 +38634,7 @@ MonoBehaviour:
   backOffsetCenter: {x: 0, y: 0, z: 0}
   disToAngle: 400
   frameCount: 4
+  showGizmos: 0
   wheelColor: {r: 0.6, g: 0.19607843, b: 0.8, a: 1}
   wheelSideOffset: 0.34
   wheelRadius: 0.52

@@ -18,6 +18,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] int frameCount;
 
     [Header("Debug Gizmos")]
+    [SerializeField] bool showGizmos;
     [SerializeField] Color wheelColor;
     [Tooltip("How far the wheels will be from the sides")]
     [SerializeField] float wheelSideOffset;
@@ -99,6 +100,11 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     private void DrawWheel(Vector3 center, Transform directionParent, float wheelRot)
     {
+        if(!showGizmos)
+        {
+            return;
+        }
+
         Gizmos.DrawSphere(center, 0.01f);
 
         for (int x = -1; x <= 1; x++)

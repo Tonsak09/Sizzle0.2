@@ -21,7 +21,6 @@ public class PoseCopyHeightToBuoyancy : PoseCopy
     /// </summary>
     public override void UpdateTarget()
     {
-        print(this.transform.position.y / midDefaultHeight);
         midBuoyancy.Height = midBuoyancyHeightHold * (this.transform.localPosition.y / midDefaultHeight);
     }
 }

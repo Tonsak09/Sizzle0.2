@@ -47,6 +47,9 @@ public class Grab : MonoBehaviour
     [Header("Sounds")]
     [SerializeField] AudioClip biteSound;
 
+    [Header("Gizmos")]
+    [SerializeField] bool showGizmos;
+
 
     // used to pass the function from this class into the animation which is handeled by the bodyanimmanager
     // Needs to be done because lerp value constatly changes 
@@ -234,6 +237,11 @@ public class Grab : MonoBehaviour
         {
             Gizmos.color = Color.red;
         }*/
+
+        if(!showGizmos)
+        {
+            return;
+        }
 
         Gizmos.DrawWireSphere(neckJoint.transform.position + 
             neckJoint.transform.TransformDirection(Vector3.Lerp(detectStartOffset, detectTargetOffset, detectOffsetAnimCurve.Evaluate(detectLerp))),

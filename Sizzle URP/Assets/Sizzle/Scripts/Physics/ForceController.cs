@@ -15,8 +15,13 @@ public class ForceController : MonoBehaviour
 
     [Header("Direction")]
     [SerializeField] Transform cam;
-    [SerializeField] float autoTurnSpeed;
+    [SerializeField] float directionCorrectionSpeed;
     [SerializeField] float minAngle;
+    [Tooltip("Any value above this will be corrected with the max direction correction speed")]
+    [SerializeField] float maxAngleConsideration;
+    [Tooltip("This curve is how much force is use to correct out of the minimum curve towards the minimal angle")]
+    [SerializeField] AnimationCurve greaterMinCurve;
+    
 
     [Header("Orientation")]
     [SerializeField] TorqueTowardsRotation midBoneTorqueCorrection;
@@ -244,21 +249,37 @@ public class ForceController : MonoBehaviour
 
         float angle = Vector3.Angle(dir, camDir);
 
+        // Within the minimal angle 
         if(Mathf.Abs(angle) <= minAngle)
         {
-            return;
+            // Corrects if negative 
+            /*if (dot > 0)
+            {
+                angle = -angle;
+            }*/
+            //CorrectDirection(withinMinCurve, angle, minAngle);
         }
-
-        if (dot > 0)
+        else
         {
-            angle = -angle;
+            // Corrects if negative 
+            if (dot > 0)
+            {
+                angle = -angle;
+            }
+            CorrectDirection(greaterMinCurve, angle, maxAngleConsideration);
         }
+    }
+
+    private void CorrectDirection(AnimationCurve curve, float angle, float maxAngle)
+    {
+        float lerp = Mathf.Abs((angle - minAngle) / maxAngle);
+        print(lerp);
 
         Vector3 eulerAngleVelocity = new Vector3(0, angle, 0);
-        Vector3 angleDis = eulerAngleVelocity * autoTurnSpeed * Time.deltaTime;
+        Vector3 angleDis = eulerAngleVelocity * directionCorrectionSpeed * greaterMinCurve.Evaluate(lerp) * Time.deltaTime;
 
         Quaternion deltaRotation = Quaternion.Euler(angleDis);
-        baseBody.MoveRotation(baseBody.rotation * deltaRotation );
+        baseBody.MoveRotation(baseBody.rotation * deltaRotation);
         //baseBody.AddRelativeTorque(angleDis * torqueForce);
     }
 
@@ -488,6 +509,9 @@ public class ForceController : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+
+        if()
+
         Gizmos.color = Color.red;
         Vector3 pos = neck.TransformDirection(frontCheckCenter);
         Gizmos.DrawWireSphere(neck.position + pos, frontCheckRadius);
