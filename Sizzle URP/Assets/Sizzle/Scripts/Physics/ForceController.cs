@@ -140,7 +140,7 @@ public class ForceController : MonoBehaviour
         //SurfaceLogic();
         Statemachine();
 
-        bManager.AdjustHeights(baseHeightLerp);
+        //bManager.AdjustHeights(baseHeightLerp);
         //bManager.AdjustHeights(crouchLerp * baseHeightLerp);
         //bManager.ProjectHeights();
 
