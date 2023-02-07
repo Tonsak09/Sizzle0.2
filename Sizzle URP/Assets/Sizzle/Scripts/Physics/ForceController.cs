@@ -510,7 +510,7 @@ public class ForceController : MonoBehaviour
     private void OnDrawGizmos()
     {
 
-        if()
+        //if()
 
         Gizmos.color = Color.red;
         Vector3 pos = neck.TransformDirection(frontCheckCenter);

@@ -3,6 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
+
+
+// TODO
+/*
+    
+    Consider scapula when adding procedurual skeleton
+    Complete leg auto complete 
+    Swap out demo proc skeleton for active one 
+
+ */
+
+
+
+
 public class SizzlePoseSystem : MonoBehaviour
 {
     [Tooltip("Tells the system what time of mixing we want to apply to Sizzle:\nMix - Seperate bones can be mixed, only applys rotation thought\nProcedural or Hard - Makes the visual copy position and rotation of either chosen")]
@@ -171,7 +185,10 @@ public class SizzlePoseSystem : MonoBehaviour
         // The procedurual skeleton is formed a little differently than the other two skeletons
         // so it requires more manual set up but it can still be slightly automated 
 
-        // Body and neck can be 
+        // Body and neck can be automated because it follows same structure as hard and visual 
+        // Only worry about legs
+
+
 
     }
 
@@ -215,6 +232,40 @@ public class SizzlePoseSystem : MonoBehaviour
         }
 
         return current;
+    }
+
+    /// <summary>
+    /// Adds to main body of the procedurual body to the internal skeleton
+    /// </summary>
+    /// <param name="root"></param>
+    /// <param name="sections">Used to show which sections represent the main body. Begins from 0</param>
+    private void AddProcedurualBodToSkeleton(Transform root, int sections)
+    {
+        proceduralSkeleton = new List<Transform>[SECTIONCOUNT];
+
+        for (int i = 0; i < sections; i++)
+        {
+            // Creates a section for procedurual skeleton 
+            proceduralSkeleton[i] = new List<Transform>();
+
+            for (int j = 0; j < visualSkeleton[i].Count; j++)
+            {
+                proceduralSkeleton[i].Add(GetChildFromInstructions(root, indexInstructions[visualSkeleton[i][j].name]));
+            }
+        }
+
+
+    }
+
+    /// <summary>
+    /// Adds a leg to the internal procedurual skeleton
+    /// </summary>
+    /// <param name="legRoot"></param>
+    private void AddProcedurualLegToSkeleton(Transform legRoot)
+    {
+        // Follow leg down 
+
+        // Foot is split so skip a joint 
     }
 
 }
