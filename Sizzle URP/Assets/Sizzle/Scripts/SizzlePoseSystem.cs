@@ -16,8 +16,6 @@ public class SizzlePoseSystem : MonoBehaviour
     [Tooltip("Used to construct hard skeleton by referenceing how the visual skeleton is constructed")] 
     [SerializeField] Transform hardRoot;
 
-    [Tooltip("Used to construct procedural skeleton by referenceing how the visual skeleton is constructed")]
-    [SerializeField] Transform proceduralRoot;
     [SerializeField] ProcedurualReferenceRoots proceduralReferences;
 
     [Header("Bone Renderers")]
@@ -186,14 +184,6 @@ public class SizzlePoseSystem : MonoBehaviour
             
             AddProcedurualLegToSkeleton(proceduralReferences.legRoots[i], proceduralReferences.legConnectionRoots[i], i + nonLegSectionCount);
         }
-
-        print("Printing each section count");
-
-        for (int i = 0; i < proceduralSkeleton.Length; i++)
-        {
-            print(proceduralSkeleton[i].Count);
-        }
-
     }
 
     /// <summary>
@@ -287,7 +277,6 @@ public class SizzlePoseSystem : MonoBehaviour
         List<Transform> hard = hardSkeleton[section];
         List<Transform> procedurual = proceduralSkeleton[section];
 
-
         while (true)
         {
             // Resets lerp each refresh 
@@ -299,7 +288,7 @@ public class SizzlePoseSystem : MonoBehaviour
                 {
                     case MixingModes.mix:
 
-                        visual[i].localRotation = Quaternion.Lerp(procedurual[i].localRotation, hard[i].localRotation, lerps[i]);
+                        visual[i].localRotation = Quaternion.Lerp(procedurual[i].localRotation, hard[i].localRotation, lerps[section]);
 
                         /*if(lerps[i] <= Mathf.Epsilon)
                         {
