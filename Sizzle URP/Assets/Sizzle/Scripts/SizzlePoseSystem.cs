@@ -3,20 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-
-
-// TODO
-/*
-    
-    Consider scapula when adding procedurual skeleton
-    Complete leg auto complete 
-    Swap out demo proc skeleton for active one 
-
- */
-
-
-
-
 public class SizzlePoseSystem : MonoBehaviour
 {
     [Tooltip("Tells the system what time of mixing we want to apply to Sizzle:\nMix - Seperate bones can be mixed, only applys rotation thought\nProcedural or Hard - Makes the visual copy position and rotation of either chosen")]
@@ -71,12 +57,18 @@ public class SizzlePoseSystem : MonoBehaviour
     {
         VisualSkeletonSetUp();
         ProceduralAndHardSkeletonsSetUp();
+
+        for (int i = 0; i < SECTIONCOUNT; i++)
+        {
+            StartCoroutine(PoseCopySectionCoroutine(i));
+        }
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        PoseCopy();
+        //PoseCopy();
     }
+
 
     /// <summary>
     /// By using the lerp values changes the visual skeleton to copy 
@@ -164,7 +156,7 @@ public class SizzlePoseSystem : MonoBehaviour
         for (int i = 0; i < SECTIONCOUNT; i++)
         {
             // Creating a section 
-            proceduralSkeleton[i] = new List<Transform>();
+            //proceduralSkeleton[i] = new List<Transform>(); // Generates procedurual sections here as well because convient 
             hardSkeleton[i] = new List<Transform>();
 
             // Goes through each bone in section 
@@ -176,7 +168,7 @@ public class SizzlePoseSystem : MonoBehaviour
                 //proceduralRoot.Find(visualSkeleton[i][j].name) 
                 //hardSkeleton[i].Add( hardRoot.Find(hardSkeleton[i][j].name) );
 
-                proceduralSkeleton[i].Add(GetChildFromInstructions(proceduralRoot, indexInstructions[visualSkeleton[i][j].name]));
+                //proceduralSkeleton[i].Add(GetChildFromInstructions(proceduralRoot, indexInstructions[visualSkeleton[i][j].name]));
                 hardSkeleton[i].Add(GetChildFromInstructions(hardRoot, indexInstructions[visualSkeleton[i][j].name]));
             }
         }
@@ -184,11 +176,23 @@ public class SizzlePoseSystem : MonoBehaviour
 
         // The procedurual skeleton is formed a little differently than the other two skeletons
         // so it requires more manual set up but it can still be slightly automated 
+        int nonLegSectionCount = 3;
+        AddProcedurualBodToSkeleton(proceduralReferences.bodyRoot, nonLegSectionCount);
 
         // Body and neck can be automated because it follows same structure as hard and visual 
         // Only worry about legs
+        for (int i = 0; i < proceduralReferences.legRoots.Count; i++)
+        {
+            
+            AddProcedurualLegToSkeleton(proceduralReferences.legRoots[i], proceduralReferences.legConnectionRoots[i], i + nonLegSectionCount);
+        }
 
+        print("Printing each section count");
 
+        for (int i = 0; i < proceduralSkeleton.Length; i++)
+        {
+            print(proceduralSkeleton[i].Count);
+        }
 
     }
 
@@ -253,21 +257,84 @@ public class SizzlePoseSystem : MonoBehaviour
                 proceduralSkeleton[i].Add(GetChildFromInstructions(root, indexInstructions[visualSkeleton[i][j].name]));
             }
         }
-
-
     }
 
     /// <summary>
     /// Adds a leg to the internal procedurual skeleton
     /// </summary>
     /// <param name="legRoot"></param>
-    private void AddProcedurualLegToSkeleton(Transform legRoot)
+    private void AddProcedurualLegToSkeleton(Transform legRoot, Transform connector, int section)
     {
-        // Follow leg down 
+        proceduralSkeleton[section] = new List<Transform>();
 
-        // Foot is split so skip a joint 
+        // Add connector to skeleton 
+        proceduralSkeleton[section].Add(connector);
+        Transform current = legRoot;
+        // Follow leg down 
+        for (int i = 0; i < 3; i++)
+        {
+            // Gets next first child 
+            proceduralSkeleton[section].Add(current);
+            current = current.GetChild(0);
+        }
+
     }
 
+
+    private IEnumerator PoseCopySectionCoroutine(int section)
+    {
+        List<Transform> visual = visualSkeleton[section];
+        List<Transform> hard = hardSkeleton[section];
+        List<Transform> procedurual = proceduralSkeleton[section];
+
+
+        while (true)
+        {
+            // Resets lerp each refresh 
+            float[] lerps = lerpValues.Lerps;
+
+            for (int i = 0; i < visual.Count; i++)
+            {
+                switch (mixMode)
+                {
+                    case MixingModes.mix:
+
+                        visual[i].localRotation = Quaternion.Lerp(procedurual[i].localRotation, hard[i].localRotation, lerps[i]);
+
+                        /*if(lerps[i] <= Mathf.Epsilon)
+                        {
+                            visual[i].localRotation = procedurual[i].localRotation;
+                        }
+                        else if(lerps[i] >= (1 - Mathf.Epsilon))
+                        {
+                            visual[i].localRotation = hard[i].localRotation;
+                        }
+                        else
+                        {
+                            visual[i].rotation = Quaternion.Lerp(procedurual[i].rotation, hard[i].rotation, lerps[i]);
+                        }*/
+
+                        //visualSkeleton[i][j].localPosition = Vector3.Lerp(proceduralSkeleton[i][j].localPosition, hardSkeleton[i][j].localPosition, lerps[i]);
+
+                        break;
+                    case MixingModes.procedurual:
+                        visual[i].localRotation = procedurual[i].localRotation;
+                        //visualSkeleton[i][j].localPosition = proceduralSkeleton[i][j].localPosition;
+
+
+                        break;
+                    case MixingModes.hard:
+                        visual[i].localRotation = hard[i].localRotation;
+                        //visualSkeleton[i][j].localPosition = hardSkeleton[i][j].localPosition;
+
+                        break;
+                    default:
+                        break;
+                }
+            }
+            yield return null;
+        }
+    }
 }
 
 
@@ -291,13 +358,13 @@ public class ProcedurualReferenceRoots
 {
     [SerializeField] public Transform bodyRoot;
     [SerializeField] public List<Transform> legRoots;
+    [Tooltip("Scapula and thighs")]
+    [SerializeField] public List<Transform> legConnectionRoots;
 }
 
 [System.Serializable]
 public class LerpValues
 {
-    
-
     [Range(0, 1)][SerializeField] public float mouthLerp;
     [Range(0, 1)][SerializeField] public float neckLerp;
     [Range(0, 1)][SerializeField] public float bodyLerp;

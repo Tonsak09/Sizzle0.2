@@ -273,7 +273,6 @@ public class ForceController : MonoBehaviour
     private void CorrectDirection(AnimationCurve curve, float angle, float maxAngle)
     {
         float lerp = Mathf.Abs((angle - minAngle) / maxAngle);
-        print(lerp);
 
         Vector3 eulerAngleVelocity = new Vector3(0, angle, 0);
         Vector3 angleDis = eulerAngleVelocity * directionCorrectionSpeed * greaterMinCurve.Evaluate(lerp) * Time.deltaTime;

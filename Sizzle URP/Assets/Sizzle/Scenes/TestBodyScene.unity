@@ -230,6 +230,7 @@ MonoBehaviour:
   proceduralReferences:
     bodyRoot: {fileID: 0}
     legRoots: []
+    legConnectionRoots: []
   visualBoneRenderer: {fileID: 0}
   hardBoneRenderer: {fileID: 0}
   procedurualBoneRenderer: {fileID: 0}
@@ -651,26 +652,39 @@ MonoBehaviour:
     - {fileID: 6639723391895936428}
     - {fileID: 60308823979077961}
     legLFVisual:
+    - {fileID: 5206131088763255124}
     - {fileID: 7721608030716009791}
     - {fileID: 1585467421188205074}
     - {fileID: 4791958177189456961}
     legRFVisual:
+    - {fileID: 6217427126785056626}
     - {fileID: 5942814652772890445}
     - {fileID: 8134274531187298588}
     - {fileID: 5573597255225726956}
     legLBVisual:
+    - {fileID: 1571454946162308553}
     - {fileID: 6660166300616444673}
     - {fileID: 7385324855728021643}
     - {fileID: 2493313540231290926}
     legRBVisual:
+    - {fileID: 1106685193353380446}
     - {fileID: 1342843798195801009}
     - {fileID: 1550389663455202699}
     - {fileID: 2295313792992379625}
   hardRoot: {fileID: 543450652485188468}
   proceduralRoot: {fileID: 543450653535299273}
   proceduralReferences:
-    bodyRoot: {fileID: 0}
-    legRoots: []
+    bodyRoot: {fileID: 1544602730229085664}
+    legRoots:
+    - {fileID: 8323325614211057977}
+    - {fileID: 3253999362419235427}
+    - {fileID: 4473049581790620719}
+    - {fileID: 3667014506710730319}
+    legConnectionRoots:
+    - {fileID: 4774048398834837385}
+    - {fileID: 6726333757061689637}
+    - {fileID: 2538376174881168417}
+    - {fileID: 1672404036862728436}
   visualBoneRenderer: {fileID: 2086090186}
   hardBoneRenderer: {fileID: 1223171267}
   procedurualBoneRenderer: {fileID: 173113668}
@@ -11660,7 +11674,6 @@ GameObject:
   - component: {fileID: 1262757563}
   - component: {fileID: 1262757562}
   - component: {fileID: 1262757561}
-  - component: {fileID: 1262757560}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -11668,18 +11681,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1262757560
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262757559}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69897cde6a84e2242a7c456b21be62b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!54 &1262757561
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -12203,7 +12204,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1396286456}
-  m_LocalRotation: {x: 0.060384676, y: 0.87963104, z: -0.11615523, w: 0.45728654}
+  m_LocalRotation: {x: 0.060384654, y: 0.87963104, z: -0.11615522, w: 0.45728648}
   m_LocalPosition: {x: -3.787725, y: 2.0130358, z: 5.659646}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -32335,11 +32336,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6597483971186144247, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.4572865
+      value: 0.45728642
       objectReference: {fileID: 0}
     - target: {fileID: 6597483971186144247, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.060384654
+      value: 0.060384657
       objectReference: {fileID: 0}
     - target: {fileID: 6597483971186144247, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.y
@@ -32347,7 +32348,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6597483971186144247, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.11615522
+      value: -0.11615524
       objectReference: {fileID: 0}
     - target: {fileID: 7721200724511234079, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.w
