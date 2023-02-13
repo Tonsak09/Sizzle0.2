@@ -2600,7 +2600,7 @@ GameObject:
   - component: {fileID: 5709166498431929680}
   - component: {fileID: 4931679095410448357}
   m_Layer: 0
-  m_Name: PoseCopy Sizzle
+  m_Name: Old-PoseCopy Sizzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

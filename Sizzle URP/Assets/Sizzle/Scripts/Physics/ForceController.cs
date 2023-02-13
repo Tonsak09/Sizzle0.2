@@ -21,6 +21,7 @@ public class ForceController : MonoBehaviour
     [SerializeField] float maxAngleConsideration;
     [Tooltip("This curve is how much force is use to correct out of the minimum curve towards the minimal angle")]
     [SerializeField] AnimationCurve greaterMinCurve;
+    [SerializeField] bool inverseDir;
     
 
     [Header("Orientation")]
@@ -406,12 +407,24 @@ public class ForceController : MonoBehaviour
 
     private Vector3 GetCamDirection()
     {
+
+
+
         Vector3 camToMid = baseBody.position - cam.position;
+        if (inverseDir)
+        {
+            camToMid = -camToMid;
+        }
 
         // Project onto the forward vector allows for speed to be relative
         // to how much the camera is faced towards the movement direciton
         // Now when Sizzle is orientating themself speed should speed up as it's correcting its orientation
-        return Vector3.ProjectOnPlane(camToMid, normal).normalized;
+        Vector3 dir = Vector3.ProjectOnPlane(camToMid, normal).normalized;
+            
+        
+
+        
+        return dir;
     }
 
     private IEnumerator DashSubroutine()

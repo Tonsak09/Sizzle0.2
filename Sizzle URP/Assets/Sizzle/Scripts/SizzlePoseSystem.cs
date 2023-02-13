@@ -12,11 +12,13 @@ public class SizzlePoseSystem : MonoBehaviour
 
     [Header("References")]
     [SerializeField] VisualReferenceVariables visualReferences;
-    
+
     [Tooltip("Used to construct hard skeleton by referenceing how the visual skeleton is constructed")] 
     [SerializeField] Transform hardRoot;
 
     [SerializeField] ProcedurualReferenceRoots proceduralReferences;
+
+    [SerializeField] JointGroups jointGroups;
 
     [Header("Bone Renderers")]
     [SerializeField] BoneRenderer visualBoneRenderer;
@@ -64,6 +66,10 @@ public class SizzlePoseSystem : MonoBehaviour
 
     private void Update()
     {
+        jointGroups.visualBaseJoint.position = jointGroups.procedurualBaseJoint.position;
+
+        // Does this actually need to be in the same position too?
+        //jointGroups.hardBaseJoint.position = jointGroups.procedurualBaseJoint.position;
         //PoseCopy();
     }
 
@@ -163,8 +169,6 @@ public class SizzlePoseSystem : MonoBehaviour
                 // Since skeletons follow the exact same naming scheme 
                 // we can reference the already completeted visual skeleton 
                 // to construct the rest of the skeleton 
-                //proceduralRoot.Find(visualSkeleton[i][j].name) 
-                //hardSkeleton[i].Add( hardRoot.Find(hardSkeleton[i][j].name) );
 
                 //proceduralSkeleton[i].Add(GetChildFromInstructions(proceduralRoot, indexInstructions[visualSkeleton[i][j].name]));
                 hardSkeleton[i].Add(GetChildFromInstructions(hardRoot, indexInstructions[visualSkeleton[i][j].name]));
@@ -384,4 +388,15 @@ public class LerpValues
             return info;
         }
     }
+}
+
+[System.Serializable]
+public class JointGroups
+{
+    [Tooltip("This sections is used to center the positions of the skeletons on the procedurual")]
+    [SerializeField] public Transform visualBaseJoint;
+    [Tooltip("This sections is used to center the positions of the skeletons on the procedurual")]
+    [SerializeField] public Transform procedurualBaseJoint;
+    [Tooltip("This sections is used to center the positions of the skeletons on the procedurual")]
+    [SerializeField] public Transform hardBaseJoint;
 }
