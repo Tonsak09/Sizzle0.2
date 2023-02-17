@@ -15,6 +15,9 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] LegSet front;
     [SerializeField] LegSet back;
 
+    [Header("Animation")]
+    [SerializeField] AnimationDetails frontAnimationDetails;
+
     [Header("Settings")]
     [Tooltip("Is essentially the speed that the animation plays in ratio to the distance travlled")]
     [SerializeField] float disToAngle;
@@ -27,7 +30,9 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] float wheelSideOffset;
     [SerializeField] float wheelRadius;
     [SerializeField] Vector3 frontOffsetCenter;
-
+    [Space]
+    [SerializeField] Color animationColor;
+    [SerializeField][Range(1, 30)] int animationcurveDetail;
 
     // Start is called before the first frame update
     void Start()
@@ -86,11 +91,18 @@ public class OvergrownLegsAnimator : MonoBehaviour
     public class LegSet
     {
         [SerializeField] public Transform parentBone;
-        [SerializeField] public Transform legA;
-        [SerializeField] public Transform legB;
+        [SerializeField] public Transform left;
+        [SerializeField] public Transform right;
 
         // Avaliable for code use but not meant for editor
         public float Rot { get; set; }
+    }
+
+    [System.Serializable]
+    public class AnimationDetails
+    {
+        [SerializeField] public List<Vector3> animationKeys;
+        [SerializeField] public List<AnimationCurve> keyConnectionCurves;
     }
 
 
@@ -105,8 +117,12 @@ public class OvergrownLegsAnimator : MonoBehaviour
         Vector3 pairCenter = frontOffsetCenter;
         Gizmos.DrawSphere(pairCenter, 0.01f);
 
+        // Visualizes the wheels 
         DrawWheel(pairCenter + Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
         DrawWheel(pairCenter - Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
+
+        // Draws out the animation curves and points 
+        DrawAnimationPath(frontAnimationDetails);
     }
 
     private void DrawWheel(Vector3 center, Transform directionParent, float wheelRot)
@@ -133,6 +149,38 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
                     Gizmos.DrawLine(center, center + vector * wheelRadius);
                     Gizmos.DrawSphere(center + vector * wheelRadius, 0.01f);
+                }
+            }
+        }
+    }
+
+    private void DrawAnimationPath(AnimationDetails details)
+    {
+        Gizmos.color = animationColor;
+
+        // Draw for each side 
+        for (int i = 0; i < details.animationKeys.Count; i++)
+        {
+            Gizmos.DrawSphere(details.animationKeys[i], 0.01f);
+
+            if(i + 1 < details.animationKeys.Count)
+            {
+                float lerp = 0;
+                float changeInLerp = 1.0f / animationcurveDetail;
+
+                Vector3 current = details.animationKeys[i];
+                Vector3 next = details.animationKeys[i + 1];
+
+                for (int j = 0; j < animationcurveDetail; j++)
+                {
+                    Vector3 beginline = Vector3.Slerp(next, current, details.keyConnectionCurves[i].Evaluate(lerp));
+                    Vector3 endLine = Vector3.Slerp(next, current, details.keyConnectionCurves[i].Evaluate(lerp + changeInLerp));
+                    Gizmos.DrawLine(beginline, endLine);
+
+                    Gizmos.DrawSphere(endLine, 0.002f);
+
+                    lerp += changeInLerp;
+                    print(endLine);
                 }
             }
         }

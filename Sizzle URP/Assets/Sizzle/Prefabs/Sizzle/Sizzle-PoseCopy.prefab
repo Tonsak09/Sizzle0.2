@@ -5766,8 +5766,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8361374617838292384}
-  - component: {fileID: 577562156}
   - component: {fileID: 577562157}
+  - component: {fileID: 577562156}
   m_Layer: 3
   m_Name: Procedurual BodyRoot
   m_TagString: Untagged
@@ -5792,30 +5792,6 @@ Transform:
   m_Father: {fileID: 8578936579443129708}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &577562156
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3383071626286262666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 907bb5e7342f583428464ffd66bb8a70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  front: {fileID: 4946657858311221451}
-  frontPair: []
-  frontOffsetCenter: {x: 0, y: 0, z: 0.25}
-  back: {fileID: 0}
-  backPair: []
-  backOffsetCenter: {x: 0, y: 0, z: 0}
-  disToAngle: 400
-  frameCount: 4
-  showGizmos: 0
-  wheelColor: {r: 0.6, g: 0.19607843, b: 0.8, a: 1}
-  wheelSideOffset: 0.34
-  wheelRadius: 0.52
 --- !u!114 &577562157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6026,6 +6002,33 @@ MonoBehaviour:
     m_RotationOrder: 4
   angleBeforeSlide: 0
   SizzleState: 0
+--- !u!114 &577562156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3383071626286262666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 907bb5e7342f583428464ffd66bb8a70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  front:
+    parentBone: {fileID: 0}
+    legA: {fileID: 0}
+    legB: {fileID: 0}
+  back:
+    parentBone: {fileID: 0}
+    legA: {fileID: 0}
+    legB: {fileID: 0}
+  disToAngle: 400
+  frameCount: 4
+  showGizmos: 0
+  wheelColor: {r: 0.6, g: 0.19607843, b: 0.8, a: 1}
+  wheelSideOffset: 0.34
+  wheelRadius: 0.52
+  frontOffsetCenter: {x: 0, y: 0, z: 0.25}
 --- !u!1 &3407098651071751090
 GameObject:
   m_ObjectHideFlags: 0
