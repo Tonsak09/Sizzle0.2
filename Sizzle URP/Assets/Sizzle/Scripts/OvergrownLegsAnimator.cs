@@ -5,15 +5,18 @@ using UnityEngine;
 public class OvergrownLegsAnimator : MonoBehaviour
 {
     [Header("Transforms")]
-    [SerializeField] Transform front;
+    /*[SerializeField] Transform front;
     [SerializeField] Transform[] frontPair;
     [SerializeField] Vector3 frontOffsetCenter;
     [Space]
     [SerializeField] Transform back;
     [SerializeField] Transform[] backPair;
-    [SerializeField] Vector3 backOffsetCenter;
+    [SerializeField] Vector3 backOffsetCenter;*/
+    [SerializeField] LegSet front;
+    [SerializeField] LegSet back;
 
     [Header("Settings")]
+    [Tooltip("Is essentially the speed that the animation plays in ratio to the distance travlled")]
     [SerializeField] float disToAngle;
     [SerializeField] int frameCount;
 
@@ -23,13 +26,13 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [Tooltip("How far the wheels will be from the sides")]
     [SerializeField] float wheelSideOffset;
     [SerializeField] float wheelRadius;
+    [SerializeField] Vector3 frontOffsetCenter;
 
-    private float frontRot;
 
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(LegPair(front, true));
+        StartCoroutine(LegPair(front));
     }
 
     // Update is called once per frame
@@ -42,44 +45,52 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// The coroutine that controls a pair of legs 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator LegPair(Transform parent, bool isFront)
+    private IEnumerator LegPair(LegSet pair)
     {
         // The position that will be added to 
-        Vector3 holdPos = parent.position;
+        Vector3 holdPos = pair.parentBone.position;
         float distanceTravelled = 0;
+        
 
         while (true)
         {
             // Adds distance from previous to new 
             // TODO: Get vector between old and new. Use mag for distance and dot product with forward vector to see whether its moving with or against 
-            float newDis = Vector3.Distance(parent.position, holdPos);
-            holdPos = parent.position;
+            float newDis = Vector3.Distance(pair.parentBone.position, holdPos);
+            holdPos = pair.parentBone.position;
 
             distanceTravelled += newDis;
+            pair.Rot += newDis * disToAngle;
 
-
-            if(isFront)
+            if(pair.Rot >= 360)
             {
-                frontRot += newDis * disToAngle;
-
-                if(frontRot >= 360)
-                {
-                    // Loop values 
-                    frontRot = 0;
-                    distanceTravelled = 0;
-                }
-
-                GetFramFromWheel();
+                // Loop values 
+                pair.Rot = 0;
+                distanceTravelled = 0;
             }
+
+            GetFrameFromWheel();
+            
 
 
             yield return null;
         }
     }
 
-    private void GetFramFromWheel()
+    private void GetFrameFromWheel()
     {
         //print( (int)(frontRot / (360 / frameCount)));
+    }
+
+    [System.Serializable]
+    public class LegSet
+    {
+        [SerializeField] public Transform parentBone;
+        [SerializeField] public Transform legA;
+        [SerializeField] public Transform legB;
+
+        // Avaliable for code use but not meant for editor
+        public float Rot { get; set; }
     }
 
 
@@ -88,14 +99,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
         Gizmos.color = wheelColor;
         
 
-        Matrix4x4 rotationMatrix = Matrix4x4.TRS(front.position, front.rotation, Vector3.one);
+        Matrix4x4 rotationMatrix = Matrix4x4.TRS(front.parentBone.position, front.parentBone.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
 
         Vector3 pairCenter = frontOffsetCenter;
         Gizmos.DrawSphere(pairCenter, 0.01f);
 
-        DrawWheel(pairCenter + Vector3.right * wheelSideOffset, front, frontRot);
-        DrawWheel(pairCenter - Vector3.right * wheelSideOffset, front, frontRot);
+        DrawWheel(pairCenter + Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
+        DrawWheel(pairCenter - Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
     }
 
     private void DrawWheel(Vector3 center, Transform directionParent, float wheelRot)

@@ -5766,6 +5766,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8361374617838292384}
+  - component: {fileID: 577562156}
+  - component: {fileID: 577562157}
   m_Layer: 3
   m_Name: Procedurual BodyRoot
   m_TagString: Untagged
@@ -5790,6 +5792,240 @@ Transform:
   m_Father: {fileID: 8578936579443129708}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &577562156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3383071626286262666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 907bb5e7342f583428464ffd66bb8a70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  front: {fileID: 4946657858311221451}
+  frontPair: []
+  frontOffsetCenter: {x: 0, y: 0, z: 0.25}
+  back: {fileID: 0}
+  backPair: []
+  backOffsetCenter: {x: 0, y: 0, z: 0}
+  disToAngle: 400
+  frameCount: 4
+  showGizmos: 0
+  wheelColor: {r: 0.6, g: 0.19607843, b: 0.8, a: 1}
+  wheelSideOffset: 0.34
+  wheelRadius: 0.52
+--- !u!114 &577562157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3383071626286262666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d504ee21f3ad8e74087bb8c2ba367e5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseBody: {fileID: 432571882914034822}
+  frontBody: {fileID: 4946657858311221451}
+  neck: {fileID: 736475394523997791}
+  legsController: {fileID: 8954653530480682961}
+  midBodyBuoyancy: {fileID: 432571882914034816}
+  cam: {fileID: 0}
+  directionCorrectionSpeed: 5
+  minAngle: 35
+  maxAngleConsideration: 70
+  greaterMinCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  inverseDir: 0
+  midBoneTorqueCorrection: {fileID: 7018321352527987587}
+  maxVecDisFromDown: 2
+  disBetweenChecks: 0.36
+  frontCheckCenter: {x: 0, y: 0.07, z: 0.45}
+  frontCheckRadius: 0.13
+  checkMask:
+    serializedVersion: 2
+    m_Bits: 1537
+  moveForce: 1100
+  torqueForce: 10000
+  crouchkey: 306
+  moveForceCrouch: 400
+  torqueForceCrouch: 5000
+  crouchSpeed: 6
+  unCrouchSpeed: 5
+  minLerp: 0.3
+  bManager: {fileID: 0}
+  dashKey: 32
+  dashForceImpulse: 0
+  dashForceContinuous: 6000
+  dashTime: 0.3
+  coolDownTimeDash: 0.3
+  dashBounceBackImpulse: 500
+  dashBounceBackVertical: 600
+  dashForceoverLerp:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.5
+      inSlope: 0.8552267
+      outSlope: 0.8552267
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.39575672
+    - serializedVersion: 3
+      time: 0.6313881
+      value: 1
+      inSlope: -0.31732056
+      outSlope: -0.31732056
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 1
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.0062561
+      value: -0.006248474
+      inSlope: -9.433027
+      outSlope: -9.433027
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.08388421
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dashVerticalForce: 1500
+  dashVerticalOverLerp:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dashSound: {fileID: 8300000, guid: cb9398afb315e494e821dc354960d90e, type: 3}
+  camOutSpeed: 2
+  camOutCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  camBackSpeed: 1
+  camBackCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dashTargetFOV: 100
+  jumpKey: 32
+  jumpForceImpulse: 0
+  jumpForceContinuous: 8000
+  jumpTime: 0.3
+  jumpForceOverLerp:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  angleBeforeSlide: 0
+  SizzleState: 0
 --- !u!1 &3407098651071751090
 GameObject:
   m_ObjectHideFlags: 0
@@ -20517,13 +20753,11 @@ GameObject:
   m_Component:
   - component: {fileID: 8578936579443129708}
   - component: {fileID: 8954653530480682961}
-  - component: {fileID: 7018321351210764562}
   - component: {fileID: 7018321351825057592}
   - component: {fileID: 7018321352274969030}
   - component: {fileID: 7018321352274969025}
   - component: {fileID: 7018321351764489022}
   - component: {fileID: 7018321351137526138}
-  - component: {fileID: 1608990548443178577}
   m_Layer: 3
   m_Name: Sizzle-PoseCopy
   m_TagString: Sizzle
@@ -20600,215 +20834,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &7018321351210764562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8954653530480682966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d504ee21f3ad8e74087bb8c2ba367e5c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseBody: {fileID: 432571882914034822}
-  frontBody: {fileID: 4946657858311221451}
-  neck: {fileID: 736475394523997791}
-  legsController: {fileID: 8954653530480682961}
-  midBodyBuoyancy: {fileID: 432571882914034816}
-  cam: {fileID: 0}
-  directionCorrectionSpeed: 5
-  minAngle: 35
-  maxAngleConsideration: 70
-  greaterMinCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  midBoneTorqueCorrection: {fileID: 7018321352527987587}
-  maxVecDisFromDown: 2
-  disBetweenChecks: 0.36
-  frontCheckCenter: {x: 0, y: 0.07, z: 0.45}
-  frontCheckRadius: 0.13
-  checkMask:
-    serializedVersion: 2
-    m_Bits: 1537
-  moveForce: 1100
-  torqueForce: 10000
-  crouchkey: 306
-  moveForceCrouch: 400
-  torqueForceCrouch: 5000
-  crouchSpeed: 6
-  unCrouchSpeed: 5
-  minLerp: 0.3
-  bManager: {fileID: 0}
-  dashKey: 32
-  dashForceImpulse: 0
-  dashForceContinuous: 6000
-  dashTime: 0.3
-  coolDownTimeDash: 0.3
-  dashBounceBackImpulse: 500
-  dashBounceBackVertical: 600
-  dashForceoverLerp:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0.5
-      inSlope: 0.8552267
-      outSlope: 0.8552267
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.39575672
-    - serializedVersion: 3
-      time: 0.6313881
-      value: 1
-      inSlope: -0.31732056
-      outSlope: -0.31732056
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1.0062561
-      value: -0.006248474
-      inSlope: -9.433027
-      outSlope: -9.433027
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.08388421
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  dashVerticalForce: 1500
-  dashVerticalOverLerp:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.5
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  dashSound: {fileID: 8300000, guid: cb9398afb315e494e821dc354960d90e, type: 3}
-  camOutSpeed: 2
-  camOutCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  camBackSpeed: 1
-  camBackCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  dashTargetFOV: 100
-  jumpKey: 32
-  jumpForceImpulse: 0
-  jumpForceContinuous: 8000
-  jumpTime: 0.3
-  jumpForceOverLerp:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 2
-      outSlope: 2
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  angleBeforeSlide: 0
-  SizzleState: 0
 --- !u!114 &7018321351825057592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21161,30 +21186,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   savePointOverride: {fileID: 0}
   baseJoint: {fileID: 4982125933846713757}
---- !u!114 &1608990548443178577
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8954653530480682966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 907bb5e7342f583428464ffd66bb8a70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  front: {fileID: 4946657858311221451}
-  frontPair: []
-  frontOffsetCenter: {x: 0, y: 0, z: 0.25}
-  back: {fileID: 0}
-  backPair: []
-  backOffsetCenter: {x: 0, y: 0, z: 0}
-  disToAngle: 400
-  frameCount: 4
-  showGizmos: 0
-  wheelColor: {r: 0.6, g: 0.19607843, b: 0.8, a: 1}
-  wheelSideOffset: 0.34
-  wheelRadius: 0.52
 --- !u!1 &9030196617605762532
 GameObject:
   m_ObjectHideFlags: 0
