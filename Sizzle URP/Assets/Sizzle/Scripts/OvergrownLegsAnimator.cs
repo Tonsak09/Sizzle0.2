@@ -24,7 +24,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] int frameCount;
 
     [Header("Debug Gizmos")]
-    [SerializeField] bool showGizmos;
+    [SerializeField] DisplayMode display;
+    private enum DisplayMode
+    {
+        Wheel, 
+        Animation,
+        None
+    }
+
     [SerializeField] Color wheelColor;
     [Tooltip("How far the wheels will be from the sides")]
     [SerializeField] float wheelSideOffset;
@@ -32,6 +39,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] Vector3 frontOffsetCenter;
     [Space]
     [SerializeField] Color animationColor;
+    [SerializeField] float keySize = 0.01f;
+    [SerializeField] float detailSize = 0.002f;
     [SerializeField][Range(1, 30)] int animationcurveDetail;
 
     // Start is called before the first frame update
@@ -108,30 +117,32 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = wheelColor;
-        
+        switch (display)
+        {
+            case DisplayMode.Wheel:
+                Gizmos.color = wheelColor;
 
-        Matrix4x4 rotationMatrix = Matrix4x4.TRS(front.parentBone.position, front.parentBone.rotation, Vector3.one);
-        Gizmos.matrix = rotationMatrix;
+                Matrix4x4 rotationMatrix = Matrix4x4.TRS(front.parentBone.position, front.parentBone.rotation, Vector3.one);
+                Gizmos.matrix = rotationMatrix;
 
-        Vector3 pairCenter = frontOffsetCenter;
-        Gizmos.DrawSphere(pairCenter, 0.01f);
+                Vector3 pairCenter = frontOffsetCenter;
+                Gizmos.DrawSphere(pairCenter, 0.01f);
 
-        // Visualizes the wheels 
-        DrawWheel(pairCenter + Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
-        DrawWheel(pairCenter - Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
-
-        // Draws out the animation curves and points 
-        DrawAnimationPath(frontAnimationDetails);
+                // Visualizes the wheels 
+                DrawWheel(pairCenter + Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
+                DrawWheel(pairCenter - Vector3.right * wheelSideOffset, front.parentBone, front.Rot);
+                break;
+            case DisplayMode.Animation:
+                // Draws out the animation curves and points 
+                DrawAnimationPath(frontAnimationDetails);
+                break;
+            case DisplayMode.None:
+                break;
+        }
     }
 
     private void DrawWheel(Vector3 center, Transform directionParent, float wheelRot)
     {
-        if(!showGizmos)
-        {
-            return;
-        }
-
         Gizmos.DrawSphere(center, 0.01f);
 
         for (int x = -1; x <= 1; x++)
@@ -161,28 +172,43 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // Draw for each side 
         for (int i = 0; i < details.animationKeys.Count; i++)
         {
-            Gizmos.DrawSphere(details.animationKeys[i], 0.01f);
+            Gizmos.DrawSphere(details.animationKeys[i], keySize);
 
             if(i + 1 < details.animationKeys.Count)
             {
-                float lerp = 0;
-                float changeInLerp = 1.0f / animationcurveDetail;
-
-                Vector3 current = details.animationKeys[i];
-                Vector3 next = details.animationKeys[i + 1];
-
-                for (int j = 0; j < animationcurveDetail; j++)
-                {
-                    Vector3 beginline = Vector3.Slerp(next, current, details.keyConnectionCurves[i].Evaluate(lerp));
-                    Vector3 endLine = Vector3.Slerp(next, current, details.keyConnectionCurves[i].Evaluate(lerp + changeInLerp));
-                    Gizmos.DrawLine(beginline, endLine);
-
-                    Gizmos.DrawSphere(endLine, 0.002f);
-
-                    lerp += changeInLerp;
-                    print(endLine);
-                }
+                DrawAnimationCurve(details, i, i + 1);
             }
+            else
+            {
+                // Loops s
+                DrawAnimationCurve(details, i, 0);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Draws the animation curve between two of the animation keys 
+    /// </summary>
+    /// <param name="details"></param>
+    /// <param name="currentIndex"></param>
+    /// <param name="nextIndex"></param>
+    private void DrawAnimationCurve(AnimationDetails details, int currentIndex, int nextIndex)
+    {
+        float lerp = 0;
+        float changeInLerp = 1.0f / animationcurveDetail;
+
+        Vector3 currentPoint = details.animationKeys[currentIndex];
+        Vector3 nextPoint = details.animationKeys[nextIndex];
+
+        for (int j = 0; j < animationcurveDetail; j++)
+        {
+            Vector3 beginline = Vector3.Slerp(nextPoint, currentPoint, details.keyConnectionCurves[currentIndex].Evaluate(lerp));
+            Vector3 endLine = Vector3.Slerp(nextPoint, currentPoint, details.keyConnectionCurves[currentIndex].Evaluate(lerp + changeInLerp));
+
+            Gizmos.DrawLine(beginline, endLine);
+            Gizmos.DrawSphere(endLine, detailSize);
+
+            lerp += changeInLerp;
         }
     }
 }

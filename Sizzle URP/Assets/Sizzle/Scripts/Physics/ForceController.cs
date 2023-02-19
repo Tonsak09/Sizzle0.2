@@ -122,7 +122,7 @@ public class ForceController : MonoBehaviour
         SizzleState = states.movement;
         frontRigid = frontBody.GetComponent<Rigidbody>();
         sm = GameObject.FindObjectOfType<SoundManager>();
-        cm = this.GetComponent<CamManager>();
+        cm = this.transform.GetComponentInParent<CamManager>();
 
 
         if (cam == null)
