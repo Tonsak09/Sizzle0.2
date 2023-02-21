@@ -90,7 +90,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
             // Derrives from: 
             // index * lerpPerFrame <= currentLerp;
             int index = Mathf.FloorToInt(currentLerp / lerpPerFrame);
-            print(lerpPerFrame);
+            
             AnimationCurve curve = details.keyConnectionCurves[index];
             Vector3 previousPos = details.animationKeys[index];
             Vector3 nextPos;
@@ -107,12 +107,12 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             pair.FootPosRight = previousPos;
 
-             /*
-             float lerpPerDetail = 1.0f / details.levelOfDetail[index];
+            float lerpPerDetail = 1.0f / details.levelOfDetail[index];
              // Check if cache needs to be changed 
              if (index != frameIndexHold)
              {
-                 cacheLinePoints.Clear();
+                frameIndexHold = index;
+                cacheLinePoints.Clear();
 
 
                  for (int i = 0; i < details.levelOfDetail[index]; i++)
@@ -133,12 +133,20 @@ public class OvergrownLegsAnimator : MonoBehaviour
              // index * lerpPer <= currentLerp;
              int detailIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
 
-             // Set feet position 
-             pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[detailIndex + 1], detailLerp);
-             */
+             // Set feet position
+             
+            if(detailIndex + 1 < details.levelOfDetail[index])
+            {
+                pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[detailIndex + 1], detailLerp);
+            }
+            else
+            {
+                pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[0], detailLerp);
+            }
 
 
-             yield return null;
+
+            yield return null;
         }
     }
 
