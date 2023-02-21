@@ -364,7 +364,7 @@ public class ForceController : MonoBehaviour
 
                 SizzleState = states.action;
                 baseBody.AddForce(dashForceImpulse * baseBody.transform.forward, ForceMode.Impulse);
-                legsController.Dash(baseBody); // Activates the dash leg animations 
+                //legsController.Dash(baseBody); // Activates the dash leg animations 
 
                 sm.PlaySoundFX(dashSound, this.transform.position, "DASH");
                 DashCo = StartCoroutine(DashSubroutine());
