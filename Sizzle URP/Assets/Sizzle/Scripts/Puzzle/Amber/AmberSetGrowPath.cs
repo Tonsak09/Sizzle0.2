@@ -20,6 +20,10 @@ public class AmberSetGrowPath : AmberSet
     [SerializeField] AnimationCurve pitchCurve;
     [SerializeField] AudioClip completionClip;
 
+    [Header("Debug")]
+    [SerializeField] Mode currentMode;
+    private enum Mode { normal, inactive, active }
+
     private Vector3[] targetScales;
     private bool started;
 
@@ -39,17 +43,51 @@ public class AmberSetGrowPath : AmberSet
     // Update is called once per frame
     void Update()
     {
-        if(!started)
+
+        switch (currentMode)
         {
-            if(AllAmberUnlocked())
-            {
-                started = true;
-                if(completionClip != null)
+            case Mode.normal:
+                if (!started)
                 {
-                    GameObject.FindObjectOfType<SoundManager>().PlaySoundFXAfterDelay(completionClip, this.transform.position, "COMPLETE", 2);
+                    if (AllAmberUnlocked())
+                    {
+                        started = true;
+                        if (completionClip != null)
+                        {
+                            GameObject.FindObjectOfType<SoundManager>().PlaySoundFXAfterDelay(completionClip, this.transform.position, "COMPLETE", 2);
+                        }
+                        StartCoroutine(GrowPath());
+                    }
                 }
-                StartCoroutine(GrowPath());
-            }
+                break;
+            case Mode.inactive:
+                for (int i = 0; i < pathToGrow.Count; i++)
+                {
+                    //pathToGrow[index], targetScales[index]
+
+                    pathToGrow[i].localScale =
+                        new Vector3
+                        (
+                            Mathf.LerpUnclamped(startScale.x, targetScales[i].x, XZCurve.Evaluate(0)),
+                            Mathf.LerpUnclamped(startScale.y, targetScales[i].y, YCurve.Evaluate(0)),
+                            Mathf.LerpUnclamped(startScale.y, targetScales[i].y, XZCurve.Evaluate(0))
+                        );
+                }
+                break;
+            case Mode.active:
+                for (int i = 0; i < pathToGrow.Count; i++)
+                {
+                    //pathToGrow[index], targetScales[index]
+
+                    pathToGrow[i].localScale =
+                        new Vector3
+                        (
+                            Mathf.LerpUnclamped(startScale.x, targetScales[i].x, XZCurve.Evaluate(1)),
+                            Mathf.LerpUnclamped(startScale.y, targetScales[i].y, YCurve.Evaluate(1)),
+                            Mathf.LerpUnclamped(startScale.y, targetScales[i].y, XZCurve.Evaluate(1))
+                        );
+                }
+                break;
         }
     }
 
