@@ -32,6 +32,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] Vector3 frontOffsetCenter;
     [Space]
     [SerializeField] Color animationColor;
+    [SerializeField] Color animationFloorColor;
     [SerializeField] float keySize = 0.01f;
     [SerializeField] float detailSize = 0.002f;
 
@@ -39,12 +40,28 @@ public class OvergrownLegsAnimator : MonoBehaviour
     void Start()
     {
         StartCoroutine(LegPair(front, frontAnimationDetails));
+        StartCoroutine(AnimationLogic(front));
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    /// <summary>
+    /// This coroutine is in charge of bringing the foot to 
+    /// either the animation or resting positions 
+    /// </summary>
+    /// <param name="pair"></param>
+    /// <returns></returns>
+    private IEnumerator AnimationLogic(LegSet pair)
+    {
+        while(true)
+        {
+            pair.ikTargetLeft.position = Vector3.Lerp(Vector3.zero, pair.parentBone.TransformPoint(pair.FootPosRight), pair.restingToAnimation);
+            yield return null;
+        }
     }
 
     /// <summary>
@@ -142,26 +159,16 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             // The lerp value between two details 
             float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
-            print(detailNextindex * lerpPerDetail);
 
             // Set feet position
             pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-
-            /* // Cannot swap back to 0
-             if(detailIndex + 1 < details.levelOfDetail[index])
-             {
-                 //pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[detailIndex + 1], detailLerp);
-                 pair.FootPosRight = cacheLinePoints[detailIndex + 1];
-             }
-             else
-             {
-                 pair.FootPosRight = cacheLinePoints[0];
-             }*/
 
 
             yield return null;
         }
     }
+
+    
 
     [System.Serializable]
     public class LegSet
@@ -169,6 +176,9 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [SerializeField] public Transform parentBone;
         [SerializeField] public Transform left;
         [SerializeField] public Transform right;
+        [Space]
+        [SerializeField] public Transform ikTargetLeft;
+        [SerializeField] [Range(0,1)] public float restingToAnimation;
 
         // Avaliable for code use but not meant for editor
         public float Rot { get; set; }
@@ -285,11 +295,43 @@ public class OvergrownLegsAnimator : MonoBehaviour
         Vector3 currentPoint = details.animationKeys[currentIndex];
         Vector3 nextPoint = details.animationKeys[nextIndex];
 
+
+        
+
+        if (currentIndex == 0)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(front.parentBone.TransformPoint(currentPoint), Vector3.down, out hit))
+            {
+                Gizmos.color = animationFloorColor;
+                Gizmos.DrawSphere(front.parentBone.InverseTransformPoint(hit.point), keySize);
+            }
+
+            // **************** NEEDS TO CHANGE ***********
+            currentPoint = front.parentBone.InverseTransformPoint(hit.point);
+        }
+        else if(currentIndex == details.animationKeys.Count - 1)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(front.parentBone.TransformPoint(nextPoint), Vector3.down, out hit))
+            {
+                Gizmos.color = animationFloorColor;
+                Gizmos.DrawSphere(front.parentBone.InverseTransformPoint(hit.point), keySize);
+            }
+
+            // **************** NEEDS TO CHANGE ***********
+            nextPoint = front.parentBone.InverseTransformPoint(hit.point);
+        }
+        else
+        {
+            Gizmos.color = animationColor;
+        }
+
         for (int j = 0; j < details.levelOfDetail[currentIndex]; j++)
         {
             // Curved points from one keyframe to the next 
-            Vector3 beginline = Vector3.Slerp(nextPoint, currentPoint, details.keyConnectionCurves[currentIndex].Evaluate(lerp));
-            Vector3 endLine = Vector3.Slerp(nextPoint, currentPoint, details.keyConnectionCurves[currentIndex].Evaluate(lerp + changeInLerp));
+            Vector3 beginline = Vector3.Slerp(currentPoint, nextPoint, details.keyConnectionCurves[currentIndex].Evaluate(lerp));
+            Vector3 endLine = Vector3.Slerp(currentPoint, nextPoint, details.keyConnectionCurves[currentIndex].Evaluate(lerp + changeInLerp));
 
             Gizmos.DrawLine(beginline, endLine);
             Gizmos.DrawSphere(endLine, detailSize);
