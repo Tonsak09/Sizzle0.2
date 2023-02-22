@@ -108,42 +108,55 @@ public class OvergrownLegsAnimator : MonoBehaviour
             pair.FootPosRight = previousPos;
 
             float lerpPerDetail = 1.0f / details.levelOfDetail[index];
-             // Check if cache needs to be changed 
-             if (index != frameIndexHold)
-             {
+            // Check if cache needs to be changed 
+            if (index != frameIndexHold)
+            {
                 frameIndexHold = index;
                 cacheLinePoints.Clear();
 
+                for (int i = 0; i < details.levelOfDetail[index]; i++)
+                {
+                    // Adds points based on the line that is creates between
+                    // two key frames 
+                    float lerp = i * lerpPerDetail;
+                    Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
+                    cacheLinePoints.Add(point);
+                }
 
-                 for (int i = 0; i < details.levelOfDetail[index]; i++)
-                 {
-                     // Adds points based on the line that is creates between
-                     // two key frames 
-                     float lerp = i * lerpPerDetail;
-                     Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
-                     cacheLinePoints.Add(point);
-                 }
-             }
+                // Adds a final position so it does not reset to start of frame 
+                cacheLinePoints.Add(nextPos);
+
+            }
 
              // Used to locate position along the detail path 
 
              // Finds out what is the lerp that is currently between the current index point and its next destination 
+             // Used to find the current index 
              float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
-             // Derrives from: 
-             // index * lerpPer <= currentLerp;
-             int detailIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
 
-             // Set feet position
-             
-            if(detailIndex + 1 < details.levelOfDetail[index])
-            {
-                pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[detailIndex + 1], detailLerp);
-            }
-            else
-            {
-                pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[0], detailLerp);
-            }
 
+            // Derrives from: 
+            // index * lerpPer <= currentLerp;
+            int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
+            int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
+
+            // The lerp value between two details 
+            float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
+            print(detailNextindex * lerpPerDetail);
+
+            // Set feet position
+            pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+
+            /* // Cannot swap back to 0
+             if(detailIndex + 1 < details.levelOfDetail[index])
+             {
+                 //pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailIndex], cacheLinePoints[detailIndex + 1], detailLerp);
+                 pair.FootPosRight = cacheLinePoints[detailIndex + 1];
+             }
+             else
+             {
+                 pair.FootPosRight = cacheLinePoints[0];
+             }*/
 
 
             yield return null;
