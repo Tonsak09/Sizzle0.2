@@ -96,6 +96,10 @@ public class ForceController : MonoBehaviour
     [Space]
     [SerializeField] private states SizzleState;
     public states CurrentSizzleState { get { return SizzleState; } }
+
+    [Header("Gizmos")]
+    [SerializeField] bool drawGizmos;
+
     public enum states
     {
         movement,
@@ -522,7 +526,10 @@ public class ForceController : MonoBehaviour
     private void OnDrawGizmos()
     {
 
-        //if()
+        if(drawGizmos == false)
+        {
+            return;
+        }
 
         Gizmos.color = Color.red;
         Vector3 pos = neck.TransformDirection(frontCheckCenter);

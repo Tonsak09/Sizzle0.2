@@ -16,7 +16,7 @@ public class Foot : MonoBehaviour
 
     private void LateUpdate()
     {
-        this.transform.position = root.position;
+        //this.transform.position = root.position;
 
         // Match with floor normal 
         RaycastHit hit;
