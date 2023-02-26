@@ -2532,7 +2532,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.00000091735274, y: -0.00000012572855, z: 0.40707985}
+  m_ConnectedAnchor: {x: -1.6518201e-13, y: -0.0000000055879354, z: 0.40708002}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -3846,7 +3846,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4414406328232977900
 Transform:
   m_ObjectHideFlags: 0
@@ -4243,7 +4243,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.000001225155, y: 0.00000009033829, z: 0.077001005}
+  m_ConnectedAnchor: {x: -3.8496428e-14, y: 0.0000000037252903, z: 0.077000834}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -4607,7 +4607,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: 0.0000015615951, y: 0.000000029802322, z: -0.01799687}
+  m_ConnectedAnchor: {x: -1.0261912e-15, y: 0, z: -0.017997056}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -5335,7 +5335,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1882492634701192411
 Transform:
   m_ObjectHideFlags: 0
@@ -6002,6 +6002,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   angleBeforeSlide: 0
   SizzleState: 0
+  drawGizmos: 0
 --- !u!114 &577562156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6019,12 +6020,14 @@ MonoBehaviour:
     left: {fileID: 1361338992530485625}
     right: {fileID: 5498491880943886883}
     ikTargetLeft: {fileID: 8107666941812581475}
+    ikTargetRight: {fileID: 0}
     restingToAnimation: 1
   back:
     parentBone: {fileID: 4828520568003301159}
     left: {fileID: 6878510594031998063}
     right: {fileID: 6018441147442904591}
     ikTargetLeft: {fileID: 0}
+    ikTargetRight: {fileID: 0}
     restingToAnimation: 0
   frontAnimationDetails:
     animationKeys:
@@ -6224,7 +6227,8 @@ MonoBehaviour:
     levelOfDetail: 0500000003000000030000000300000002000000020000000500000005000000
     footOffset: 0.1
   disToAngle: 20000
-  footTransitionSpeed: 15
+  footTransitionSpeedToIdle: 0
+  footTransitionSpeedToAnim: 0
   maxRaycastDis: 10
   raycastLayer:
     serializedVersion: 2
@@ -9365,7 +9369,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.0000014454108, y: 0.00000011979137, z: 0.44578528}
+  m_ConnectedAnchor: {x: -1.7702418e-13, y: -0.000000006402879, z: 0.44578516}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -12158,7 +12162,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.0000018533316, y: 0.00000013835961, z: 0.50275576}
+  m_ConnectedAnchor: {x: 2.014757e-13, y: -0.0000000105646905, z: 0.5027559}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
@@ -17602,7 +17606,7 @@ ConfigurableJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.0000015138648, y: -0.00000011920929, z: 0.016045514}
+  m_ConnectedAnchor: {x: 1.2325951e-33, y: 0, z: 0.016045399}
   serializedVersion: 2
   m_SecondaryAxis: {x: 0, y: 1, z: 0}
   m_XMotion: 0
