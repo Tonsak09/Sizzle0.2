@@ -17,6 +17,9 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] float footTransitionSpeedToIdle;
     [SerializeField] float footTransitionSpeedToAnim;
     [Space]
+    [SerializeField] bool printVel;
+    [SerializeField] int minVelToMove;
+    [Space]
     [SerializeField] float maxRaycastDis = 10.0f;
     [SerializeField] LayerMask raycastLayer;
 
@@ -66,11 +69,34 @@ public class OvergrownLegsAnimator : MonoBehaviour
     {
         while(true)
         {
-            
+
+            if(pair.TurningToIdle)
+            {
+                // Logic to turn the foot smoothly towards the resting position 
+                if (pair.restingToAnimation < 1)
+                {
+                    pair.restingToAnimation += footTransitionSpeedToAnim * Time.deltaTime;
+                }
+                else
+                {
+                    pair.restingToAnimation = 1.0f;
+                }
+            }
+            else
+            {
+                if (pair.restingToAnimation > 0)
+                {
+                    pair.restingToAnimation -= footTransitionSpeedToIdle * Time.deltaTime;
+                }
+                else
+                {
+                    pair.restingToAnimation = 0.0f;
+                }
+            }
+
 
             if (pair.restingToAnimation < 1)
             {
-
                 // Lerps position to the ground 
                 Vector3 point = details.animationKeys[0];
                 RaycastHit hit;
@@ -100,7 +126,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
     {
         // The position that will be added to 
         Vector3 holdPos = pair.parentBone.position;
-        float distanceTravelled = 0;
 
         // Should not be changed during play 
         // This is how much of a  0 to 1 scale each frame gets 
@@ -204,10 +229,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
-    private void CalculateVelToRot(LegSet pair, ref Vector3 holdPos, ref float distanceTravelled)
+    /*private void CalculateVelToRot(LegSet pair, ref Vector3 holdPos, ref float distanceTravelled)
     {
-        
-
         // Adds distance from previous to new 
         Vector3 holdToNew = pair.parentBone.position - holdPos;
         float newDis = holdToNew.sqrMagnitude;
@@ -223,8 +246,15 @@ public class OvergrownLegsAnimator : MonoBehaviour
             pair.Rot = 0;
             distanceTravelled = 0;
         }
-    }
+    }*/
 
+    /// <summary>
+    /// Updates the rotation of a leg set based 
+    /// on the distance its parent bone has moved 
+    /// in the world space 
+    /// </summary>
+    /// <param name="pair"></param>
+    /// <returns></returns>
     private IEnumerator UpdateLegSetRot(LegSet pair)
     {
         Vector3 holdPos = pair.parentBone.position;
@@ -273,28 +303,22 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             int vel = (int)(holdToNew.sqrMagnitude * multiplier);
 
-            if(vel > 1)
+            if(printVel)
             {
-                if(pair.restingToAnimation < 1)
-                {
-                    pair.restingToAnimation += footTransitionSpeedToAnim * Time.deltaTime;
+                print(vel);
+            }
 
-                }
-                else
-                {
-                    pair.restingToAnimation = 1.0f;
-                }
+            // The calculations to change a set's lerp value
+            // is not done here because this is done at a consistent
+            // frame time which would NOT look smooth for a user 
+            if(vel > minVelToMove)
+            {
+                pair.TurningToIdle = true;
+                
             }
             else
             {
-                if(pair.restingToAnimation > 0)
-                {
-                    pair.restingToAnimation -= footTransitionSpeedToIdle * Time.deltaTime;
-                }
-                else
-                {
-                    pair.restingToAnimation = 0.0f;
-                }
+                pair.TurningToIdle = false;
             }
 
             yield return new WaitForSeconds(time);
@@ -312,10 +336,13 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [SerializeField] public Transform ikTargetRight;
         [SerializeField] [Range(0,1)] public float restingToAnimation;
 
+
+
         // Avaliable for code use but not meant for editor
         public float Rot { get; set; }
         public Vector3 FootPosLeft { get; set; }
         public Vector3 FootPosRight { get; set; }
+        public bool TurningToIdle { get; set; }
     }
 
     [System.Serializable]

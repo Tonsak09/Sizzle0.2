@@ -13286,11 +13286,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7721200724511234079, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.45969
+      value: 0.45969003
       objectReference: {fileID: 0}
     - target: {fileID: 7721200724511234079, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.037976854
+      value: 0.03797686
       objectReference: {fileID: 0}
     - target: {fileID: 7721200724511234079, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.y
@@ -13298,7 +13298,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7721200724511234079, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.073051855
+      value: -0.07305187
       objectReference: {fileID: 0}
     - target: {fileID: 7782122032926639630, guid: 4da8cb8f6b7edd44ea893859c5aa9d85, type: 3}
       propertyPath: m_LocalPosition.x
@@ -13823,12 +13823,28 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 577562156, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
-      propertyPath: footTransitionSpeedToAnim
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 577562156, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
+      propertyPath: minVelToMove
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 577562156, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
+      propertyPath: footTransitionSpeedToAnim
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 577562156, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
       propertyPath: footTransitionSpeedToIdle
-      value: 25
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 577562156, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
+      propertyPath: footTransitionSpeedToAnimTrue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 577562156, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
+      propertyPath: footTransitionSpeedToIdleTrue
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 577562157, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
       propertyPath: cam
@@ -13877,6 +13893,10 @@ PrefabInstance:
     - target: {fileID: 8578936579443129708, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8954653530480682961, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8954653530480682966, guid: 4e21430c5f0018c4d8d58a72b7243706, type: 3}
       propertyPath: m_Name
