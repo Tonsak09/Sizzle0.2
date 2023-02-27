@@ -308,4 +308,9 @@ public static class Maths
     {
         return a + (b - a) * t;
     }
+
+    public static Vector3 MirrorOnY(Vector3 vec)
+    {
+        return new Vector3(-vec.x, vec.y, vec.z);
+    }
 }
