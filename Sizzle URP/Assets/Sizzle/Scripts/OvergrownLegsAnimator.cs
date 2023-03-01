@@ -10,11 +10,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     [Header("Animation")]
     [SerializeField] AnimationDetails frontAnimationDetails;
+    [SerializeField] AnimationDetails backAnimationDetails;
 
     [Header("Settings")]
     [Tooltip("The speed that the animation plays in ratio to the distance travlled")]
     [SerializeField] float disToAngle;
+    [Tooltip("Speed for foot to turn to idle")]
     [SerializeField] float footTransitionSpeedToIdle;
+    [Tooltip("Speed for foot to turn to animation")]
     [SerializeField] float footTransitionSpeedToAnim;
     [Space]
     [SerializeField] bool printVel;
@@ -46,56 +49,72 @@ public class OvergrownLegsAnimator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(UpdateLegVelAndTransitions(front));
-        StartCoroutine(UpdateLegSetRot(front));
+        front.RotRight = front.legRotOffset;
+        back.RotLeft = back.legRotOffset;
 
-        StartCoroutine(LegPair(front, frontAnimationDetails));
-        StartCoroutine(AnimationLogic(front, frontAnimationDetails));
+        StartCoroutine(StartCoAfterTime(0.5f));
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator StartCoAfterTime(float time)
     {
-        
+        yield return new WaitForSeconds(time);
+
+        StartCoroutines(front, frontAnimationDetails);
+        StartCoroutines(back, backAnimationDetails);
+    }
+
+
+    private void StartCoroutines(LegSet set, AnimationDetails details)
+    {
+        StartCoroutine(UpdateLegVelAndTransitions(set));
+        StartCoroutine(UpdateLegSetRot(set));
+        StartCoroutine(LegPair(set, details));
+        StartCoroutine(AnimationLogic(set, details));
+    }
+
+    
+    private void Update()
+    {
+        print("Front right: " + front.RotRight + " Front left: " + front.RotLeft);
     }
 
     /// <summary>
     /// This coroutine is in charge of bringing the foot to 
     /// either the animation or resting positions 
     /// </summary>
-    /// <param name="pair"></param>
+    /// <param name="set"></param>
     /// <returns></returns>
-    private IEnumerator AnimationLogic(LegSet pair, AnimationDetails details)
+    private IEnumerator AnimationLogic(LegSet set, AnimationDetails details)
     {
         while(true)
         {
 
-            if(pair.TurningToIdle)
+            if(set.TurningToIdle)
             {
                 // Logic to turn the foot smoothly towards the resting position 
-                if (pair.restingToAnimation < 1)
+                if (set.restingToAnimation < 1)
                 {
-                    pair.restingToAnimation += footTransitionSpeedToAnim * Time.deltaTime;
+                    set.restingToAnimation += footTransitionSpeedToAnim * Time.deltaTime;
                 }
                 else
                 {
-                    pair.restingToAnimation = 1.0f;
+                    set.restingToAnimation = 1.0f;
                 }
             }
             else
             {
-                if (pair.restingToAnimation > 0)
+                if (set.restingToAnimation > 0)
                 {
-                    pair.restingToAnimation -= footTransitionSpeedToIdle * Time.deltaTime;
+                    set.restingToAnimation -= footTransitionSpeedToIdle * Time.deltaTime;
                 }
                 else
                 {
-                    pair.restingToAnimation = 0.0f;
+                    set.restingToAnimation = 0.0f;
                 }
             }
 
 
-            if (pair.restingToAnimation < 1)
+            if (set.restingToAnimation < 1)
             {
                 // Since our logic is not simply refering
                 // to the raycast done in the leg pair coroutine
@@ -111,29 +130,29 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
                 // Lerps position to the ground 
                 Vector3 pointLeft = details.animationKeys[0];
-                if (Physics.Raycast(front.parentBone.TransformPoint(pointLeft), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+                if (Physics.Raycast(set.parentBone.TransformPoint(pointLeft), Vector3.down, out hit, maxRaycastDis, raycastLayer))
                 {
                     pointLeft = hit.point + Vector3.up * details.footOffset;
                 }
                 
                 // Positioning is calculated locally rather than globally 
-                pair.ikTargetLeft.position = Vector3.Lerp(pointLeft, pair.parentBone.TransformPoint(pair.FootPosLeft), pair.restingToAnimation);
+                set.ikTargetLeft.position = Vector3.Lerp(pointLeft, set.parentBone.TransformPoint(set.FootPosLeft), set.restingToAnimation);
 
 
                 Vector3 pointRight = Maths.MirrorOnY(details.animationKeys[0]);
-                if (Physics.Raycast(front.parentBone.TransformPoint(pointRight), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+                if (Physics.Raycast(set.parentBone.TransformPoint(pointRight), Vector3.down, out hit, maxRaycastDis, raycastLayer))
                 {
                     pointRight = hit.point + Vector3.up * details.footOffset;
                 }
 
                 // Positioning is calculated locally rather than globally 
-                pair.ikTargetRight.position = Vector3.Lerp(pointRight, pair.parentBone.TransformPoint(pair.FootPosRight), pair.restingToAnimation);
+                set.ikTargetRight.position = Vector3.Lerp(pointRight, set.parentBone.TransformPoint(set.FootPosRight), set.restingToAnimation);
 
             }
             else
             {
-                pair.ikTargetLeft.position = pair.parentBone.TransformPoint(pair.FootPosLeft);
-                pair.ikTargetRight.position = pair.parentBone.TransformPoint(pair.FootPosRight);
+                set.ikTargetLeft.position = set.parentBone.TransformPoint(set.FootPosLeft);
+                set.ikTargetRight.position = set.parentBone.TransformPoint(set.FootPosRight);
             }
 
             yield return null;
@@ -168,35 +187,35 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
-    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool oppositeLeg = false)
+    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
     {
         // Gets lerp that goes across whole animation 
         // Just takes the rotation and turns it into a 0 to 1 scale 
-        float currentLerp = pair.Rot / 360.0f;
+        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
 
         // Derrives from: 
         // index * lerpPerFrame <= currentLerp;
         int index = Mathf.FloorToInt(currentLerp / lerpPerFrame);
 
         AnimationCurve curve = details.keyConnectionCurves[index];
-        Vector3 previousPos = oppositeLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
+        Vector3 previousPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
         Vector3 nextPos;
 
 
         // Gets next position. If necessary then loop 
         if (index + 1 < details.animationKeys.Count)
         {
-            nextPos = oppositeLeg ? Maths.MirrorOnY(details.animationKeys[index + 1]) : details.animationKeys[index + 1];
+            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index + 1]) : details.animationKeys[index + 1];
         }
         else
         {
-            nextPos = oppositeLeg ? Maths.MirrorOnY(details.animationKeys[0]) : details.animationKeys[0];
+            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[0]) : details.animationKeys[0];
         }
 
         if (index == 0)
         {
             RaycastHit hit;
-            if (Physics.Raycast(front.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
             {
                 previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
             }
@@ -204,7 +223,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         else if (index == details.animationKeys.Count - 1)
         {
             RaycastHit hit;
-            if (Physics.Raycast(front.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
             {
                 nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
             }
@@ -213,7 +232,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
 
 
-        if(oppositeLeg)
+        if(isRightLeg)
         {
             pair.FootPosRight = previousPos;
         }
@@ -259,7 +278,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
 
         // Set feet position
-        if(oppositeLeg)
+        if(isRightLeg)
         {
             pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
         }
@@ -289,13 +308,23 @@ public class OvergrownLegsAnimator : MonoBehaviour
             float newDis = holdToNew.sqrMagnitude;
             holdPos = pair.parentBone.position;
 
-            pair.Rot += newDis * disToAngle;
+            pair.RotRight += newDis * disToAngle;
+            pair.RotLeft += newDis * disToAngle;
 
             // Loops value if over 360 
-            if (pair.Rot >= 360)
+            if (pair.RotRight >= 360)
+            {
+                print("loop right " + pair.RotRight);
+
+                // Loop values 
+                pair.RotRight = 0;
+            }
+
+            if (pair.RotLeft >= 360)
             {
                 // Loop values 
-                pair.Rot = 0;
+                pair.RotLeft = 0;
+                print("loop left");
             }
 
             yield return null;
@@ -359,10 +388,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [SerializeField] public Transform ikTargetLeft;
         [SerializeField] public Transform ikTargetRight;
         [SerializeField] [Range(0,1)] public float restingToAnimation;
+        [SerializeField] public float legRotOffset;
 
+        private float rotLeft;
+        private float rotRight;
 
         // Avaliable for code use but not meant for editor
-        public float Rot { get; set; }
+        public float RotLeft { get { return rotLeft; } set { rotLeft = value; } }
+        public float RotRight { get { return rotRight; } set { rotRight = value; } }
         public Vector3 FootPosLeft { get; set; }
         public Vector3 FootPosRight { get; set; }
         public bool TurningToIdle { get; set; }
@@ -381,38 +414,41 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        DisplayGizmos(front, frontAnimationDetails, frontOffsetCenter);
+        DisplayGizmos(back, backAnimationDetails, Vector3.zero);
+    }
+
+    private void DisplayGizmos(LegSet set, AnimationDetails details, Vector3 offset)
+    {
         // Transform of gizmos is based on the parentBone 
-        Matrix4x4 rotationMatrix = Matrix4x4.TRS(front.parentBone.position, front.parentBone.rotation, Vector3.one);
+        Matrix4x4 rotationMatrix = Matrix4x4.TRS(set.parentBone.position, set.parentBone.rotation, Vector3.one);
         Gizmos.matrix = rotationMatrix;
-        
+
 
         switch (display)
         {
             case DisplayMode.Wheel:
                 Gizmos.color = wheelColor;
 
-                Vector3 pairCenter = frontOffsetCenter;
-                Gizmos.DrawSphere(pairCenter, 0.01f);
+                // Draws center of wheel
+                Gizmos.DrawSphere(offset, 0.01f);
 
                 // Visualizes the wheels 
-                DrawWheel(pairCenter + Vector3.right * wheelSideOffset, front.Rot);
-                DrawWheel(pairCenter - Vector3.right * wheelSideOffset, front.Rot);
+                DrawWheel(offset + Vector3.right * wheelSideOffset, set.RotRight);
+                DrawWheel(offset - Vector3.right * wheelSideOffset, set.RotLeft);
                 break;
             case DisplayMode.Animation:
                 // Draws out the animation curves and points 
-                DrawAnimationPath(frontAnimationDetails);
+                DrawAnimationPath(set, details);
 
                 // Draws current Point along path 
                 Gizmos.color = Color.red;
-                Gizmos.DrawSphere(front.FootPosRight, 0.01f);
+                Gizmos.DrawSphere(set.FootPosRight, 0.01f);
 
                 break;
             case DisplayMode.None:
                 break;
         }
-
-
-
     }
 
     private void DrawWheel(Vector3 center, float wheelRot)
@@ -439,7 +475,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
-    private void DrawAnimationPath(AnimationDetails details)
+    private void DrawAnimationPath(LegSet set, AnimationDetails details)
     {
         Gizmos.color = animationColor;
 
@@ -452,14 +488,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
             if(i + 1 < details.animationKeys.Count)
             {
                 // Line from current frame to next 
-                DrawAnimationCurve(details, i, i + 1);
-                DrawAnimationCurve(details, i, i + 1, true);
+                DrawAnimationCurve(set, details, i, i + 1);
+                DrawAnimationCurve(set, details, i, i + 1, true);
             }
             else
             {
                 // Loops
-                DrawAnimationCurve(details, i, 0);
-                DrawAnimationCurve(details, i, 0, true);
+                DrawAnimationCurve(set, details, i, 0);
+                DrawAnimationCurve(set, details, i, 0, true);
             }
         }
         
@@ -471,7 +507,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// <param name="details"></param>
     /// <param name="currentIndex"></param>
     /// <param name="nextIndex"></param>
-    private void DrawAnimationCurve(AnimationDetails details, int currentIndex, int nextIndex, bool inverseX = false)
+    private void DrawAnimationCurve(LegSet set, AnimationDetails details, int currentIndex, int nextIndex, bool inverseX = false)
     {
         float lerp = 0;
         float changeInLerp = 1.0f / details.levelOfDetail[currentIndex];
@@ -498,14 +534,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             RaycastHit hit;
             Vector3 point = Vector3.zero;
-            if (Physics.Raycast(front.parentBone.TransformPoint(currentPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            if (Physics.Raycast(set.parentBone.TransformPoint(currentPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
             {
                 Gizmos.color = animationFloorColor;
                 point = hit.point + Vector3.up * details.footOffset;
-                Gizmos.DrawSphere(front.parentBone.InverseTransformPoint(point), keySize);
+                Gizmos.DrawSphere(set.parentBone.InverseTransformPoint(point), keySize);
             }
 
-            currentPoint = front.parentBone.InverseTransformPoint(point);
+            currentPoint = set.parentBone.InverseTransformPoint(point);
         }
         else if(currentIndex == details.animationKeys.Count - 1)
         {
@@ -513,14 +549,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             RaycastHit hit;
             Vector3 point = Vector3.zero;
-            if (Physics.Raycast(front.parentBone.TransformPoint(nextPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            if (Physics.Raycast(set.parentBone.TransformPoint(nextPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
             {
                 Gizmos.color = animationFloorColor;
                 point = hit.point + Vector3.up * details.footOffset;
-                Gizmos.DrawSphere(front.parentBone.InverseTransformPoint(point), keySize);
+                Gizmos.DrawSphere(set.parentBone.InverseTransformPoint(point), keySize);
             }
 
-            nextPoint = front.parentBone.InverseTransformPoint(point);
+            nextPoint = set.parentBone.InverseTransformPoint(point);
         }
         else
         {
