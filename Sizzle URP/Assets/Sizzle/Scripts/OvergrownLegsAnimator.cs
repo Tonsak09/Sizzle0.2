@@ -17,11 +17,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] float disToAngle;
     [Tooltip("Speed for foot to turn to idle")]
     [SerializeField] float footTransitionSpeedToIdle;
+    [SerializeField] AnimationCurve footTransitionToIdleCurve; // Speed of transition is modified over curve 
     [Tooltip("Speed for foot to turn to animation")]
     [SerializeField] float footTransitionSpeedToAnim;
+    [SerializeField] AnimationCurve footTransitionToAnimCurve;// Speed of transition is modified over curve 
     [Space]
     [SerializeField] bool printVel;
-    [SerializeField] int minVelToMove;
+    [SerializeField] int velWhenToAnim;
+    [SerializeField] int velCompletelyAnim;
     [Space]
     [SerializeField] float maxRaycastDis = 10.0f;
     [SerializeField] LayerMask raycastLayer;
@@ -94,25 +97,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
         nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[nextIndex]) : details.animationKeys[nextIndex];
 
 
-        /*// Gets next position. If necessary then loop 
-        if (index + 1 < details.animationKeys.Count)
-        {
-            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index + 1]) : details.animationKeys[index + 1];
-        }
-        else
-        {
-            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[0]) : details.animationKeys[0];
-        }*/
-
-        if (index == 0)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
-            }
-        }
-        else if (index == details.animationKeys.Count - 1)
+        // Check if next index is a raycast 
+        if (details.raycastIndexList.Contains(nextIndex))
         {
             RaycastHit hit;
             if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
@@ -120,8 +106,16 @@ public class OvergrownLegsAnimator : MonoBehaviour
                 nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
             }
         }
-        // Else the position is just normal
 
+        // Check if the current index should be a raycast 
+        if (details.raycastIndexList.Contains(index))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
+            }
+        }
 
 
         if (isRightLeg)
@@ -192,13 +186,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
     {
         while(true)
         {
-
-            if(set.TurningToIdle)
+            float difference = Mathf.Abs(set.TargetLerp - set.restingToAnimation);
+            print(difference);
+            if(set.TargetLerp > set.restingToAnimation)
             {
                 // Logic to turn the foot smoothly towards the resting position 
                 if (set.restingToAnimation < 1)
                 {
-                    set.restingToAnimation += footTransitionSpeedToAnim * Time.deltaTime;
+                    set.restingToAnimation += footTransitionToAnimCurve.Evaluate(difference) * footTransitionSpeedToAnim * Time.deltaTime;
                 }
                 else
                 {
@@ -209,7 +204,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
             {
                 if (set.restingToAnimation > 0)
                 {
-                    set.restingToAnimation -= footTransitionSpeedToIdle * Time.deltaTime;
+                    set.restingToAnimation -= footTransitionToIdleCurve.Evaluate(difference) * footTransitionSpeedToIdle * Time.deltaTime;
                 }
                 else
                 {
@@ -371,13 +366,13 @@ public class OvergrownLegsAnimator : MonoBehaviour
             // The calculations to change a set's lerp value
             // is not done here because this is done at a consistent
             // frame time which would NOT look smooth for a user 
-            if(vel > minVelToMove)
+            if(vel > velWhenToAnim && vel < velCompletelyAnim)
             {
-                pair.TurningToIdle = true;
+                pair.TargetLerp = Mathf.InverseLerp(velWhenToAnim, velCompletelyAnim, vel);
             }
             else
             {
-                pair.TurningToIdle = false;
+                pair.TargetLerp = vel >= velCompletelyAnim ? 1 : 0;
             }
 
             yield return new WaitForSeconds(time);
@@ -404,7 +399,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         public float RotRight { get { return rotRight; } set { rotRight = value; } }
         public Vector3 FootPosLeft { get; set; }
         public Vector3 FootPosRight { get; set; }
-        public bool TurningToIdle { get; set; }
+        public float TargetLerp { get; set; }
     }
 
     [System.Serializable]
@@ -418,6 +413,10 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [Space]
         [SerializeField] public float footOffset;
     }
+
+
+
+
 
     private void OnDrawGizmos()
     {
