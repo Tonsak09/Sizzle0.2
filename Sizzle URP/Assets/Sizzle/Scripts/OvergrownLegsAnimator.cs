@@ -72,11 +72,115 @@ public class OvergrownLegsAnimator : MonoBehaviour
         StartCoroutine(AnimationLogic(set, details));
     }
 
-    
-    private void Update()
+    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
     {
-        print("Front right: " + front.RotRight + " Front left: " + front.RotLeft);
+        // Gets lerp that goes across whole animation 
+        // Just takes the rotation and turns it into a 0 to 1 scale 
+        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
+
+        // Derrives from: 
+        // index * lerpPerFrame <= currentLerp;
+        int index = Mathf.FloorToInt(currentLerp / lerpPerFrame);
+        int nextIndex = index + 1;
+
+        AnimationCurve curve = details.keyConnectionCurves[index];
+        Vector3 previousPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
+        Vector3 nextPos;
+
+        if(nextIndex >= details.animationKeys.Count)
+        {
+            nextIndex = 0;
+        }
+        nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[nextIndex]) : details.animationKeys[nextIndex];
+
+
+        /*// Gets next position. If necessary then loop 
+        if (index + 1 < details.animationKeys.Count)
+        {
+            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index + 1]) : details.animationKeys[index + 1];
+        }
+        else
+        {
+            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[0]) : details.animationKeys[0];
+        }*/
+
+        if (index == 0)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
+            }
+        }
+        else if (index == details.animationKeys.Count - 1)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
+            }
+        }
+        // Else the position is just normal
+
+
+
+        if (isRightLeg)
+        {
+            pair.FootPosRight = previousPos;
+        }
+        else
+        {
+            pair.FootPosLeft = previousPos;
+        }
+
+        float lerpPerDetail = 1.0f / details.levelOfDetail[index];
+        // Check if cache needs to be changed 
+        if (index != frameIndexHold)
+        {
+            frameIndexHold = index;
+            cacheLinePoints.Clear();
+
+            for (int i = 0; i < details.levelOfDetail[index]; i++)
+            {
+                // Adds points based on the line that is creates between
+                // two key frames 
+                float lerp = i * lerpPerDetail;
+                Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
+                cacheLinePoints.Add(point);
+            }
+
+            // Adds a final position so it does not reset to start of frame 
+            cacheLinePoints.Add(nextPos);
+
+        }
+
+        // Used to locate position along the detail path 
+
+        // Finds out what is the lerp that is currently between the current index point and its next destination 
+        // Used to find the current index 
+        float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
+
+
+        // Derrives from: 
+        // index * lerpPer <= currentLerp;
+        int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
+        int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
+
+        // The lerp value between two details 
+        float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
+
+        // Set feet position
+        if (isRightLeg)
+        {
+            pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+        }
+        else
+        {
+            pair.FootPosLeft = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+        }
+        return frameIndexHold;
     }
+
 
     /// <summary>
     /// This coroutine is in charge of bringing the foot to 
@@ -187,107 +291,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
-    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
-    {
-        // Gets lerp that goes across whole animation 
-        // Just takes the rotation and turns it into a 0 to 1 scale 
-        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
-
-        // Derrives from: 
-        // index * lerpPerFrame <= currentLerp;
-        int index = Mathf.FloorToInt(currentLerp / lerpPerFrame);
-
-        AnimationCurve curve = details.keyConnectionCurves[index];
-        Vector3 previousPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
-        Vector3 nextPos;
-
-
-        // Gets next position. If necessary then loop 
-        if (index + 1 < details.animationKeys.Count)
-        {
-            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index + 1]) : details.animationKeys[index + 1];
-        }
-        else
-        {
-            nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[0]) : details.animationKeys[0];
-        }
-
-        if (index == 0)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
-            }
-        }
-        else if (index == details.animationKeys.Count - 1)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
-            }
-        }
-        // Else the position is just normal
-
-
-
-        if(isRightLeg)
-        {
-            pair.FootPosRight = previousPos;
-        }
-        else
-        {
-            pair.FootPosLeft = previousPos;
-        }
-
-        float lerpPerDetail = 1.0f / details.levelOfDetail[index];
-        // Check if cache needs to be changed 
-        if (index != frameIndexHold)
-        {
-            frameIndexHold = index;
-            cacheLinePoints.Clear();
-
-            for (int i = 0; i < details.levelOfDetail[index]; i++)
-            {
-                // Adds points based on the line that is creates between
-                // two key frames 
-                float lerp = i * lerpPerDetail;
-                Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
-                cacheLinePoints.Add(point);
-            }
-
-            // Adds a final position so it does not reset to start of frame 
-            cacheLinePoints.Add(nextPos);
-
-        }
-
-        // Used to locate position along the detail path 
-
-        // Finds out what is the lerp that is currently between the current index point and its next destination 
-        // Used to find the current index 
-        float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
-
-
-        // Derrives from: 
-        // index * lerpPer <= currentLerp;
-        int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
-        int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
-
-        // The lerp value between two details 
-        float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
-
-        // Set feet position
-        if(isRightLeg)
-        {
-            pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-        }
-        else
-        {
-            pair.FootPosLeft = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-        }
-        return frameIndexHold;
-    }
 
     /// <summary>
     /// Updates the rotation of a leg set based 
@@ -314,17 +317,20 @@ public class OvergrownLegsAnimator : MonoBehaviour
             // Loops value if over 360 
             if (pair.RotRight >= 360)
             {
-                print("loop right " + pair.RotRight);
-
+                // Gets overflow even if multiple 360's over 
+                float overFlow = pair.RotRight % 360;
+               
                 // Loop values 
-                pair.RotRight = 0;
+                pair.RotRight = overFlow;
             }
 
             if (pair.RotLeft >= 360)
             {
+                // Gets overflow even if multiple 360's over 
+                float overFlow = pair.RotLeft % 360;
+
                 // Loop values 
-                pair.RotLeft = 0;
-                print("loop left");
+                pair.RotLeft = overFlow;
             }
 
             yield return null;
@@ -407,10 +413,11 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [SerializeField] public List<Vector3> animationKeys;
         [SerializeField] public List<AnimationCurve> keyConnectionCurves;
         [SerializeField] public List<int> levelOfDetail;
+        [Tooltip("What keyframes use raycast positioning to decide their position")]
+        [SerializeField] public List<int> raycastIndexList;
         [Space]
         [SerializeField] public float footOffset;
     }
-
 
     private void OnDrawGizmos()
     {
@@ -504,9 +511,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// <summary>
     /// Draws the animation curve between two of the animation keys 
     /// </summary>
-    /// <param name="details"></param>
-    /// <param name="currentIndex"></param>
-    /// <param name="nextIndex"></param>
     private void DrawAnimationCurve(LegSet set, AnimationDetails details, int currentIndex, int nextIndex, bool inverseX = false)
     {
         float lerp = 0;
@@ -527,8 +531,38 @@ public class OvergrownLegsAnimator : MonoBehaviour
             nextPoint = new Vector3(-details.animationKeys[nextIndex].x, details.animationKeys[nextIndex].y, details.animationKeys[nextIndex].z);
         }
 
-        
-        if (currentIndex == 0)
+        // Check if next index is a raycast 
+        if (details.raycastIndexList.Contains(nextIndex))
+        {
+            RaycastHit hit;
+            Vector3 point = Vector3.zero;
+            if (Physics.Raycast(set.parentBone.TransformPoint(nextPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                Gizmos.color = animationFloorColor;
+                point = hit.point + Vector3.up * details.footOffset;
+                Gizmos.DrawSphere(set.parentBone.InverseTransformPoint(point), keySize);
+            }
+
+            nextPoint = set.parentBone.InverseTransformPoint(point);
+        }
+
+        // Check if the current index should be a raycast 
+        if (details.raycastIndexList.Contains(currentIndex))
+        {
+            RaycastHit hit;
+            Vector3 point = Vector3.zero;
+            if (Physics.Raycast(set.parentBone.TransformPoint(currentPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                Gizmos.color = animationFloorColor;
+                point = hit.point + Vector3.up * details.footOffset;
+                Gizmos.DrawSphere(set.parentBone.InverseTransformPoint(point), keySize);
+            }
+
+            currentPoint = set.parentBone.InverseTransformPoint(point);
+        }
+
+
+        /*if (currentIndex == 0)
         {
             // Bring foot to ground rather than just animation point 
 
@@ -560,9 +594,9 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
         else
         {
-            Gizmos.color = animationColor;
-        }
-
+            
+        }*/
+        Gizmos.color = animationColor;
         for (int j = 0; j < details.levelOfDetail[currentIndex]; j++)
         {
             // Curved points from one keyframe to the next 
