@@ -11,6 +11,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [Header("Animation")]
     [SerializeField] AnimationDetails frontAnimationDetails;
     [SerializeField] AnimationDetails backAnimationDetails;
+    [SerializeField] ForceAnimationDetails frontForceAnimation;
 
     [Header("Settings")]
     [Tooltip("The speed that the animation plays in ratio to the distance travlled")]
@@ -56,6 +57,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
         back.RotLeft = back.legRotOffset;
 
         StartCoroutine(StartCoAfterTime(0.5f));
+    }
+
+    private void Update()
+    {
+        if(Input.GetKey(KeyCode.R))
+        {
+            frontForceAnimation.rb.AddRelativeTorque(frontForceAnimation.torqueForce * Vector3.forward * Time.deltaTime);
+        }
     }
 
     private IEnumerator StartCoAfterTime(float time)
@@ -414,8 +423,12 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [SerializeField] public float footOffset;
     }
 
-
-
+    [System.Serializable]
+    public class ForceAnimationDetails
+    {
+        [SerializeField] public Rigidbody rb;
+        [SerializeField] public float torqueForce;
+    }
 
 
     private void OnDrawGizmos()
