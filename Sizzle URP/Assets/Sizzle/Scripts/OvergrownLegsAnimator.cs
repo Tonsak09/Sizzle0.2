@@ -11,7 +11,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [Header("Animation")]
     [SerializeField] AnimationDetails frontAnimationDetails;
     [SerializeField] AnimationDetails backAnimationDetails;
-    [SerializeField] ForceAnimationDetails frontForceAnimation;
+    [SerializeField] WobbleAnimationDetails frontWobbleDetails;
 
     [Header("Settings")]
     [Tooltip("The speed that the animation plays in ratio to the distance travlled")]
@@ -36,6 +36,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     {
         Wheel, 
         Animation,
+        BoneRot,
         None
     }
 
@@ -49,6 +50,11 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] Color animationFloorColor;
     [SerializeField] float keySize = 0.01f;
     [SerializeField] float detailSize = 0.002f;
+    [Space]
+    [SerializeField] Color balanceCurrentColor;
+    [SerializeField] Color balanceGoalColor;
+    [SerializeField] float balanceCurrentSize;
+    [SerializeField] float balanceGoalSize;
 
     // Start is called before the first frame update
     void Start()
@@ -57,24 +63,18 @@ public class OvergrownLegsAnimator : MonoBehaviour
         back.RotLeft = back.legRotOffset;
 
         StartCoroutine(StartCoAfterTime(0.5f));
+
+        bool statement = false;
+        print(statement ? "This is true" : "This is false");
     }
 
     private void Update()
     {
         if(Input.GetKey(KeyCode.R))
         {
-            frontForceAnimation.rb.AddRelativeTorque(frontForceAnimation.torqueForce * Vector3.forward * Time.deltaTime);
+            TryWobbleRotate(frontWobbleDetails);
         }
     }
-
-    private IEnumerator StartCoAfterTime(float time)
-    {
-        yield return new WaitForSeconds(time);
-
-        StartCoroutines(front, frontAnimationDetails);
-        StartCoroutines(back, backAnimationDetails);
-    }
-
 
     private void StartCoroutines(LegSet set, AnimationDetails details)
     {
@@ -82,6 +82,35 @@ public class OvergrownLegsAnimator : MonoBehaviour
         StartCoroutine(UpdateLegSetRot(set));
         StartCoroutine(LegPair(set, details));
         StartCoroutine(AnimationLogic(set, details));
+    }
+
+    /// <summary>
+    /// Begins a wobble rotate animation onto the Sizzle
+    /// body. Primarily used during walking animation 
+    /// </summary>
+    /// <param name="details"></param>
+    public void TryWobbleRotate(WobbleAnimationDetails details)
+    {
+        if (details.rotationCo == null)
+        {
+            details.rotationCo = StartCoroutine(TryWobbleRotateCo(details));
+        }
+    }
+
+    /// <summary>
+    /// This coroutine moves the bone's target z rotation
+    /// over a period of time 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator TryWobbleRotateCo(WobbleAnimationDetails details)
+    {
+        float lerp = 0;
+
+        while (lerp <= 1)
+        {
+            lerp += Time.deltaTime;
+            yield return null;
+        }
     }
 
     private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
@@ -195,8 +224,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     {
         while(true)
         {
+            // This value is how far the target lerp is from its current lerp
             float difference = Mathf.Abs(set.TargetLerp - set.restingToAnimation);
-            print(difference);
             if(set.TargetLerp > set.restingToAnimation)
             {
                 // Logic to turn the foot smoothly towards the resting position 
@@ -388,6 +417,19 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Begins a coroutine after a set amount of time
+    /// </summary>
+    /// <param name="time"></param>
+    /// <returns></returns>
+    private IEnumerator StartCoAfterTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        StartCoroutines(front, frontAnimationDetails);
+        StartCoroutines(back, backAnimationDetails);
+    }
+
     [System.Serializable]
     public class LegSet
     {
@@ -424,10 +466,17 @@ public class OvergrownLegsAnimator : MonoBehaviour
     }
 
     [System.Serializable]
-    public class ForceAnimationDetails
+    public class WobbleAnimationDetails
     {
-        [SerializeField] public Rigidbody rb;
-        [SerializeField] public float torqueForce;
+        // Settings for adjusting the wobble of Sizzle during
+        // walking 
+
+        [SerializeField] ConfigurableJoint joint;
+        [SerializeField] float rotMag;
+
+        public Coroutine rotationCo { get; set; }
+        public Transform Bone { get { return joint.transform; } }
+
     }
 
 
@@ -465,6 +514,13 @@ public class OvergrownLegsAnimator : MonoBehaviour
                 Gizmos.DrawSphere(set.FootPosRight, 0.01f);
 
                 break;
+
+            case DisplayMode.BoneRot:
+
+                DrawBalance(frontWobbleDetails);
+
+                break;
+
             case DisplayMode.None:
                 break;
         }
@@ -573,41 +629,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
             currentPoint = set.parentBone.InverseTransformPoint(point);
         }
 
-
-        /*if (currentIndex == 0)
-        {
-            // Bring foot to ground rather than just animation point 
-
-            RaycastHit hit;
-            Vector3 point = Vector3.zero;
-            if (Physics.Raycast(set.parentBone.TransformPoint(currentPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                Gizmos.color = animationFloorColor;
-                point = hit.point + Vector3.up * details.footOffset;
-                Gizmos.DrawSphere(set.parentBone.InverseTransformPoint(point), keySize);
-            }
-
-            currentPoint = set.parentBone.InverseTransformPoint(point);
-        }
-        else if(currentIndex == details.animationKeys.Count - 1)
-        {
-            // Draws from detail path to the ground
-
-            RaycastHit hit;
-            Vector3 point = Vector3.zero;
-            if (Physics.Raycast(set.parentBone.TransformPoint(nextPoint), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                Gizmos.color = animationFloorColor;
-                point = hit.point + Vector3.up * details.footOffset;
-                Gizmos.DrawSphere(set.parentBone.InverseTransformPoint(point), keySize);
-            }
-
-            nextPoint = set.parentBone.InverseTransformPoint(point);
-        }
-        else
-        {
-            
-        }*/
         Gizmos.color = animationColor;
         for (int j = 0; j < details.levelOfDetail[currentIndex]; j++)
         {
@@ -620,5 +641,20 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             lerp += changeInLerp;
         }
+    }
+
+    /// <summary>
+    /// Visualize the wobble and balance details 
+    /// </summary>
+    /// <param name="details"></param>
+    private void DrawBalance(WobbleAnimationDetails details)
+    {
+        Gizmos.color = balanceCurrentColor;
+        Gizmos.DrawLine(details.Bone.position, details.Bone.position + Vector3.right * balanceCurrentSize / 2);
+        Gizmos.DrawLine(details.Bone.position, details.Bone.position - Vector3.right * balanceCurrentSize / 2);
+
+        Gizmos.color = balanceGoalColor;
+        Gizmos.DrawLine(details.Bone.position, details.Bone.position + Vector3.right * balanceGoalSize / 2);
+        Gizmos.DrawLine(details.Bone.position, details.Bone.position - Vector3.right * balanceGoalSize / 2);
     }
 }
