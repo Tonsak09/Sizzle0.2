@@ -11,7 +11,10 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [Header("Animation")]
     [SerializeField] AnimationDetails frontAnimationDetails;
     [SerializeField] AnimationDetails backAnimationDetails;
-    [SerializeField] WobbleAnimationDetails frontWobbleDetails;
+    [Space]
+    [SerializeField] WobbleSettings wobbleAnimationDetails;
+    [Space]
+    [SerializeField] IdleAnimDetails idleAnimationDetails;
 
     [Header("Settings")]
     [Tooltip("The speed that the animation plays in ratio to the distance travlled")]
@@ -37,24 +40,34 @@ public class OvergrownLegsAnimator : MonoBehaviour
         Wheel, 
         Animation,
         BoneRot,
+        Idle,
         None
     }
 
+    [Header("Wheel")]
     [SerializeField] Color wheelColor;
     [Tooltip("How far the wheels will be from the sides")]
     [SerializeField] float wheelSideOffset;
     [SerializeField] float wheelRadius;
     [SerializeField] Vector3 frontOffsetCenter;
     [Space]
+    [Header("Animation Walk")]
     [SerializeField] Color animationColor;
     [SerializeField] Color animationFloorColor;
     [SerializeField] float keySize = 0.01f;
     [SerializeField] float detailSize = 0.002f;
     [Space]
+    [Header("Balance")]
     [SerializeField] Color balanceCurrentColor;
     [SerializeField] Color balanceGoalColor;
     [SerializeField] float balanceCurrentSize;
     [SerializeField] float balanceGoalSize;
+    [Space]
+    [Header("Idle")]
+    [SerializeField] Color idleRaycastColor;
+    [SerializeField] Color idleHitColor;
+    [SerializeField] float idleRaycastSize;
+    [SerializeField] float idleHitSize;
 
     // Start is called before the first frame update
     void Start()
@@ -63,24 +76,23 @@ public class OvergrownLegsAnimator : MonoBehaviour
         back.RotLeft = back.legRotOffset;
 
         StartCoroutine(StartCoAfterTime(0.5f));
-
-        bool statement = false;
-        print(statement ? "This is true" : "This is false");
     }
 
     private void Update()
     {
-        if(Input.GetKey(KeyCode.R))
+        /*if(Input.GetKey(KeyCode.R))
         {
-            TryWobbleRotate(frontWobbleDetails);
-        }
+            TryWobbleRotate(wobbleAnimationDetails.frontWobbleDetails, test);
+        }*/
     }
 
-    private void StartCoroutines(LegSet set, AnimationDetails details)
+    private void StartCoroutines(LegSet set, AnimationDetails details, WobbleAnimationDetailsFirst wobbleSettings)
     {
         StartCoroutine(UpdateLegVelAndTransitions(set));
         StartCoroutine(UpdateLegSetRot(set));
         StartCoroutine(LegPair(set, details));
+        //StartCoroutine(WobbleLogic(set, wobbleSettings, 1.0f / (float)details.animationKeys.Count));
+        StartCoroutine(WobbleLogic(set, wobbleSettings));
         StartCoroutine(AnimationLogic(set, details));
     }
 
@@ -89,12 +101,16 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// body. Primarily used during walking animation 
     /// </summary>
     /// <param name="details"></param>
-    public void TryWobbleRotate(WobbleAnimationDetails details)
+    public bool TryWobbleRotate(WobbleAnimationDetailsFirst details, bool alternate)
     {
         if (details.rotationCo == null)
         {
-            details.rotationCo = StartCoroutine(TryWobbleRotateCo(details));
+            details.rotationCo = StartCoroutine(TryWobbleRotateCo(details, alternate));
+            return true;
         }
+
+        // System was occupied 
+        return false;
     }
 
     /// <summary>
@@ -102,18 +118,64 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// over a period of time 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator TryWobbleRotateCo(WobbleAnimationDetails details)
+    private IEnumerator TryWobbleRotateCo(WobbleAnimationDetailsFirst details, bool alternate)
     {
         float lerp = 0;
+        float rot = 0;
+        float targetRot = alternate ? details.angle : -details.angle;
+        Vector3 hold = details.joint.targetRotation.eulerAngles;
 
         while (lerp <= 1)
         {
-            lerp += Time.deltaTime;
+            //details.joint.targetRotation = Vector3.Lerp
+            rot = Mathf.LerpAngle(0, targetRot, details.upCurve.Evaluate(lerp));
+
+            // The front wobbles on the z axis
+            // while the back wobbles the x axis 
+            if(details.wobbleZ)
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, rot));
+            }
+            else
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, rot, hold.z));
+            }
+
+            lerp += Time.deltaTime * details.upSpeed;
             yield return null;
         }
+
+        // Bring back 
+        lerp = 0;
+        while (lerp <= 1)
+        {
+            rot = Mathf.LerpAngle(targetRot, 0, details.returnCurve.Evaluate(lerp));
+
+            if (details.wobbleZ)
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, rot));
+            }
+            else
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, rot, hold.z));
+            }
+
+            lerp += Time.deltaTime * details.returnSpeed;
+            yield return null;
+        }
+
+        // CLeanup
+        details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, 0));
+        details.rotationCo = null;
     }
 
-    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
+    /// <summary>
+    /// Use to get a legs current animation key index 
+    /// </summary>
+    /// <param name="pair"></param>
+    /// <param name="isRightLeg"></param>
+    /// <returns></returns>
+    private int GetLegAnimIndex(LegSet pair, float lerpPerFrame, bool isRightLeg)
     {
         // Gets lerp that goes across whole animation 
         // Just takes the rotation and turns it into a 0 to 1 scale 
@@ -121,7 +183,12 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
         // Derrives from: 
         // index * lerpPerFrame <= currentLerp;
-        int index = Mathf.FloorToInt(currentLerp / lerpPerFrame);
+        return Mathf.FloorToInt(currentLerp / lerpPerFrame);
+    }
+
+    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
+    {
+        int index = GetLegAnimIndex(pair, lerpPerFrame, isRightLeg);
         int nextIndex = index + 1;
 
         AnimationCurve curve = details.keyConnectionCurves[index];
@@ -190,6 +257,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
         // Finds out what is the lerp that is currently between the current index point and its next destination 
         // Used to find the current index 
+        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
         float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
 
 
@@ -212,7 +280,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
         return frameIndexHold;
     }
-
 
     /// <summary>
     /// This coroutine is in charge of bringing the foot to 
@@ -324,6 +391,58 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Changes the rotation of Sizzle based on the speed of movement
+    /// and the current frame 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WobbleLogic(LegSet pair, WobbleAnimationDetailsFirst wobbleDetails)
+    {
+        while(true)
+        {
+            yield return null;
+        }
+    }
+
+    private IEnumerator WobbleLogic(LegSet pair, WobbleAnimationDetailsFirst wobbleDetails, float lerpPerFrame)
+    {
+        bool canWobble = true; // As to not repeat if sitting on a frame 
+        int hold = -1;
+
+        bool alternate = false;
+
+        while (true)
+        {
+            if(canWobble)
+            {
+                // Check when to wobble  
+                if (wobbleDetails.indexToWobble.Contains(GetLegAnimIndex(pair, lerpPerFrame, true)))
+                {
+                    bool attempt = TryWobbleRotate(wobbleDetails, alternate);
+
+                    if(attempt)
+                    {
+                        alternate = !alternate;
+                    }
+                }
+
+                canWobble = false;
+                hold = GetLegAnimIndex(pair, lerpPerFrame, !alternate);
+            }
+            else
+            {
+                // THe moment the frame changes Sizzle can wobble again 
+                if(hold != GetLegAnimIndex(pair, lerpPerFrame, !alternate))
+                {
+                    canWobble = true;
+                }
+            }
+            
+
+            yield return null;
+        }
+        
+    }
 
     /// <summary>
     /// Updates the rotation of a leg set based 
@@ -426,8 +545,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
 
-        StartCoroutines(front, frontAnimationDetails);
-        StartCoroutines(back, backAnimationDetails);
+        StartCoroutines(front, frontAnimationDetails, wobbleAnimationDetails.frontWobbleDetails);
+        StartCoroutines(back, backAnimationDetails, wobbleAnimationDetails.backWobbleDetails);
     }
 
     [System.Serializable]
@@ -450,6 +569,10 @@ public class OvergrownLegsAnimator : MonoBehaviour
         public float RotRight { get { return rotRight; } set { rotRight = value; } }
         public Vector3 FootPosLeft { get; set; }
         public Vector3 FootPosRight { get; set; }
+        /// <summary>
+        /// The Lerp value between resting and animation that this set wants 
+        /// to be at. It is referenced in animation logic 
+        /// </summary>
         public float TargetLerp { get; set; }
     }
 
@@ -466,16 +589,49 @@ public class OvergrownLegsAnimator : MonoBehaviour
     }
 
     [System.Serializable]
-    public class WobbleAnimationDetails
+    public class IdleAnimDetails
+    {
+        [SerializeField] public float speed;
+        [SerializeField] public AnimationCurve directCurve;
+        [SerializeField] public float height;
+        [SerializeField] public AnimationCurve heightCurve;
+        [Space]          
+        [SerializeField] public Vector3 offsetToRaycast;
+        [SerializeField] public float raycastRange;
+        [SerializeField] public LayerMask layer;
+    }
+
+    [System.Serializable]
+    public class WobbleSettings
+    {
+        [SerializeField] public WobbleAnimationDetailsFirst frontWobbleDetails;
+        [SerializeField] public WobbleAnimationDetailsFirst backWobbleDetails;
+    }
+
+    [System.Serializable]
+    public class WobbleAnimationDetailsFirst
     {
         // Settings for adjusting the wobble of Sizzle during
         // walking 
 
-        [SerializeField] ConfigurableJoint joint;
-        [SerializeField] float rotMag;
+        [SerializeField] public bool wobbleZ; // Whether to rotae z or x axis 
+        [SerializeField] public ConfigurableJoint joint;
+        [SerializeField] public List<int> indexToWobble;
+        [SerializeField] public float angle;
+
+        [SerializeField] public float upSpeed;
+        [SerializeField] public AnimationCurve upCurve;
+        [SerializeField] public float returnSpeed;
+        [SerializeField] public AnimationCurve returnCurve;
 
         public Coroutine rotationCo { get; set; }
         public Transform Bone { get { return joint.transform; } }
+
+    }
+
+    [System.Serializable]
+    public class WobbleAnimDetails
+    {
 
     }
 
@@ -517,7 +673,13 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             case DisplayMode.BoneRot:
 
-                DrawBalance(frontWobbleDetails);
+                DrawBalance(wobbleAnimationDetails.frontWobbleDetails);
+
+                break;
+
+            case DisplayMode.Idle:
+
+                DrawIdle(idleAnimationDetails.offsetToRaycast);
 
                 break;
 
@@ -647,14 +809,40 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// Visualize the wobble and balance details 
     /// </summary>
     /// <param name="details"></param>
-    private void DrawBalance(WobbleAnimationDetails details)
+    private void DrawBalance(WobbleAnimationDetailsFirst details)
     {
+        Vector3 dir = new Vector3(Mathf.Cos(details.angle), Mathf.Sin(details.angle), 0);
+
         Gizmos.color = balanceCurrentColor;
-        Gizmos.DrawLine(details.Bone.position, details.Bone.position + Vector3.right * balanceCurrentSize / 2);
-        Gizmos.DrawLine(details.Bone.position, details.Bone.position - Vector3.right * balanceCurrentSize / 2);
+        Gizmos.DrawLine(Vector3.zero, dir * balanceCurrentSize / 2);
+        Gizmos.DrawLine(Vector3.zero, -dir * balanceCurrentSize / 2);
 
         Gizmos.color = balanceGoalColor;
-        Gizmos.DrawLine(details.Bone.position, details.Bone.position + Vector3.right * balanceGoalSize / 2);
-        Gizmos.DrawLine(details.Bone.position, details.Bone.position - Vector3.right * balanceGoalSize / 2);
+        Gizmos.DrawLine(Vector3.zero, dir * balanceGoalSize / 2);
+        Gizmos.DrawLine(Vector3.zero, -dir * balanceGoalSize / 2);
+    }
+
+    private void DrawIdle(Vector3 offset)
+    {
+        // Where is the raycast coming from 
+        Gizmos.color = idleRaycastColor;
+        Gizmos.DrawWireSphere(offset, idleRaycastSize);
+
+        // Hit
+        Gizmos.color = idleHitColor;
+
+        RaycastHit hit;
+        // Not changed by the gizmos matrix 
+        Ray ray = new Ray(this.transform.position + this.transform.TransformDirection(offset), Vector3.down);
+
+
+        if (Physics.Raycast(ray, out hit, idleAnimationDetails.raycastRange, idleAnimationDetails.layer))
+        {
+            Vector3 localPoint = this.transform.InverseTransformPoint(hit.point);
+            Gizmos.DrawWireSphere(localPoint, idleHitSize);
+            Gizmos.DrawLine(localPoint, offset);
+
+            print(localPoint);
+        }
     }
 }
