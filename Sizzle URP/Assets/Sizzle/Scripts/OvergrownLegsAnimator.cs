@@ -27,8 +27,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] AnimationCurve footTransitionToAnimCurve;// Speed of transition is modified over curve 
     [Space]
     [SerializeField] bool printVel;
-    [SerializeField] int velWhenToAnim;
-    [SerializeField] int velCompletelyAnim;
+    [SerializeField] int animMinSpeed;
+    [SerializeField] int dashMinSpeed;
     [Space]
     [SerializeField] float maxRaycastDis = 10.0f;
     [SerializeField] LayerMask raycastLayer;
@@ -68,6 +68,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] Color idleHitColor;
     [SerializeField] float idleRaycastSize;
     [SerializeField] float idleHitSize;
+
+    private int velMag;
 
     // Start is called before the first frame update
     void Start()
@@ -289,13 +291,17 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// <returns></returns>
     private IEnumerator AnimationLogic(LegSet set, AnimationDetails details)
     {
+        SizzleState current = SizzleState.Idle;
+        SizzleState target = SizzleState.Idle;
+
         while(true)
         {
-            // This value is how far the target lerp is from its current lerp
+            #region Old
+            /*// This value is how far the target lerp is from its current lerp
             float difference = Mathf.Abs(set.TargetLerp - set.restingToAnimation);
             if(set.TargetLerp > set.restingToAnimation)
             {
-                // Logic to turn the foot smoothly towards the resting position 
+                // Logic to turn the foot smoothly towards the animation logic 
                 if (set.restingToAnimation < 1)
                 {
                     set.restingToAnimation += footTransitionToAnimCurve.Evaluate(difference) * footTransitionSpeedToAnim * Time.deltaTime;
@@ -307,6 +313,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
             }
             else
             {
+                // Logic to turn the foot smoothly towards the resting logic 
                 if (set.restingToAnimation > 0)
                 {
                     set.restingToAnimation -= footTransitionToIdleCurve.Evaluate(difference) * footTransitionSpeedToIdle * Time.deltaTime;
@@ -357,7 +364,31 @@ public class OvergrownLegsAnimator : MonoBehaviour
             {
                 set.ikTargetLeft.position = set.parentBone.TransformPoint(set.FootPosLeft);
                 set.ikTargetRight.position = set.parentBone.TransformPoint(set.FootPosRight);
+            }*/
+            #endregion
+
+            // Find out where on the speed range 
+            // Sizzle currently is 
+
+            if(velMag < animMinSpeed)
+            {
+                // Idle
+                target = SizzleState.Idle;
             }
+            else if(velMag < dashMinSpeed)
+            {
+                // Walk 
+                target = SizzleState.Walk;
+
+                // Make faster as vel goes up 
+            }
+            else
+            {
+                // Dashing 
+                target = SizzleState.Dash;
+            }
+
+
 
             yield return null;
         }
@@ -510,27 +541,27 @@ public class OvergrownLegsAnimator : MonoBehaviour
             Vector3 holdToNew = pair.parentBone.position - holdPos;
             holdPos = pair.parentBone.position;
 
-            int vel = (int)(holdToNew.sqrMagnitude * multiplier);
+            velMag = (int)(holdToNew.sqrMagnitude * multiplier);
 
             // Just in case we want to see how the vel
             // value changes over time. Easier than just
             // typing out another print statement 
             if(printVel)
             {
-                print(vel);
+                print(velMag);
             }
 
             // The calculations to change a set's lerp value
             // is not done here because this is done at a consistent
             // frame time which would NOT look smooth for a user 
-            if(vel > velWhenToAnim && vel < velCompletelyAnim)
+            /*if(vel > velWhenToAnim && vel < velCompletelyAnim)
             {
                 pair.TargetLerp = Mathf.InverseLerp(velWhenToAnim, velCompletelyAnim, vel);
             }
             else
             {
                 pair.TargetLerp = vel >= velCompletelyAnim ? 1 : 0;
-            }
+            }*/
 
             yield return new WaitForSeconds(time);
         }
@@ -573,7 +604,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         /// The Lerp value between resting and animation that this set wants 
         /// to be at. It is referenced in animation logic 
         /// </summary>
-        public float TargetLerp { get; set; }
+        //public float TargetLerp { get; set; }
     }
 
     [System.Serializable]
@@ -635,6 +666,12 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     }
 
+    private enum SizzleState
+    {
+        Idle,
+        Walk,
+        Dash 
+    }
 
     private void OnDrawGizmos()
     {
