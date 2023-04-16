@@ -14,7 +14,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [Space]
     [SerializeField] WobbleSettings wobbleAnimationDetails;
     [Space]
-    [SerializeField] IdleAnimDetails idleAnimationDetails;
+    [SerializeField] IdleAnimDetails idleAnimDetails;
 
     [Header("Settings")]
     [Tooltip("The speed that the animation plays in ratio to the distance travlled")]
@@ -76,8 +76,10 @@ public class OvergrownLegsAnimator : MonoBehaviour
         Walk,
         Dash
     }
-    private SizzleState current = SizzleState.Idle;
-    private SizzleState target = SizzleState.Idle;
+    private SizzleState currentState = SizzleState.Idle;
+    private SizzleState targetState = SizzleState.Idle;
+
+    private Coroutine idleAdjustCoroutine;
 
     // Start is called before the first frame update
     void Start()
@@ -138,23 +140,39 @@ public class OvergrownLegsAnimator : MonoBehaviour
         if (velMag < animMinSpeed)
         {
             // Idle
-            target = SizzleState.Idle;
+            targetState = SizzleState.Idle;
         }
         else if (velMag < dashMinSpeed)
         {
             // Walk 
-            target = SizzleState.Walk;
-
-            // Make faster as vel goes up 
+            targetState = SizzleState.Walk;
         }
         else
         {
             // Dashing 
-            target = SizzleState.Dash;
+            targetState = SizzleState.Dash;
         }
 
-        set.ikTargetLeft.position = set.parentBone.TransformPoint(set.FootPosLeft);
-        set.ikTargetRight.position = set.parentBone.TransformPoint(set.FootPosRight);
+        Vector3 currentIdealLeft = Vector3.zero;
+        Vector3 currentIdealRight = Vector3.zero;
+
+        switch (currentState)
+        {
+            case SizzleState.Idle:
+                TryRunIdleLogic();
+
+
+                break;
+            case SizzleState.Walk:
+                // Walking logic is always running 
+
+                currentIdealLeft = set.parentBone.TransformPoint(set.WalkFootIdealLeft);
+                currentIdealRight = set.parentBone.TransformPoint(set.WalkFootIdealRight);
+                break;
+            case SizzleState.Dash:
+                break;
+        }
+
     }
 
     /// <summary>
@@ -300,10 +318,10 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// each setction 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator UpdateVelCo(LegSet pair)
+    private IEnumerator UpdateVelCo(LegSet set)
     {
         // The position that will be added to 
-        Vector3 holdPos = pair.parentBone.position;
+        Vector3 holdPos = set.parentBone.position;
 
         // Just makes the value more human readable 
         float multiplier = 10000.0f;
@@ -312,12 +330,46 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // v = s/t
         while (true)
         {
-            UpdateVel(pair, ref holdPos, multiplier);
+            UpdateVel(set, ref holdPos, multiplier);
 
             yield return new WaitForSeconds(time);
         }
     }
 
+    [System.Serializable]
+    public class LegSet
+    {
+        [SerializeField] public Transform parentBone;
+        [SerializeField] public Transform left;
+        [SerializeField] public Transform right;
+        [Space]
+        [SerializeField] public Transform ikTargetLeft;
+        [SerializeField] public Transform ikTargetRight;
+        //[SerializeField][Range(0, 1)] public float restingToAnimation;
+        [SerializeField] public float legRotOffset;
+
+        private float rotLeft;
+        private float rotRight;
+
+        // Avaliable for code use but not meant for editor
+        public float RotLeft { get { return rotLeft; } set { rotLeft = value; } }
+        public float RotRight { get { return rotRight; } set { rotRight = value; } }
+
+        /// <summary>
+        /// The walk cycle ideal foot position for he left foot 
+        /// </summary>
+        public Vector3 WalkFootIdealLeft { get; set; }
+        /// <summary>
+        /// The walk cycle ideal foot position for the right foot 
+        /// </summary>
+        public Vector3 WalkFootIdealRight { get; set; }
+
+        /// <summary>
+        /// The Lerp value between resting and animation that this set wants 
+        /// to be at. It is referenced in animation logic 
+        /// </summary>
+        //public float TargetLerp { get; set; }s
+    }
 
 
     #region Walking
@@ -378,29 +430,34 @@ public class OvergrownLegsAnimator : MonoBehaviour
         float lerpPerFrame = 1.0f / (float)details.animationKeys.Count;
 
         // Caching
-        int frameIndexHoldRight = -1;
         int frameIndexHoldLeft = -1;
+        float detailLerpLeft = 0;
+        int frameIndexHoldRight = -1;
+        float detailLerpRight = 0;
+
         List<Vector3> cacheLinePointsRight = new List<Vector3>();
         List<Vector3> cacheLinePointsLeft = new List<Vector3>();
 
         while (true)
         {
             // Left leg
-            frameIndexHoldLeft = ProcessLeg(pair, details, lerpPerFrame, ref frameIndexHoldLeft, cacheLinePointsLeft, false);
+            frameIndexHoldLeft = GetDetailIndex(pair, details, lerpPerFrame, frameIndexHoldLeft, ref detailLerpLeft, cacheLinePointsLeft, false);
+            pair.WalkFootIdealLeft = GetWalkTargetPos(cacheLinePointsLeft, frameIndexHoldLeft, frameIndexHoldLeft + 1, lerpPerFrame, false);
 
             // Right leg
-            frameIndexHoldRight = ProcessLeg(pair, details, lerpPerFrame, ref frameIndexHoldRight, cacheLinePointsRight, true);
+            frameIndexHoldLeft = GetDetailIndex(pair, details, lerpPerFrame, frameIndexHoldRight, ref detailLerpRight, cacheLinePointsLeft, true);
+            pair.WalkFootIdealLeft = GetWalkTargetPos(cacheLinePointsRight, frameIndexHoldRight, frameIndexHoldRight + 1, lerpPerFrame, true);
+
 
             yield return null;
         }
     }
-
     /// <summary>
-    /// Finds the current index from the list of points between each seperate
-    /// frame 
+    /// Gets the index of the detail that makes 
+    /// the points between each frame 
     /// </summary>
     /// <returns></returns>
-    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
+    private int GetDetailIndex(LegSet pair, AnimationDetails details, float lerpPerFrame, int frameIndexHold, ref float detailLerp, List<Vector3> cacheLinePoints, bool isRightLeg = false)
     {
         int index = GetLegAnimIndex(pair, lerpPerFrame, isRightLeg);
         int nextIndex = index + 1;
@@ -440,7 +497,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // Check if cache needs to be changed 
         if (index != frameIndexHold)
         {
-            frameIndexHold = index;
             cacheLinePoints.Clear();
 
             for (int i = 0; i < details.levelOfDetail[index]; i++)
@@ -452,7 +508,9 @@ public class OvergrownLegsAnimator : MonoBehaviour
                 cacheLinePoints.Add(point);
             }
 
-            // Adds a final position so it does not reset to start of frame 
+            // Add the start of the next list to avoid having reset
+            // to the beginning of this cache and makes it more
+            // convient for code below to not worry about overflow 
             cacheLinePoints.Add(nextPos);
 
         }
@@ -462,27 +520,24 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // Finds out what is the lerp that is currently between the current index point and its next destination 
         // Used to find the current index 
         float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
-        float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
+        detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
 
 
         // Derrives from: 
         // index * lerpPer <= currentLerp;
         int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
-        int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
+        return detailCurrentIndex;
+    }
 
-        // The lerp value between two details 
-        float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
-
+    /// <summary>
+    /// Get the current position that the walk cycle
+    /// wants Sizzle's foot to be
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetWalkTargetPos(List<Vector3> cacheLinePoints, int detailCurrentIndex, int detailNextindex, float minorDetailLerp, bool isRightLeg = false)
+    {
         // Set feet position
-        if (isRightLeg)
-        {
-            pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-        }
-        else
-        {
-            pair.FootPosLeft = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-        }
-        return frameIndexHold;
+        return Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
     }
 
     /// <summary>
@@ -500,33 +555,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // Derrives from: 
         // index * lerpPerFrame <= currentLerp;
         return Mathf.FloorToInt(currentLerp / lerpPerFrame);
-    }
-
-    [System.Serializable]
-    public class LegSet
-    {
-        [SerializeField] public Transform parentBone;
-        [SerializeField] public Transform left;
-        [SerializeField] public Transform right;
-        [Space]
-        [SerializeField] public Transform ikTargetLeft;
-        [SerializeField] public Transform ikTargetRight;
-        //[SerializeField][Range(0, 1)] public float restingToAnimation;
-        [SerializeField] public float legRotOffset;
-
-        private float rotLeft;
-        private float rotRight;
-
-        // Avaliable for code use but not meant for editor
-        public float RotLeft { get { return rotLeft; } set { rotLeft = value; } }
-        public float RotRight { get { return rotRight; } set { rotRight = value; } }
-        public Vector3 FootPosLeft { get; set; }
-        public Vector3 FootPosRight { get; set; }
-        /// <summary>
-        /// The Lerp value between resting and animation that this set wants 
-        /// to be at. It is referenced in animation logic 
-        /// </summary>
-        //public float TargetLerp { get; set; }
     }
 
     [System.Serializable]
@@ -709,9 +737,75 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     #region IdleAdjust
 
+    /// <summary>
+    /// Attempts to begin the coroutine if 
+    /// not already running that adjusts 
+    /// feet when moving slowly 
+    /// </summary>
+    private void TryRunIdleLogic()
+    {
+        if(idleAdjustCoroutine == null)
+        {
+            idleAdjustCoroutine = StartCoroutine(IdleAdjustLogic(front, idleAnimDetails));
+            idleAdjustCoroutine = StartCoroutine(IdleAdjustLogic(back, idleAnimDetails));
+        }
+    }
+
+    private IEnumerator IdleAdjustLogic(LegSet set, IdleAnimDetails details)
+    {
+        bool isMoving = false;
+
+        // TODO: Take into account vertical adjustments 
+
+        while(true)
+        {
+            // If in animation return
+            if(!isMoving)
+            {
+                // Get the foots current position
+                Vector3 nextPos = GetIdleNextPos(details);
+
+                // If the distance to where it is now and the next pos 
+                // is greater than a given threshold begin the movement 
+                // animation 
+
+                if(Vector3.SqrMagnitude(nextPos - set.right.position) >= details.disToMove)
+                {
+                    // TODO: Create an animation that updates from one point to another
+
+                    isMoving = true;
+                }
+            }
+
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// Gets the next idle position 
+    /// </summary>
+    /// <param name="details"></param>
+    /// <returns></returns>
+    private Vector3 GetIdleNextPos(IdleAnimDetails details)
+    {
+        RaycastHit hit;
+        // Not changed by the gizmos matrix 
+        Ray ray = new Ray(this.transform.position + this.transform.TransformDirection(details.offsetToRaycast), Vector3.down);
+
+
+        if (Physics.Raycast(ray, out hit, idleAnimDetails.raycastRange, idleAnimDetails.layer))
+        {
+            return hit.point;
+        }
+
+        // Else return a holding spot for the hand 
+        return Vector3.zero;
+    }
+
     [System.Serializable]
     public class IdleAnimDetails
     {
+        [SerializeField] public float disToMove;
         [SerializeField] public float speed;
         [SerializeField] public AnimationCurve directCurve;
         [SerializeField] public float height;
@@ -757,7 +851,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
                 // Draws current Point along path 
                 Gizmos.color = Color.red;
-                Gizmos.DrawSphere(set.FootPosRight, 0.01f);
+                Gizmos.DrawSphere(set.WalkFootIdealRight, 0.01f);
 
                 break;
 
@@ -769,7 +863,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
             case DisplayMode.Idle:
 
-                DrawIdle(idleAnimationDetails.offsetToRaycast);
+                DrawIdle(idleAnimDetails);
 
                 break;
 
@@ -912,27 +1006,25 @@ public class OvergrownLegsAnimator : MonoBehaviour
         Gizmos.DrawLine(Vector3.zero, -dir * balanceGoalSize / 2);
     }
 
-    private void DrawIdle(Vector3 offset)
+    private void DrawIdle(IdleAnimDetails details)
     {
         // Where is the raycast coming from 
         Gizmos.color = idleRaycastColor;
-        Gizmos.DrawWireSphere(offset, idleRaycastSize);
+        Gizmos.DrawWireSphere(details.offsetToRaycast, idleRaycastSize);
 
         // Hit
         Gizmos.color = idleHitColor;
 
         RaycastHit hit;
         // Not changed by the gizmos matrix 
-        Ray ray = new Ray(this.transform.position + this.transform.TransformDirection(offset), Vector3.down);
+        Ray ray = new Ray(this.transform.position + this.transform.TransformDirection(details.offsetToRaycast), Vector3.down);
 
 
-        if (Physics.Raycast(ray, out hit, idleAnimationDetails.raycastRange, idleAnimationDetails.layer))
+        if (Physics.Raycast(ray, out hit, idleAnimDetails.raycastRange, idleAnimDetails.layer))
         {
             Vector3 localPoint = this.transform.InverseTransformPoint(hit.point);
             Gizmos.DrawWireSphere(localPoint, idleHitSize);
-            Gizmos.DrawLine(localPoint, offset);
-
-            print(localPoint);
+            Gizmos.DrawLine(localPoint, details.offsetToRaycast);
         }
     }
 
