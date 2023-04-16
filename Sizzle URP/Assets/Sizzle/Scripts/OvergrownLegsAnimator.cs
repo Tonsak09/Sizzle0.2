@@ -1,4 +1,4 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -70,6 +70,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] float idleHitSize;
 
     private int velMag;
+    private enum SizzleState
+    {
+        Idle,
+        Walk,
+        Dash
+    }
+    private SizzleState current = SizzleState.Idle;
+    private SizzleState target = SizzleState.Idle;
 
     // Start is called before the first frame update
     void Start()
@@ -82,15 +90,82 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     private void Update()
     {
-        /*if(Input.GetKey(KeyCode.R))
+        AnimationTranslator(front);
+        AnimationTranslator(back);
+    }
+
+    /// <summary>
+    /// Updates the velocity of this script
+    /// </summary>
+    /// <param name="pair"></param>
+    /// <param name="holdPos"></param>
+    /// <param name="multiplier"></param>
+    private void UpdateVel(LegSet pair, ref Vector3 holdPos, float multiplier)
+    {
+        Vector3 holdToNew = pair.parentBone.position - holdPos;
+        holdPos = pair.parentBone.position;
+
+        velMag = (int)(holdToNew.sqrMagnitude * multiplier);
+
+        // Just in case we want to see how the vel
+        // value changes over time. Easier than just
+        // typing out another print statement 
+        if (printVel)
         {
-            TryWobbleRotate(wobbleAnimationDetails.frontWobbleDetails, test);
+            print(velMag);
+        }
+
+        // The calculations to change a set's lerp value
+        // is not done here because this is done at a consistent
+        // frame time which would NOT look smooth for a user 
+        /*if(vel > velWhenToAnim && vel < velCompletelyAnim)
+        {
+            pair.TargetLerp = Mathf.InverseLerp(velWhenToAnim, velCompletelyAnim, vel);
+        }
+        else
+        {
+            pair.TargetLerp = vel >= velCompletelyAnim ? 1 : 0;
         }*/
     }
 
+    /// <summary>
+    /// This is how the script animates from 
+    /// one mode to the next 
+    /// </summary>
+    private void AnimationTranslator(LegSet set)
+    {
+        // Find out which state Sizzle should be going to 
+        if (velMag < animMinSpeed)
+        {
+            // Idle
+            target = SizzleState.Idle;
+        }
+        else if (velMag < dashMinSpeed)
+        {
+            // Walk 
+            target = SizzleState.Walk;
+
+            // Make faster as vel goes up 
+        }
+        else
+        {
+            // Dashing 
+            target = SizzleState.Dash;
+        }
+
+        set.ikTargetLeft.position = set.parentBone.TransformPoint(set.FootPosLeft);
+        set.ikTargetRight.position = set.parentBone.TransformPoint(set.FootPosRight);
+    }
+
+    /// <summary>
+    /// Starts all necessary coroutines 
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="details"></param>
+    /// <param name="wobbleSettings"></param>
     private void StartCoroutines(LegSet set, AnimationDetails details, WobbleAnimationDetailsFirst wobbleSettings)
     {
-        StartCoroutine(UpdateLegVelAndTransitions(set));
+        StartCoroutine(UpdateVelCo(set));
         StartCoroutine(UpdateLegSetRot(set));
         StartCoroutine(LegPair(set, details));
         //StartCoroutine(WobbleLogic(set, wobbleSettings, 1.0f / (float)details.animationKeys.Count));
@@ -99,202 +174,28 @@ public class OvergrownLegsAnimator : MonoBehaviour
     }
 
     /// <summary>
-    /// Begins a wobble rotate animation onto the Sizzle
-    /// body. Primarily used during walking animation 
+    /// Begins a coroutine after a set amount of time
     /// </summary>
-    /// <param name="details"></param>
-    public bool TryWobbleRotate(WobbleAnimationDetailsFirst details, bool alternate)
-    {
-        if (details.rotationCo == null)
-        {
-            details.rotationCo = StartCoroutine(TryWobbleRotateCo(details, alternate));
-            return true;
-        }
-
-        // System was occupied 
-        return false;
-    }
-
-    /// <summary>
-    /// This coroutine moves the bone's target z rotation
-    /// over a period of time 
-    /// </summary>
+    /// <param name="time"></param>
     /// <returns></returns>
-    private IEnumerator TryWobbleRotateCo(WobbleAnimationDetailsFirst details, bool alternate)
+    private IEnumerator StartCoAfterTime(float time)
     {
-        float lerp = 0;
-        float rot = 0;
-        float targetRot = alternate ? details.angle : -details.angle;
-        Vector3 hold = details.joint.targetRotation.eulerAngles;
+        yield return new WaitForSeconds(time);
 
-        while (lerp <= 1)
-        {
-            //details.joint.targetRotation = Vector3.Lerp
-            rot = Mathf.LerpAngle(0, targetRot, details.upCurve.Evaluate(lerp));
-
-            // The front wobbles on the z axis
-            // while the back wobbles the x axis 
-            if(details.wobbleZ)
-            {
-                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, rot));
-            }
-            else
-            {
-                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, rot, hold.z));
-            }
-
-            lerp += Time.deltaTime * details.upSpeed;
-            yield return null;
-        }
-
-        // Bring back 
-        lerp = 0;
-        while (lerp <= 1)
-        {
-            rot = Mathf.LerpAngle(targetRot, 0, details.returnCurve.Evaluate(lerp));
-
-            if (details.wobbleZ)
-            {
-                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, rot));
-            }
-            else
-            {
-                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, rot, hold.z));
-            }
-
-            lerp += Time.deltaTime * details.returnSpeed;
-            yield return null;
-        }
-
-        // CLeanup
-        details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, 0));
-        details.rotationCo = null;
-    }
-
-    /// <summary>
-    /// Use to get a legs current animation key index 
-    /// </summary>
-    /// <param name="pair"></param>
-    /// <param name="isRightLeg"></param>
-    /// <returns></returns>
-    private int GetLegAnimIndex(LegSet pair, float lerpPerFrame, bool isRightLeg)
-    {
-        // Gets lerp that goes across whole animation 
-        // Just takes the rotation and turns it into a 0 to 1 scale 
-        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
-
-        // Derrives from: 
-        // index * lerpPerFrame <= currentLerp;
-        return Mathf.FloorToInt(currentLerp / lerpPerFrame);
-    }
-
-    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
-    {
-        int index = GetLegAnimIndex(pair, lerpPerFrame, isRightLeg);
-        int nextIndex = index + 1;
-
-        AnimationCurve curve = details.keyConnectionCurves[index];
-        Vector3 previousPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
-        Vector3 nextPos;
-
-        if(nextIndex >= details.animationKeys.Count)
-        {
-            nextIndex = 0;
-        }
-        nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[nextIndex]) : details.animationKeys[nextIndex];
-
-
-        // Check if next index is a raycast 
-        if (details.raycastIndexList.Contains(nextIndex))
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
-            }
-        }
-
-        // Check if the current index should be a raycast 
-        if (details.raycastIndexList.Contains(index))
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
-            {
-                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
-            }
-        }
-
-
-        if (isRightLeg)
-        {
-            pair.FootPosRight = previousPos;
-        }
-        else
-        {
-            pair.FootPosLeft = previousPos;
-        }
-
-        float lerpPerDetail = 1.0f / details.levelOfDetail[index];
-        // Check if cache needs to be changed 
-        if (index != frameIndexHold)
-        {
-            frameIndexHold = index;
-            cacheLinePoints.Clear();
-
-            for (int i = 0; i < details.levelOfDetail[index]; i++)
-            {
-                // Adds points based on the line that is creates between
-                // two key frames 
-                float lerp = i * lerpPerDetail;
-                Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
-                cacheLinePoints.Add(point);
-            }
-
-            // Adds a final position so it does not reset to start of frame 
-            cacheLinePoints.Add(nextPos);
-
-        }
-
-        // Used to locate position along the detail path 
-
-        // Finds out what is the lerp that is currently between the current index point and its next destination 
-        // Used to find the current index 
-        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
-        float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
-
-
-        // Derrives from: 
-        // index * lerpPer <= currentLerp;
-        int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
-        int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
-
-        // The lerp value between two details 
-        float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
-
-        // Set feet position
-        if (isRightLeg)
-        {
-            pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-        }
-        else
-        {
-            pair.FootPosLeft = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
-        }
-        return frameIndexHold;
+        StartCoroutines(front, frontAnimationDetails, wobbleAnimationDetails.frontWobbleDetails);
+        StartCoroutines(back, backAnimationDetails, wobbleAnimationDetails.backWobbleDetails);
     }
 
     /// <summary>
     /// This coroutine is in charge of bringing the foot to 
     /// either the animation or resting positions 
     /// </summary>
-    /// <param name="set"></param>
     /// <returns></returns>
     private IEnumerator AnimationLogic(LegSet set, AnimationDetails details)
     {
-        SizzleState current = SizzleState.Idle;
-        SizzleState target = SizzleState.Idle;
+        
 
-        while(true)
+        while (true)
         {
             #region Old
             /*// This value is how far the target lerp is from its current lerp
@@ -367,15 +268,15 @@ public class OvergrownLegsAnimator : MonoBehaviour
             }*/
             #endregion
 
-            // Find out where on the speed range 
+            /*// Find out where on the speed range 
             // Sizzle currently is 
 
-            if(velMag < animMinSpeed)
+            if (velMag < animMinSpeed)
             {
                 // Idle
                 target = SizzleState.Idle;
             }
-            else if(velMag < dashMinSpeed)
+            else if (velMag < dashMinSpeed)
             {
                 // Walk 
                 target = SizzleState.Walk;
@@ -386,9 +287,81 @@ public class OvergrownLegsAnimator : MonoBehaviour
             {
                 // Dashing 
                 target = SizzleState.Dash;
+            }*/
+
+
+
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// This coroutine is used to caluclate the velocity of 
+    /// each setction 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator UpdateVelCo(LegSet pair)
+    {
+        // The position that will be added to 
+        Vector3 holdPos = pair.parentBone.position;
+
+        // Just makes the value more human readable 
+        float multiplier = 10000.0f;
+        float time = 0.1f;
+
+        // v = s/t
+        while (true)
+        {
+            UpdateVel(pair, ref holdPos, multiplier);
+
+            yield return new WaitForSeconds(time);
+        }
+    }
+
+
+
+    #region Walking
+
+    /// <summary>
+    /// Updates the rotation of a leg set based 
+    /// on the distance its parent bone has moved 
+    /// in the world space 
+    /// </summary>
+    /// <param name="pair"></param>
+    /// <returns></returns>
+    private IEnumerator UpdateLegSetRot(LegSet pair)
+    {
+        Vector3 holdPos = pair.parentBone.position;
+
+        while (true)
+        {
+
+            // Adds distance from previous to new 
+            Vector3 holdToNew = pair.parentBone.position - holdPos;
+            float newDis = holdToNew.sqrMagnitude;
+            holdPos = pair.parentBone.position;
+
+            pair.RotRight += newDis * disToAngle;
+            pair.RotLeft += newDis * disToAngle;
+
+            // Loops value if over 360 
+            if (pair.RotRight >= 360)
+            {
+                // Gets overflow even if multiple 360's over 
+                float overFlow = pair.RotRight % 360;
+
+                // Loop values 
+                pair.RotRight = overFlow;
             }
 
+            if (pair.RotLeft >= 360)
+            {
+                // Gets overflow even if multiple 360's over 
+                float overFlow = pair.RotLeft % 360;
 
+                // Loop values 
+                pair.RotLeft = overFlow;
+            }
 
             yield return null;
         }
@@ -423,161 +396,110 @@ public class OvergrownLegsAnimator : MonoBehaviour
     }
 
     /// <summary>
-    /// Changes the rotation of Sizzle based on the speed of movement
-    /// and the current frame 
+    /// Finds the current index from the list of points between each seperate
+    /// frame 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator WobbleLogic(LegSet pair, WobbleAnimationDetailsFirst wobbleDetails)
+    private int ProcessLeg(LegSet pair, AnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
     {
-        while(true)
+        int index = GetLegAnimIndex(pair, lerpPerFrame, isRightLeg);
+        int nextIndex = index + 1;
+
+        AnimationCurve curve = details.keyConnectionCurves[index];
+        Vector3 previousPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
+        Vector3 nextPos;
+
+        if (nextIndex >= details.animationKeys.Count)
         {
-            yield return null;
+            nextIndex = 0;
         }
-    }
+        nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[nextIndex]) : details.animationKeys[nextIndex];
 
-    private IEnumerator WobbleLogic(LegSet pair, WobbleAnimationDetailsFirst wobbleDetails, float lerpPerFrame)
-    {
-        bool canWobble = true; // As to not repeat if sitting on a frame 
-        int hold = -1;
 
-        bool alternate = false;
-
-        while (true)
+        // Check if next index is a raycast 
+        if (details.raycastIndexList.Contains(nextIndex))
         {
-            if(canWobble)
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
             {
-                // Check when to wobble  
-                if (wobbleDetails.indexToWobble.Contains(GetLegAnimIndex(pair, lerpPerFrame, true)))
-                {
-                    bool attempt = TryWobbleRotate(wobbleDetails, alternate);
-
-                    if(attempt)
-                    {
-                        alternate = !alternate;
-                    }
-                }
-
-                canWobble = false;
-                hold = GetLegAnimIndex(pair, lerpPerFrame, !alternate);
+                nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
             }
-            else
-            {
-                // THe moment the frame changes Sizzle can wobble again 
-                if(hold != GetLegAnimIndex(pair, lerpPerFrame, !alternate))
-                {
-                    canWobble = true;
-                }
-            }
-            
-
-            yield return null;
         }
-        
+
+        // Check if the current index should be a raycast 
+        if (details.raycastIndexList.Contains(index))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
+            }
+        }
+
+        float lerpPerDetail = 1.0f / details.levelOfDetail[index];
+        // Check if cache needs to be changed 
+        if (index != frameIndexHold)
+        {
+            frameIndexHold = index;
+            cacheLinePoints.Clear();
+
+            for (int i = 0; i < details.levelOfDetail[index]; i++)
+            {
+                // Adds points based on the line that is creates between
+                // two key frames 
+                float lerp = i * lerpPerDetail;
+                Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
+                cacheLinePoints.Add(point);
+            }
+
+            // Adds a final position so it does not reset to start of frame 
+            cacheLinePoints.Add(nextPos);
+
+        }
+
+        // Used to locate position along the detail path 
+
+        // Finds out what is the lerp that is currently between the current index point and its next destination 
+        // Used to find the current index 
+        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
+        float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
+
+
+        // Derrives from: 
+        // index * lerpPer <= currentLerp;
+        int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
+        int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
+
+        // The lerp value between two details 
+        float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
+
+        // Set feet position
+        if (isRightLeg)
+        {
+            pair.FootPosRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+        }
+        else
+        {
+            pair.FootPosLeft = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+        }
+        return frameIndexHold;
     }
 
     /// <summary>
-    /// Updates the rotation of a leg set based 
-    /// on the distance its parent bone has moved 
-    /// in the world space 
+    /// Use to get a legs current animation key index 
     /// </summary>
     /// <param name="pair"></param>
+    /// <param name="isRightLeg"></param>
     /// <returns></returns>
-    private IEnumerator UpdateLegSetRot(LegSet pair)
+    private int GetLegAnimIndex(LegSet pair, float lerpPerFrame, bool isRightLeg)
     {
-        Vector3 holdPos = pair.parentBone.position;
+        // Gets lerp that goes across whole animation 
+        // Just takes the rotation and turns it into a 0 to 1 scale 
+        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
 
-        while (true)
-        {
-
-            // Adds distance from previous to new 
-            Vector3 holdToNew = pair.parentBone.position - holdPos;
-            float newDis = holdToNew.sqrMagnitude;
-            holdPos = pair.parentBone.position;
-
-            pair.RotRight += newDis * disToAngle;
-            pair.RotLeft += newDis * disToAngle;
-
-            // Loops value if over 360 
-            if (pair.RotRight >= 360)
-            {
-                // Gets overflow even if multiple 360's over 
-                float overFlow = pair.RotRight % 360;
-               
-                // Loop values 
-                pair.RotRight = overFlow;
-            }
-
-            if (pair.RotLeft >= 360)
-            {
-                // Gets overflow even if multiple 360's over 
-                float overFlow = pair.RotLeft % 360;
-
-                // Loop values 
-                pair.RotLeft = overFlow;
-            }
-
-            yield return null;
-        }    
-    }
-
-    /// <summary>
-    /// This coroutine is used to caluclate the velocity of 
-    /// each setction 
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator UpdateLegVelAndTransitions(LegSet pair)
-    {
-        // The position that will be added to 
-        Vector3 holdPos = pair.parentBone.position;
-
-        // Just makes the value more human readable 
-        float multiplier = 10000.0f;
-        float time = 0.1f;
-
-        // v = s/t
-        while(true)
-        {
-
-            Vector3 holdToNew = pair.parentBone.position - holdPos;
-            holdPos = pair.parentBone.position;
-
-            velMag = (int)(holdToNew.sqrMagnitude * multiplier);
-
-            // Just in case we want to see how the vel
-            // value changes over time. Easier than just
-            // typing out another print statement 
-            if(printVel)
-            {
-                print(velMag);
-            }
-
-            // The calculations to change a set's lerp value
-            // is not done here because this is done at a consistent
-            // frame time which would NOT look smooth for a user 
-            /*if(vel > velWhenToAnim && vel < velCompletelyAnim)
-            {
-                pair.TargetLerp = Mathf.InverseLerp(velWhenToAnim, velCompletelyAnim, vel);
-            }
-            else
-            {
-                pair.TargetLerp = vel >= velCompletelyAnim ? 1 : 0;
-            }*/
-
-            yield return new WaitForSeconds(time);
-        }
-    }
-
-    /// <summary>
-    /// Begins a coroutine after a set amount of time
-    /// </summary>
-    /// <param name="time"></param>
-    /// <returns></returns>
-    private IEnumerator StartCoAfterTime(float time)
-    {
-        yield return new WaitForSeconds(time);
-
-        StartCoroutines(front, frontAnimationDetails, wobbleAnimationDetails.frontWobbleDetails);
-        StartCoroutines(back, backAnimationDetails, wobbleAnimationDetails.backWobbleDetails);
+        // Derrives from: 
+        // index * lerpPerFrame <= currentLerp;
+        return Mathf.FloorToInt(currentLerp / lerpPerFrame);
     }
 
     [System.Serializable]
@@ -589,7 +511,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [Space]
         [SerializeField] public Transform ikTargetLeft;
         [SerializeField] public Transform ikTargetRight;
-        [SerializeField] [Range(0,1)] public float restingToAnimation;
+        //[SerializeField][Range(0, 1)] public float restingToAnimation;
         [SerializeField] public float legRotOffset;
 
         private float rotLeft;
@@ -619,17 +541,134 @@ public class OvergrownLegsAnimator : MonoBehaviour
         [SerializeField] public float footOffset;
     }
 
-    [System.Serializable]
-    public class IdleAnimDetails
+    #endregion
+
+    #region Wobble
+
+    /// <summary>
+    /// Begins a wobble rotate animation onto the Sizzle
+    /// body. Primarily used during walking animation 
+    /// </summary>
+    /// <param name="details"></param>
+    public bool TryWobbleRotate(WobbleAnimationDetailsFirst details, bool alternate)
     {
-        [SerializeField] public float speed;
-        [SerializeField] public AnimationCurve directCurve;
-        [SerializeField] public float height;
-        [SerializeField] public AnimationCurve heightCurve;
-        [Space]          
-        [SerializeField] public Vector3 offsetToRaycast;
-        [SerializeField] public float raycastRange;
-        [SerializeField] public LayerMask layer;
+        if (details.rotationCo == null)
+        {
+            details.rotationCo = StartCoroutine(TryWobbleRotateCo(details, alternate));
+            return true;
+        }
+
+        // System was occupied 
+        return false;
+    }
+
+    /// <summary>
+    /// Changes the rotation of Sizzle based on the speed of movement
+    /// and the current frame 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator WobbleLogic(LegSet pair, WobbleAnimationDetailsFirst wobbleDetails)
+    {
+        while (true)
+        {
+            yield return null;
+        }
+    }
+
+    private IEnumerator WobbleLogic(LegSet pair, WobbleAnimationDetailsFirst wobbleDetails, float lerpPerFrame)
+    {
+        bool canWobble = true; // As to not repeat if sitting on a frame 
+        int hold = -1;
+
+        bool alternate = false;
+
+        while (true)
+        {
+            if (canWobble)
+            {
+                // Check when to wobble  
+                if (wobbleDetails.indexToWobble.Contains(GetLegAnimIndex(pair, lerpPerFrame, true)))
+                {
+                    bool attempt = TryWobbleRotate(wobbleDetails, alternate);
+
+                    if (attempt)
+                    {
+                        alternate = !alternate;
+                    }
+                }
+
+                canWobble = false;
+                hold = GetLegAnimIndex(pair, lerpPerFrame, !alternate);
+            }
+            else
+            {
+                // THe moment the frame changes Sizzle can wobble again 
+                if (hold != GetLegAnimIndex(pair, lerpPerFrame, !alternate))
+                {
+                    canWobble = true;
+                }
+            }
+
+
+            yield return null;
+        }
+
+    }
+
+    /// <summary>
+    /// This coroutine moves the bone's target z rotation
+    /// over a period of time 
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator TryWobbleRotateCo(WobbleAnimationDetailsFirst details, bool alternate)
+    {
+        float lerp = 0;
+        float rot = 0;
+        float targetRot = alternate ? details.angle : -details.angle;
+        Vector3 hold = details.joint.targetRotation.eulerAngles;
+
+        while (lerp <= 1)
+        {
+            //details.joint.targetRotation = Vector3.Lerp
+            rot = Mathf.LerpAngle(0, targetRot, details.upCurve.Evaluate(lerp));
+
+            // The front wobbles on the z axis
+            // while the back wobbles the x axis 
+            if (details.wobbleZ)
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, rot));
+            }
+            else
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, rot, hold.z));
+            }
+
+            lerp += Time.deltaTime * details.upSpeed;
+            yield return null;
+        }
+
+        // Bring back 
+        lerp = 0;
+        while (lerp <= 1)
+        {
+            rot = Mathf.LerpAngle(targetRot, 0, details.returnCurve.Evaluate(lerp));
+
+            if (details.wobbleZ)
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, rot));
+            }
+            else
+            {
+                details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, rot, hold.z));
+            }
+
+            lerp += Time.deltaTime * details.returnSpeed;
+            yield return null;
+        }
+
+        // CLeanup
+        details.joint.targetRotation = Quaternion.Euler(new Vector3(hold.x, hold.y, 0));
+        details.rotationCo = null;
     }
 
     [System.Serializable]
@@ -666,12 +705,26 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     }
 
-    private enum SizzleState
+    #endregion
+
+    #region IdleAdjust
+
+    [System.Serializable]
+    public class IdleAnimDetails
     {
-        Idle,
-        Walk,
-        Dash 
+        [SerializeField] public float speed;
+        [SerializeField] public AnimationCurve directCurve;
+        [SerializeField] public float height;
+        [SerializeField] public AnimationCurve heightCurve;
+        [Space]
+        [SerializeField] public Vector3 offsetToRaycast;
+        [SerializeField] public float raycastRange;
+        [SerializeField] public LayerMask layer;
     }
+
+    #endregion
+
+    #region Gizmos
 
     private void OnDrawGizmos()
     {
@@ -882,4 +935,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
             print(localPoint);
         }
     }
+
+    #endregion
 }
