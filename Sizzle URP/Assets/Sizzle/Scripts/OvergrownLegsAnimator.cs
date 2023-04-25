@@ -79,7 +79,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
     private SizzleState currentState = SizzleState.Idle;
     private SizzleState targetState = SizzleState.Idle;
 
-    private Coroutine idleAdjustCoroutine;
 
     // Start is called before the first frame update
     void Start()
@@ -153,19 +152,29 @@ public class OvergrownLegsAnimator : MonoBehaviour
             targetState = SizzleState.Dash;
         }
 
+        // Do not continue unless it needs to change 
+        if(currentState != targetState)
+        {
+            TryTransition(set, currentState, targetState);
+            return;
+        }
+
+
+        // Set to hold position 
         Vector3 currentIdealLeft = Vector3.zero;
         Vector3 currentIdealRight = Vector3.zero;
 
         switch (currentState)
         {
             case SizzleState.Idle:
-                TryRunIdleLogic();
-
+                // Begins idle logic if possible 
+                TryRunIdleLogic(set);
 
                 break;
             case SizzleState.Walk:
                 // Walking logic is always running 
 
+                // Get the current ideal 
                 currentIdealLeft = set.parentBone.TransformPoint(set.WalkFootIdealLeft);
                 currentIdealRight = set.parentBone.TransformPoint(set.WalkFootIdealRight);
                 break;
@@ -173,6 +182,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
                 break;
         }
 
+    }
+
+    private void TryTransition(LegSet set, SizzleState current, SizzleState target)
+    {
+        if(set.LegTransitionCo == null)
+        {
+            set.LegTransitionCo = StartCoroutine(TransitionBetweenStates(set, current, target, set.transitionTime));
+        }
     }
 
     /// <summary>
@@ -336,9 +353,23 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
+    private IEnumerator TransitionBetweenStates(LegSet set, SizzleState current, SizzleState target, float time)
+    {
+        float t = 0; 
+
+        while(t <= time)
+        {
+
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+    }
+
     [System.Serializable]
     public class LegSet
     {
+        [Header("Leg Set Transforms")]
         [SerializeField] public Transform parentBone;
         [SerializeField] public Transform left;
         [SerializeField] public Transform right;
@@ -348,10 +379,15 @@ public class OvergrownLegsAnimator : MonoBehaviour
         //[SerializeField][Range(0, 1)] public float restingToAnimation;
         [SerializeField] public float legRotOffset;
 
+        [Header("State Transitions")]
+        [SerializeField] public float transitionTime;
+
         private float rotLeft;
         private float rotRight;
 
         // Avaliable for code use but not meant for editor
+        public Coroutine LegTransitionCo { get; set; }
+        public Coroutine LegIdleCo { get; set; }
         public float RotLeft { get { return rotLeft; } set { rotLeft = value; } }
         public float RotRight { get { return rotRight; } set { rotRight = value; } }
 
@@ -742,12 +778,11 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// not already running that adjusts 
     /// feet when moving slowly 
     /// </summary>
-    private void TryRunIdleLogic()
+    private void TryRunIdleLogic(LegSet set)
     {
-        if(idleAdjustCoroutine == null)
+        if(set.LegIdleCo == null)
         {
-            idleAdjustCoroutine = StartCoroutine(IdleAdjustLogic(front, idleAnimDetails));
-            idleAdjustCoroutine = StartCoroutine(IdleAdjustLogic(back, idleAnimDetails));
+            set.LegIdleCo = StartCoroutine(IdleAdjustLogic(set, idleAnimDetails));
         }
     }
 
@@ -773,6 +808,18 @@ public class OvergrownLegsAnimator : MonoBehaviour
                 {
                     // TODO: Create an animation that updates from one point to another
 
+                    float lerp = 0;
+                    Vector3 startRight = set.ikTargetRight.position;
+
+                    while(lerp <= 1)
+                    {
+                        // Transition between the points 
+                        set.ikTargetRight.position = Vector3.Lerp(startRight, nextPos, lerp);
+
+                        lerp += Time.deltaTime;
+                        yield return null;
+                    }
+
                     isMoving = true;
                 }
             }
@@ -782,7 +829,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     }
 
     /// <summary>
-    /// Gets the next idle position 
+    /// Gets the next idle position along the ground. Not 
+    /// where it will be in animation. The end and start frames.
     /// </summary>
     /// <param name="details"></param>
     /// <returns></returns>
