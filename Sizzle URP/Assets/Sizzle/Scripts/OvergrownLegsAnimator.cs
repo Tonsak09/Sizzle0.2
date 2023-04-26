@@ -9,8 +9,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     [SerializeField] LegSet back;
 
     [Header("Animation")]
-    [SerializeField] AnimationDetails frontAnimationDetails;
-    [SerializeField] AnimationDetails backAnimationDetails;
+    [SerializeField] WalkAnimationDetails frontAnimationDetails;
+    [SerializeField] WalkAnimationDetails backAnimationDetails;
     [Space]
     [SerializeField] WobbleSettings wobbleAnimationDetails;
     [Space]
@@ -79,6 +79,8 @@ public class OvergrownLegsAnimator : MonoBehaviour
     private SizzleState currentState = SizzleState.Idle;
     private SizzleState targetState = SizzleState.Idle;
 
+    private bool testBool = false;
+
 
     // Start is called before the first frame update
     void Start()
@@ -86,13 +88,37 @@ public class OvergrownLegsAnimator : MonoBehaviour
         front.RotRight = front.legRotOffset;
         back.RotLeft = back.legRotOffset;
 
+        currentState = SizzleState.Walk;
+        targetState = SizzleState.Walk;
+
         StartCoroutine(StartCoAfterTime(0.5f));
     }
 
     private void Update()
     {
-        AnimationTranslator(front);
-        AnimationTranslator(back);
+        if(testBool)
+        {
+            AnimationTranslator(front);
+            AnimationTranslator(back);
+        }
+        
+    }
+
+    /// <summary>
+    /// Starts all necessary coroutines 
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="details"></param>
+    /// <param name="wobbleSettings"></param>
+    private void StartCoroutines(LegSet set, WalkAnimationDetails details, WobbleAnimationDetailsFirst wobbleSettings)
+    {
+        StartCoroutine(UpdateVelCo(set));
+        StartCoroutine(UpdateLegSetRot(set));
+
+
+        StartCoroutine(WalkLogic(set, details));
+        //StartCoroutine(WobbleLogic(set, wobbleSettings, 1.0f / (float)details.animationKeys.Count));
+        //StartCoroutine(AnimationLogic(set, details));
     }
 
     /// <summary>
@@ -129,84 +155,6 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }*/
     }
 
-    /// <summary>
-    /// This is how the script animates from 
-    /// one mode to the next 
-    /// </summary>
-    private void AnimationTranslator(LegSet set)
-    {
-        // Find out which state Sizzle should be going to 
-        if (velMag < animMinSpeed)
-        {
-            // Idle
-            targetState = SizzleState.Idle;
-        }
-        else if (velMag < dashMinSpeed)
-        {
-            // Walk 
-            targetState = SizzleState.Walk;
-        }
-        else
-        {
-            // Dashing 
-            targetState = SizzleState.Dash;
-        }
-
-        // Do not continue unless it needs to change 
-        if(currentState != targetState)
-        {
-            TryTransition(set, currentState, targetState);
-            return;
-        }
-
-
-        // Set to hold position 
-        Vector3 currentIdealLeft = Vector3.zero;
-        Vector3 currentIdealRight = Vector3.zero;
-
-        switch (currentState)
-        {
-            case SizzleState.Idle:
-                // Begins idle logic if possible 
-                TryRunIdleLogic(set);
-
-                break;
-            case SizzleState.Walk:
-                // Walking logic is always running 
-
-                // Get the current ideal 
-                currentIdealLeft = set.parentBone.TransformPoint(set.WalkFootIdealLeft);
-                currentIdealRight = set.parentBone.TransformPoint(set.WalkFootIdealRight);
-                break;
-            case SizzleState.Dash:
-                break;
-        }
-
-    }
-
-    private void TryTransition(LegSet set, SizzleState current, SizzleState target)
-    {
-        if(set.LegTransitionCo == null)
-        {
-            set.LegTransitionCo = StartCoroutine(TransitionBetweenStates(set, current, target, set.transitionTime));
-        }
-    }
-
-    /// <summary>
-    /// Starts all necessary coroutines 
-    /// </summary>
-    /// <param name="set"></param>
-    /// <param name="details"></param>
-    /// <param name="wobbleSettings"></param>
-    private void StartCoroutines(LegSet set, AnimationDetails details, WobbleAnimationDetailsFirst wobbleSettings)
-    {
-        StartCoroutine(UpdateVelCo(set));
-        StartCoroutine(UpdateLegSetRot(set));
-        StartCoroutine(LegPair(set, details));
-        //StartCoroutine(WobbleLogic(set, wobbleSettings, 1.0f / (float)details.animationKeys.Count));
-        StartCoroutine(WobbleLogic(set, wobbleSettings));
-        StartCoroutine(AnimationLogic(set, details));
-    }
 
     /// <summary>
     /// Begins a coroutine after a set amount of time
@@ -219,6 +167,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
         StartCoroutines(front, frontAnimationDetails, wobbleAnimationDetails.frontWobbleDetails);
         StartCoroutines(back, backAnimationDetails, wobbleAnimationDetails.backWobbleDetails);
+        testBool = true;
     }
 
     /// <summary>
@@ -226,7 +175,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// either the animation or resting positions 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator AnimationLogic(LegSet set, AnimationDetails details)
+    private IEnumerator AnimationLogic(LegSet set, WalkAnimationDetails details)
     {
         
 
@@ -353,15 +302,56 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
-    private IEnumerator TransitionBetweenStates(LegSet set, SizzleState current, SizzleState target, float time)
-    {
-        float t = 0; 
+    
 
-        while(t <= time)
+    /// <summary>
+    /// Updates the rotation of a leg set based 
+    /// on the distance its parent bone has moved 
+    /// in the world space. 
+    /// 
+    /// This is a overgrown class wide use
+    /// </summary>
+    /// <param name="pair"></param>
+    /// <returns></returns>
+    private IEnumerator UpdateLegSetRot(LegSet pair)
+    {
+        Vector3 holdPos = pair.parentBone.position;
+
+        while (true)
         {
 
+            // Adds distance from previous to new 
+            Vector3 holdToNew = pair.parentBone.position - holdPos;
+            float newDis = holdToNew.sqrMagnitude;
+            holdPos = pair.parentBone.position;
 
-            t += Time.deltaTime;
+            float nextRight = pair.RotRight + newDis * disToAngle;
+            float nextLeft = pair.RotLeft + newDis * disToAngle;
+
+            // Loops value if over 360 
+            if (nextRight >= 360)
+            {
+                // Gets overflow even if multiple 360's over 
+                float overFlow = nextRight % 360;
+
+                // Loop values 
+                nextRight = overFlow;
+            }
+
+            if (nextLeft >= 360)
+            {
+                // Gets overflow even if multiple 360's over 
+                float overFlow = nextLeft % 360;
+
+                // Loop values 
+                nextLeft = overFlow;
+            }
+
+
+            // The values are only applied here at the end 
+            pair.RotRight = nextRight;
+            pair.RotLeft = nextLeft;
+
             yield return null;
         }
     }
@@ -386,8 +376,11 @@ public class OvergrownLegsAnimator : MonoBehaviour
         private float rotRight;
 
         // Avaliable for code use but not meant for editor
+        // public Coroutine LegIdleCo { get; set; }
+
         public Coroutine LegTransitionCo { get; set; }
-        public Coroutine LegIdleCo { get; set; }
+        public Coroutine PrimaryLogic { get; set; }
+
         public float RotLeft { get { return rotLeft; } set { rotLeft = value; } }
         public float RotRight { get { return rotRight; } set { rotRight = value; } }
 
@@ -400,66 +393,168 @@ public class OvergrownLegsAnimator : MonoBehaviour
         /// </summary>
         public Vector3 WalkFootIdealRight { get; set; }
 
-        /// <summary>
-        /// The Lerp value between resting and animation that this set wants 
-        /// to be at. It is referenced in animation logic 
-        /// </summary>
-        //public float TargetLerp { get; set; }s
+  
+        public Vector3 IdleFootIdealLeft { get; set; }
+        public Vector3 IdleFootIdealRight { get; set; }
+
     }
 
 
-    #region Walking
+    #region Transitions
 
     /// <summary>
-    /// Updates the rotation of a leg set based 
-    /// on the distance its parent bone has moved 
-    /// in the world space 
+    /// This is how the script animates from 
+    /// one mode to the next 
     /// </summary>
-    /// <param name="pair"></param>
-    /// <returns></returns>
-    private IEnumerator UpdateLegSetRot(LegSet pair)
+    private void AnimationTranslator(LegSet set)
     {
-        Vector3 holdPos = pair.parentBone.position;
+        set.ikTargetRight.position = GetStateWalkPos(set, true);
+        set.ikTargetLeft.position = GetStateWalkPos(set, false);
 
-        while (true)
+        return;
+        // Find out which state Sizzle should be going to 
+        if (velMag < animMinSpeed)
         {
+            // Idle
+            targetState = SizzleState.Idle;
+        }
+        else if (velMag < dashMinSpeed)
+        {
+            // Walk 
+            targetState = SizzleState.Walk;
+        }
+        else
+        {
+            // Dashing 
+            targetState = SizzleState.Dash;
+        }
 
-            // Adds distance from previous to new 
-            Vector3 holdToNew = pair.parentBone.position - holdPos;
-            float newDis = holdToNew.sqrMagnitude;
-            holdPos = pair.parentBone.position;
+        // Do not continue unless it needs to change 
+        if (currentState != targetState)
+        {
+            // Begin transition to new target logic 
+            TryTransition(set, currentState, targetState);
+            return;
+        }
 
-            pair.RotRight += newDis * disToAngle;
-            pair.RotLeft += newDis * disToAngle;
+        // Check if there is a transition going on 
+        if (set.LegTransitionCo != null)
+        {
+            return;
+        }
 
-            // Loops value if over 360 
-            if (pair.RotRight >= 360)
-            {
-                // Gets overflow even if multiple 360's over 
-                float overFlow = pair.RotRight % 360;
+        // If there is not transition going on then
+        // set foot position to target 
 
-                // Loop values 
-                pair.RotRight = overFlow;
-            }
 
-            if (pair.RotLeft >= 360)
-            {
-                // Gets overflow even if multiple 360's over 
-                float overFlow = pair.RotLeft % 360;
 
-                // Loop values 
-                pair.RotLeft = overFlow;
-            }
+        set.ikTargetRight.position = GetStatePosition(set, currentState, true);
+        set.ikTargetLeft.position = GetStatePosition(set, currentState, false);
+    }
 
-            yield return null;
+    /// <summary>
+    /// Tries to transition from one type of animation 
+    /// to the next. There are two logic coroutines active
+    /// during the the logic of this call
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="current"></param>
+    /// <param name="target"></param>
+    private void TryTransition(LegSet set, SizzleState current, SizzleState target)
+    {
+        if (set.LegTransitionCo == null)
+        {
+            set.LegTransitionCo = StartCoroutine(TransitionBetweenStates(set, current, target, set.transitionTime));
         }
     }
+
+    /// <summary>
+    /// Get the position that a state wants Sizzle's foot 
+    /// to be at. This will not check if a state is active
+    /// or not 
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="state"></param>
+    /// <param name="isRight"></param>
+    /// <returns></returns>
+    private Vector3 GetStatePosition(LegSet set, SizzleState state, bool isRight = false)
+    {
+        switch (state)
+        {
+            case SizzleState.Idle:
+                return GetStateIdlePos(set, isRight);
+            case SizzleState.Walk:
+                return GetStateWalkPos(set, isRight);
+            case SizzleState.Dash:
+                return Vector3.zero;
+            default:
+                return Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// Begins the coroutine logic based on what state is passed through
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="state"></param>
+    /// <returns></returns>
+    private Coroutine StartStateLogic(LegSet set, SizzleState state)
+    {
+        switch (state)
+        {
+            case SizzleState.Idle:
+                return StartCoroutine(IdleAdjustLogic(set, idleAnimDetails));
+            case SizzleState.Walk:
+                return StartCoroutine(IdleAdjustLogic(set, idleAnimDetails));
+            case SizzleState.Dash:
+                return null;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// This logic holds the two currently active logic and
+    /// tries to smoothly transition from logic to the next
+    /// before ending the previous one
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="current"></param>
+    /// <param name="target"></param>
+    /// <param name="time"></param>
+    /// <returns></returns>
+    private IEnumerator TransitionBetweenStates(LegSet set, SizzleState current, SizzleState target, float time)
+    {
+        float t = 0;
+        Coroutine targetLogic = StartStateLogic(set, current);
+
+        while (t <= time)
+        {
+            Vector3 currentLogicPosRight = GetStatePosition(set, current, true);
+            Vector3 currentLogicPosLeft = GetStatePosition(set, current, false);
+
+            Vector3 targetLogicPosRight = GetStatePosition(set, target, true);
+            Vector3 targetLogicPosLeft = GetStatePosition(set, target, false);
+
+            set.ikTargetRight.position = Vector3.Lerp(currentLogicPosRight, targetLogicPosRight, t / time);
+            set.ikTargetLeft.position = Vector3.Lerp(currentLogicPosLeft, targetLogicPosLeft, t / time);
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        set.PrimaryLogic = targetLogic;
+    }
+
+    #endregion
+
+    #region Walking
 
     /// <summary>
     /// The coroutine that controls a pair of legs 
     /// </summary>
     /// <returns></returns>
-    private IEnumerator LegPair(LegSet pair, AnimationDetails details)
+    private IEnumerator WalkLogic(LegSet pair, WalkAnimationDetails details)
     {
         // Should not be changed during play 
         // This is how much of a  0 to 1 scale each frame gets 
@@ -468,32 +563,37 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // Caching
         int frameIndexHoldLeft = -1;
         float detailLerpLeft = 0;
+        float lerpPerDetailLeft = 0;
+
         int frameIndexHoldRight = -1;
         float detailLerpRight = 0;
+        float lerpPerDetailRight = 0;
 
-        List<Vector3> cacheLinePointsRight = new List<Vector3>();
         List<Vector3> cacheLinePointsLeft = new List<Vector3>();
+        List<Vector3> cacheLinePointsRight = new List<Vector3>();
 
         while (true)
         {
-            // Left leg
-            frameIndexHoldLeft = GetDetailIndex(pair, details, lerpPerFrame, frameIndexHoldLeft, ref detailLerpLeft, cacheLinePointsLeft, false);
-            pair.WalkFootIdealLeft = GetWalkTargetPos(cacheLinePointsLeft, frameIndexHoldLeft, frameIndexHoldLeft + 1, lerpPerFrame, false);
+            /*// Left leg
+            frameIndexHoldLeft = GetDetailIndex(pair, details, lerpPerFrame, frameIndexHoldLeft, ref lerpPerDetailLeft, ref detailLerpLeft, cacheLinePointsLeft, false);
+            pair.WalkFootIdealLeft = GetWalkTargetPos(cacheLinePointsLeft, frameIndexHoldLeft, frameIndexHoldLeft + 1, lerpPerDetailLeft, detailLerpLeft);
 
             // Right leg
-            frameIndexHoldLeft = GetDetailIndex(pair, details, lerpPerFrame, frameIndexHoldRight, ref detailLerpRight, cacheLinePointsLeft, true);
-            pair.WalkFootIdealLeft = GetWalkTargetPos(cacheLinePointsRight, frameIndexHoldRight, frameIndexHoldRight + 1, lerpPerFrame, true);
+            frameIndexHoldRight = GetDetailIndex(pair, details, lerpPerFrame, frameIndexHoldRight, ref lerpPerDetailRight, ref detailLerpRight, cacheLinePointsRight, true);
+            pair.WalkFootIdealRight = GetWalkTargetPos(cacheLinePointsRight, frameIndexHoldRight, frameIndexHoldRight + 1, lerpPerDetailRight, detailLerpRight);
+*/
 
+            // Left leg
+            frameIndexHoldLeft = ProcessLeg(pair, details, lerpPerFrame, ref frameIndexHoldLeft, cacheLinePointsLeft, false);
+
+            // Right leg
+            frameIndexHoldRight = ProcessLeg(pair, details, lerpPerFrame, ref frameIndexHoldRight, cacheLinePointsRight, true);
 
             yield return null;
         }
     }
-    /// <summary>
-    /// Gets the index of the detail that makes 
-    /// the points between each frame 
-    /// </summary>
-    /// <returns></returns>
-    private int GetDetailIndex(LegSet pair, AnimationDetails details, float lerpPerFrame, int frameIndexHold, ref float detailLerp, List<Vector3> cacheLinePoints, bool isRightLeg = false)
+
+    private int ProcessLeg(LegSet pair, WalkAnimationDetails details, float lerpPerFrame, ref int frameIndexHold, List<Vector3> cacheLinePoints, bool isRightLeg = false)
     {
         int index = GetLegAnimIndex(pair, lerpPerFrame, isRightLeg);
         int nextIndex = index + 1;
@@ -529,12 +629,115 @@ public class OvergrownLegsAnimator : MonoBehaviour
             }
         }
 
+
+        if (isRightLeg)
+        {
+            pair.WalkFootIdealRight = previousPos;
+        }
+        else
+        {
+            pair.WalkFootIdealLeft = previousPos;
+        }
+
         float lerpPerDetail = 1.0f / details.levelOfDetail[index];
         // Check if cache needs to be changed 
         if (index != frameIndexHold)
         {
+            frameIndexHold = index;
             cacheLinePoints.Clear();
 
+            for (int i = 0; i < details.levelOfDetail[index]; i++)
+            {
+                // Adds points based on the line that is creates between
+                // two key frames 
+                float lerp = i * lerpPerDetail;
+                Vector3 point = Vector3.Slerp(previousPos, nextPos, curve.Evaluate(lerp));
+                cacheLinePoints.Add(point);
+            }
+
+            // Adds a final position so it does not reset to start of frame 
+            cacheLinePoints.Add(nextPos);
+
+        }
+
+        // Used to locate position along the detail path 
+
+        // Finds out what is the lerp that is currently between the current index point and its next destination 
+        // Used to find the current index 
+        float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
+        float detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
+
+
+        // Derrives from: 
+        // index * lerpPer <= currentLerp;
+        int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
+        int detailNextindex = detailCurrentIndex + 1; // Since nextPos is added to cache don't need to worry about index out of range 
+
+        // The lerp value between two details 
+        float minorDetailLerp = Mathf.InverseLerp(detailCurrentIndex * lerpPerDetail, detailNextindex * lerpPerDetail, detailLerp);
+
+        // Set feet position
+        if (isRightLeg)
+        {
+            pair.WalkFootIdealRight = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+        }
+        else
+        {
+            pair.WalkFootIdealLeft = Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
+        }
+        return frameIndexHold;
+    }
+
+    /// <summary>
+    /// Gets the index of the detail that makes 
+    /// the points between each frame 
+    /// </summary>
+    /// <returns></returns>
+    private int GetDetailIndex(LegSet pair, WalkAnimationDetails details, float lerpPerFrame, int frameIndexHold, ref float lerpPerDetail, ref float detailLerp, List<Vector3> cacheLinePoints, bool isRightLeg = false)
+    {
+        int index = GetLegAnimIndex(pair, lerpPerFrame, isRightLeg);
+        int nextIndex = index + 1;
+
+        AnimationCurve curve = details.keyConnectionCurves[index];
+        Vector3 previousPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[index]) : details.animationKeys[index];
+        Vector3 nextPos;
+
+        if (nextIndex >= details.animationKeys.Count)
+        {
+            // Loop value 
+            nextIndex = 0;
+        }
+        nextPos = isRightLeg ? Maths.MirrorOnY(details.animationKeys[nextIndex]) : details.animationKeys[nextIndex];
+
+        // Check if next index is a raycast 
+        if (details.raycastIndexList.Contains(nextIndex))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(nextPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                nextPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
+            }
+        }
+
+        // Check if the current index should be a raycast 
+        if (details.raycastIndexList.Contains(index))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(pair.parentBone.TransformPoint(previousPos), Vector3.down, out hit, maxRaycastDis, raycastLayer))
+            {
+                previousPos = pair.parentBone.InverseTransformPoint(hit.point + Vector3.up * details.footOffset);
+            }
+        }
+
+        lerpPerDetail = 1.0f / details.levelOfDetail[index];
+        //print("Current Index: " + index);
+        //print("Frame Index Hold: " + frameIndexHold);
+
+        // Check if cache needs to be changed 
+        if (index != frameIndexHold)
+        {
+            cacheLinePoints.Clear();
+            
             for (int i = 0; i < details.levelOfDetail[index]; i++)
             {
                 // Adds points based on the line that is creates between
@@ -556,12 +759,16 @@ public class OvergrownLegsAnimator : MonoBehaviour
         // Finds out what is the lerp that is currently between the current index point and its next destination 
         // Used to find the current index 
         float currentLerp = isRightLeg ? pair.RotRight / 360.0f : pair.RotLeft / 360.0f;
-        detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
 
+        // Get the lerp of the current value between the previous and next frames
+        // This is then scaled to a more desirable scope 
+        detailLerp = Mathf.InverseLerp(index * lerpPerFrame, (index + 1) * lerpPerFrame, currentLerp);
 
         // Derrives from: 
         // index * lerpPer <= currentLerp;
+        // Essentially how many detail frames have gone by 
         int detailCurrentIndex = Mathf.FloorToInt(detailLerp / lerpPerDetail);
+
         return detailCurrentIndex;
     }
 
@@ -570,8 +777,27 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// wants Sizzle's foot to be
     /// </summary>
     /// <returns></returns>
-    private Vector3 GetWalkTargetPos(List<Vector3> cacheLinePoints, int detailCurrentIndex, int detailNextindex, float minorDetailLerp, bool isRightLeg = false)
+    private Vector3 GetWalkTargetPos(List<Vector3> cacheLinePoints, int detailCurrentIndex, int detailNextindex, float lerpPerDetail, float detailLerp)
     {
+
+        if(detailNextindex < 0 || detailNextindex >= cacheLinePoints.Count)
+        {
+            print("Next not in bounds");
+            print("Current: " + detailCurrentIndex);
+            print("Next: " + detailNextindex);
+            print("Cache Count: " + cacheLinePoints.Count);
+        }
+
+        if (detailCurrentIndex < 0 || detailCurrentIndex >= cacheLinePoints.Count)
+        {
+            print("Current not in bounds");
+            print("Current: " + detailCurrentIndex);
+            print("Next: " + detailNextindex);
+            print("Cache Count: " + cacheLinePoints.Count);
+        }
+        float minorDetailLerp = Mathf.InverseLerp((float)detailCurrentIndex * lerpPerDetail, (float)detailNextindex * lerpPerDetail, detailLerp);
+
+
         // Set feet position
         return Vector3.Lerp(cacheLinePoints[detailCurrentIndex], cacheLinePoints[detailNextindex], minorDetailLerp);
     }
@@ -593,8 +819,20 @@ public class OvergrownLegsAnimator : MonoBehaviour
         return Mathf.FloorToInt(currentLerp / lerpPerFrame);
     }
 
+    /// <summary>
+    /// Get the current point that this logic wants to put
+    /// the foot 
+    /// </summary>
+    /// <param name="set"></param>
+    /// <param name="isRight"></param>
+    /// <returns></returns>
+    private Vector3 GetStateWalkPos(LegSet set, bool isRight = false)
+    {
+        return set.parentBone.TransformPoint(isRight ? set.WalkFootIdealRight : set.WalkFootIdealLeft);
+    }
+
     [System.Serializable]
-    public class AnimationDetails
+    public class WalkAnimationDetails
     {
         [SerializeField] public List<Vector3> animationKeys;
         [SerializeField] public List<AnimationCurve> keyConnectionCurves;
@@ -773,7 +1011,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
 
     #region IdleAdjust
 
-    /// <summary>
+    /*/// <summary>
     /// Attempts to begin the coroutine if 
     /// not already running that adjusts 
     /// feet when moving slowly 
@@ -784,6 +1022,11 @@ public class OvergrownLegsAnimator : MonoBehaviour
         {
             set.LegIdleCo = StartCoroutine(IdleAdjustLogic(set, idleAnimDetails));
         }
+    }*/
+
+    public Vector3 GetStateIdlePos(LegSet set, bool isRight = false)
+    {
+        return isRight ? set.IdleFootIdealRight : set.IdleFootIdealLeft;
     }
 
     private IEnumerator IdleAdjustLogic(LegSet set, IdleAnimDetails details)
@@ -814,12 +1057,14 @@ public class OvergrownLegsAnimator : MonoBehaviour
                     while(lerp <= 1)
                     {
                         // Transition between the points 
-                        set.ikTargetRight.position = Vector3.Lerp(startRight, nextPos, lerp);
+                        set.IdleFootIdealRight = Vector3.Lerp(startRight, nextPos, lerp);
+                        //set.IdleFootIdealLeft = Vector3.Lerp(startLeft, nextPos, lerp);
 
                         lerp += Time.deltaTime;
                         yield return null;
                     }
 
+                    set.IdleFootIdealRight = nextPos;
                     isMoving = true;
                 }
             }
@@ -874,7 +1119,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         DisplayGizmos(back, backAnimationDetails, Vector3.zero);
     }
 
-    private void DisplayGizmos(LegSet set, AnimationDetails details, Vector3 offset)
+    private void DisplayGizmos(LegSet set, WalkAnimationDetails details, Vector3 offset)
     {
         // Transform of gizmos is based on the parentBone 
         Matrix4x4 rotationMatrix = Matrix4x4.TRS(set.parentBone.position, set.parentBone.rotation, Vector3.one);
@@ -944,7 +1189,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
         }
     }
 
-    private void DrawAnimationPath(LegSet set, AnimationDetails details)
+    private void DrawAnimationPath(LegSet set, WalkAnimationDetails details)
     {
         Gizmos.color = animationColor;
 
@@ -973,7 +1218,7 @@ public class OvergrownLegsAnimator : MonoBehaviour
     /// <summary>
     /// Draws the animation curve between two of the animation keys 
     /// </summary>
-    private void DrawAnimationCurve(LegSet set, AnimationDetails details, int currentIndex, int nextIndex, bool inverseX = false)
+    private void DrawAnimationCurve(LegSet set, WalkAnimationDetails details, int currentIndex, int nextIndex, bool inverseX = false)
     {
         float lerp = 0;
         float changeInLerp = 1.0f / details.levelOfDetail[currentIndex];
